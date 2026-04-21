@@ -163,7 +163,7 @@ export function MwNewslettersRecipientsPage() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setNewListOpen(true)}
-          sx={{ bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600 }}
+          sx={{ bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600 }}
         >
           New List
         </Button>
@@ -296,7 +296,7 @@ export function MwNewslettersRecipientsPage() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setNewListOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={handleNewList} disabled={!newListName.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' } }}>
+          <Button variant="contained" onClick={handleNewList} disabled={!newListName.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' } }}>
             Create List
           </Button>
         </DialogActions>
@@ -399,7 +399,7 @@ export function MwNewslettersRecipientDetailPage() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setAddOpen(true)}
-          sx={{ bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600, flexShrink: 0 }}
+          sx={{ bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600, flexShrink: 0 }}
         >
           Add Contacts
         </Button>
@@ -528,7 +528,7 @@ export function MwNewslettersRecipientDetailPage() {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setAddOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddContacts} disabled={!newEmails.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' } }}>
+          <Button variant="contained" onClick={handleAddContacts} disabled={!newEmails.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' } }}>
             Add Contacts
           </Button>
         </DialogActions>

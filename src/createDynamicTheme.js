@@ -48,13 +48,13 @@ export const createDynamicTheme = (colorblindType = 'none') => {
         light: palette.brand.primaryLight,
         main: palette.brand.primary,
         dark: palette.brand.primaryDark,
-        contrastText: getContrastText(palette.brand.primary),
+        contrastText: '#ffffff',
       },
       secondary: {
         light: palette.brand.secondaryLight,
         main: palette.brand.secondary,
         dark: palette.brand.secondaryDark,
-        contrastText: getContrastText(palette.brand.secondary),
+        contrastText: '#ffffff',
       },
       error: {
         light: palette.status.errorLight,
