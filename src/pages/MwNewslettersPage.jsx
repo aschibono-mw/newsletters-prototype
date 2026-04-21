@@ -179,43 +179,41 @@ const EDITION_HISTORY = {
 }
 
 // ── Newsletter icons ──────────────────────────────────────────────────────────
-// Single newsletter icon: document outline + solid header band + 3 text lines
+// Single newsletter icon — uses the provided Vector.svg path, coloured via currentColor
 function NlIcon({ size = 20, color, sx = {} }) {
   return (
     <Box
       component="svg"
-      viewBox="0 0 20 20"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
       sx={{ width: size, height: size, flexShrink: 0, display: 'block', color, ...sx }}
     >
-      {/* Document outline */}
-      <rect x="2.5" y="1.5" width="15" height="17" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-      {/* Solid header band */}
-      <rect x="2.5" y="1.5" width="15" height="5" rx="1.5" fill="currentColor" />
-      {/* Square off the bottom corners of the header band */}
-      <rect x="2.5" y="4.5" width="15" height="2" fill="currentColor" />
-      {/* Text lines */}
-      <rect x="5" y="10" width="10" height="1.5" rx="0.75" fill="currentColor" />
-      <rect x="5" y="13" width="7.5" height="1.5" rx="0.75" fill="currentColor" />
-      <rect x="5" y="16" width="5" height="1.5" rx="0.75" fill="currentColor" />
+      {/* White background fills the transparent cutout areas so stacked layers don't bleed through */}
+      <rect x="0" y="0" width="16" height="16" fill="white" rx="1.5" />
+      <path
+        d="M13.5147 0H1.61067C1.18618 0.00275609 0.77971 0.171878 0.478553 0.471041C0.177396 0.770204 0.00557648 1.17554 0 1.6V14.4C0.00557648 14.8245 0.177396 15.2298 0.478553 15.529C0.77971 15.8281 1.18618 15.9972 1.61067 16H13.5147C13.9392 15.9972 14.3456 15.8281 14.6468 15.529C14.9479 15.2298 15.1198 14.8245 15.1253 14.4V1.6C15.1198 1.17554 14.9479 0.770204 14.6468 0.471041C14.3456 0.171878 13.9392 0.00275609 13.5147 0V0ZM13.5147 14.3787H1.61067V1.6H13.5147V14.3787ZM3.232 4.55467H4.85333V6.176H3.232V4.55467ZM3.232 7.75467H8.62933V9.376H3.232V7.75467ZM10.2613 7.75467H11.8827V9.376H10.272L10.2613 7.75467ZM11.8827 10.9547V12.576H3.232V11.008L11.8827 10.9547ZM11.8827 4.55467V6.176H6.496V4.55467H11.8827Z"
+        fill="currentColor"
+      />
     </Box>
   )
 }
 
-// Stacked series icon: 3 offset NlIcons with white fills to give paper-stack depth
-function NlStackIcon({ size = 18, color }) {
+// Stacked series icon — 3 offset copies; white is baked into each NlIcon so layers occlude cleanly
+function NlStackIcon({ size = 20, color }) {
+  const offset = Math.round(size * 0.22)
+  const total = size + offset * 2
   return (
-    <Box sx={{ position: 'relative', width: size + 6, height: size + 6, flexShrink: 0 }}>
-      {/* Back icon */}
-      <Box sx={{ position: 'absolute', top: 4, left: 4 }}>
+    <Box sx={{ position: 'relative', width: total, height: total, flexShrink: 0 }}>
+      {/* Back page */}
+      <Box sx={{ position: 'absolute', top: offset * 2, left: offset * 2, opacity: 0.35 }}>
         <NlIcon size={size} color={color} />
       </Box>
-      {/* White occluder + mid icon */}
-      <Box sx={{ position: 'absolute', top: 2, left: 2, width: size, height: size, bgcolor: '#fff', borderRadius: '1px' }} />
-      <Box sx={{ position: 'absolute', top: 2, left: 2 }}>
+      {/* Mid page */}
+      <Box sx={{ position: 'absolute', top: offset, left: offset, opacity: 0.65 }}>
         <NlIcon size={size} color={color} />
       </Box>
-      {/* White occluder + front icon */}
-      <Box sx={{ position: 'absolute', top: 0, left: 0, width: size, height: size, bgcolor: '#fff', borderRadius: '1px' }} />
+      {/* Front page */}
       <Box sx={{ position: 'absolute', top: 0, left: 0 }}>
         <NlIcon size={size} color={color} />
       </Box>
@@ -1561,7 +1559,10 @@ function RecipientListsPanel({ lists, setLists, onSelectList }) {
               '& .row-kebab': { opacity: 0 },
               '&:hover .row-kebab': { opacity: 1 },
             }}>
-              <Typography onClick={() => onSelectList(list.id)} sx={{ fontSize: '13px', fontWeight: 600, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>{list.name}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={() => onSelectList(list.id)}>
+                <PeopleOutlineIcon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: TEAL, '&:hover': { textDecoration: 'underline' } }}>{list.name}</Typography>
+              </Box>
               <Typography sx={{ fontSize: '13px' }}>{list.subscribers.toLocaleString()}</Typography>
               <Box>
                 {list.usedIn.length === 0
@@ -1847,6 +1848,70 @@ function AllNewslettersInbox() {
             </Box>
           </Box>
         </Box>
+
+        {/* Performance strip — aggregated across all series */}
+        {(() => {
+          const allEditions = Object.values(EDITION_HISTORY).flat()
+          const opens  = allEditions.map(e => parseFloat(e.open))
+          const clicks = allEditions.map(e => parseFloat(e.clicks))
+          const avgOpen   = (opens.reduce((a, b) => a + b, 0) / opens.length).toFixed(1)
+          const avgClicks = (clicks.reduce((a, b) => a + b, 0) / clicks.length).toFixed(1)
+          const totalRecipients = SERIES.reduce((a, s) => a + s.recipients, 0)
+
+          // Trend: average of most-recent edition per series vs second-most-recent
+          const recentOpens = Object.values(EDITION_HISTORY).map(eds => parseFloat(eds[0]?.open ?? 0))
+          const prevOpens   = Object.values(EDITION_HISTORY).map(eds => parseFloat(eds[1]?.open ?? eds[0]?.open ?? 0))
+          const openTrend   = (recentOpens.reduce((a,b)=>a+b,0)/recentOpens.length) - (prevOpens.reduce((a,b)=>a+b,0)/prevOpens.length)
+
+          const recentClicks = Object.values(EDITION_HISTORY).map(eds => parseFloat(eds[0]?.clicks ?? 0))
+          const prevClicks   = Object.values(EDITION_HISTORY).map(eds => parseFloat(eds[1]?.clicks ?? eds[0]?.clicks ?? 0))
+          const clickTrend   = (recentClicks.reduce((a,b)=>a+b,0)/recentClicks.length) - (prevClicks.reduce((a,b)=>a+b,0)/prevClicks.length)
+
+          const metrics = [
+            { label: 'Avg Open Rate',    value: `${avgOpen}%`,       trend: openTrend,  trendLabel: 'vs prev editions' },
+            { label: 'Avg Click Rate',   value: `${avgClicks}%`,     trend: clickTrend, trendLabel: 'vs prev editions' },
+            { label: 'Editions Sent',    value: allEditions.length,  trend: null,       trendLabel: 'total sent'       },
+            { label: 'Total Subscribers',value: totalRecipients,     trend: null,       trendLabel: 'across all series'},
+            { label: 'Active Series',    value: SERIES.length,       trend: null,       trendLabel: 'newsletters'      },
+          ]
+
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0, mb: 1.75, mt: 0.25 }}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', textTransform: 'uppercase', mr: 2, flexShrink: 0 }}>
+                Overall Performance
+              </Typography>
+              <Box sx={{ display: 'flex', flex: 1, gap: 0, border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'hidden', bgcolor: 'background.paper' }}>
+                {metrics.map((m, i) => (
+                  <Box
+                    key={m.label}
+                    sx={{
+                      flex: 1, px: 1.5, py: 1,
+                      borderRight: i < metrics.length - 1 ? '1px solid' : 'none',
+                      borderColor: 'divider',
+                      display: 'flex', alignItems: 'baseline', gap: 1,
+                    }}
+                  >
+                    <Typography sx={{ fontSize: '15px', fontWeight: 700, color: 'text.primary', lineHeight: 1, flexShrink: 0 }}>
+                      {m.value}
+                    </Typography>
+                    <Box>
+                      <Typography sx={{ fontSize: '11px', color: 'text.secondary', fontWeight: 500, lineHeight: 1.2 }}>
+                        {m.label}
+                      </Typography>
+                      {m.trend !== null ? (
+                        <Typography sx={{ fontSize: '10px', fontWeight: 600, color: m.trend > 0 ? '#16a34a' : m.trend < 0 ? '#dc2626' : 'text.disabled' }}>
+                          {m.trend > 0 ? `↑ +${m.trend.toFixed(1)}%` : m.trend < 0 ? `↓ ${m.trend.toFixed(1)}%` : '—'}
+                        </Typography>
+                      ) : (
+                        <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>{m.trendLabel}</Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )
+        })()}
 
         {/* Filter tabs */}
         <Box sx={{ display: 'flex', gap: 0.75 }}>

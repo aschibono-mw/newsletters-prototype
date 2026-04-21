@@ -279,7 +279,12 @@ function AudiocastBlock({ generating, playing, onPlayPause, onRemove, accentColo
         </Box>
       ) : (
         /* Player state */
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, bgcolor: `${accentColor}06` }}>
+        <Box sx={{ bgcolor: `${accentColor}06` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, pt: 1.5, pb: 0.5 }}>
+            <CampaignOutlinedIcon sx={{ fontSize: 13, color: accentColor, opacity: 0.8 }} />
+            <Typography sx={{ fontSize: '11px', fontWeight: 700, color: accentColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Audiocast</Typography>
+          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, pb: 1.5 }}>
           <IconButton
             size="small"
             onClick={onPlayPause}
@@ -304,6 +309,7 @@ function AudiocastBlock({ generating, playing, onPlayPause, onRemove, accentColo
             </Box>
           </Box>
           <VolumeUpOutlinedIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />
+        </Box>
         </Box>
       )}
     </Box>
@@ -1120,6 +1126,7 @@ export default function MwNewslettersEditorPage() {
   const [audioCastPlaying, setAudioCastPlaying] = useState(false)
 
   const handleAddAudiocast = () => {
+    setAudioCastPanelOpen(false)
     setAudioCastBlock(true)
     setAudioCastGenerating(true)
     setAudioCastGenerated(false)

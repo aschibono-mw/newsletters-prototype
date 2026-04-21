@@ -210,12 +210,15 @@ export function MwNewslettersRecipientsPage() {
               }}
             >
               {/* List name */}
-              <Typography
-                sx={{ fontSize: '13px', fontWeight: 600, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
                 onClick={() => navigate(`/mw-newsletters/recipients/${list.id}`)}
               >
-                {list.name}
-              </Typography>
+                <PeopleOutlineIcon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, color: TEAL, '&:hover': { textDecoration: 'underline' } }}>
+                  {list.name}
+                </Typography>
+              </Box>
 
               {/* Subscribers */}
               <Typography sx={{ fontSize: '13px', color: 'text.primary' }}>
