@@ -80,7 +80,7 @@ const SERIES = [
     status: 'curating',
     articlesCount: 23,
     progress: 35,
-    sources: ['Explore', 'Monitor'],
+    sources: ['Explore', 'Monitor', 'RSS'],
     searches: [
       { name: 'Brand Monitoring', type: 'explore' },
       { name: 'Meltwater Leadership', type: 'explore' },
@@ -485,10 +485,21 @@ function LatestEditionCard({ series, onEdit }) {
         )}
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: isCurating && !series.estReady ? 2 : 0 }}>
-          <SearchPills searches={series.searches} max={3} />
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', '&:hover .edit-sources-link': { opacity: 1 } }}
+          >
+            <SearchPills searches={series.searches} max={3} />
+            <Typography
+              className="edit-sources-link"
+              onClick={e => e.stopPropagation()}
+              sx={{ fontSize: '12px', color: TEAL, cursor: 'pointer', fontWeight: 500, opacity: 0, transition: 'opacity 0.15s', '&:hover': { textDecoration: 'underline' } }}
+            >
+              Edit sources
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', gap: 1, ml: 1 }}>
             {isCurating && (
-              <Button size="small" variant="outlined" onClick={() => onEdit(series.id)} sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5 }}>
+              <Button size="small" variant="outlined" onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${series.id}`, '_blank') }} sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5 }}>
                 Preview draft
               </Button>
             )}
@@ -926,12 +937,18 @@ function SeriesDetail({ series }) {
             <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
             <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>Next send: <strong>{series.nextSend}</strong></Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+          <Box
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap',
+              '&:hover .edit-sources-link': { opacity: 1 },
+            }}
+          >
             <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>Sources:</Typography>
             <SearchPills searches={series.searches} max={4} />
             <Typography
+              className="edit-sources-link"
               onClick={() => openCuration(0)}
-              sx={{ fontSize: '12px', color: TEAL, cursor: 'pointer', fontWeight: 500, ml: 0.25, '&:hover': { textDecoration: 'underline' } }}
+              sx={{ fontSize: '12px', color: TEAL, cursor: 'pointer', fontWeight: 500, ml: 0.25, opacity: 0, transition: 'opacity 0.15s', '&:hover': { textDecoration: 'underline' } }}
             >
               Edit sources
             </Typography>
@@ -1241,9 +1258,8 @@ function InboxRow({ item }) {
     ? [
         { label: 'Review & Edit',          icon: <OpenInNewIcon sx={{ fontSize: 15 }} />, primary: true },
         { label: 'Schedule send',          icon: <AccessTimeOutlinedIcon sx={{ fontSize: 15 }} /> },
-        { label: 'Generate audio cast',    icon: <GraphicEqOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
-        { label: 'Edit series settings',   icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
+        { label: 'Edit series settings', icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
         { label: 'Manage recipients',      icon: <PeopleOutlineIcon sx={{ fontSize: 15 }} /> },
         { label: 'Duplicate series',       icon: <ViewStreamOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
@@ -1252,9 +1268,8 @@ function InboxRow({ item }) {
     : [
         { label: 'Open in editor',         icon: <OpenInNewIcon sx={{ fontSize: 15 }} />, primary: true },
         { label: 'Preview draft',          icon: <AllInboxOutlinedIcon sx={{ fontSize: 15 }} /> },
-        { label: 'Generate audio cast',    icon: <GraphicEqOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
-        { label: 'Edit series settings',   icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
+        { label: 'Edit series settings', icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
         { label: 'Manage recipients',      icon: <PeopleOutlineIcon sx={{ fontSize: 15 }} /> },
         { label: 'Duplicate series',       icon: <ViewStreamOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
@@ -1348,7 +1363,7 @@ function InboxRow({ item }) {
             ? <Tooltip title="View edition">
                 <IconButton
                   size="small"
-                  onClick={e => e.stopPropagation()}
+                  onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${item.series.id}`, '_blank') }}
                   sx={{ color: 'text.disabled' }}
                 >
                   <OpenInNewIcon sx={{ fontSize: 14 }} />
