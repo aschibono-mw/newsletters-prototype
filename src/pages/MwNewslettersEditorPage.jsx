@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Box, Button, Chip, Divider, IconButton, InputBase, Tab, Tabs, Tooltip,
-  Typography, Menu, MenuItem, LinearProgress, Switch, Popover,
+  Typography, Menu, MenuItem, LinearProgress, Switch, Popover, Slider, Select, FormControl, InputLabel,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
@@ -63,6 +63,10 @@ import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined'
 import GradeOutlinedIcon from '@mui/icons-material/GradeOutlined'
 import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined'
+import VolumeUpOutlinedIcon from '@mui/icons-material/VolumeUpOutlined'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import PauseIcon from '@mui/icons-material/Pause'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const TEAL       = '#00827F'
@@ -224,6 +228,212 @@ function SourceTag({ origin }) {
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: bg, borderRadius: '4px', px: 0.75, py: 0.2 }}>
       <Icon sx={{ fontSize: 11, color }} />
       <Typography sx={{ fontSize: '10px', fontWeight: 600, color }}>{origin}</Typography>
+    </Box>
+  )
+}
+
+// ── Audiocast canvas block ────────────────────────────────────────────────────
+function AudiocastBlock({ generating, playing, onPlayPause, onRemove, accentColor }) {
+  const [progress, setProgress] = useState(0)
+  const intervalRef = useRef(null)
+
+  useEffect(() => {
+    if (playing) {
+      intervalRef.current = setInterval(() => {
+        setProgress(p => {
+          if (p >= 100) { clearInterval(intervalRef.current); return 100 }
+          return p + 0.3
+        })
+      }, 100)
+    } else {
+      clearInterval(intervalRef.current)
+    }
+    return () => clearInterval(intervalRef.current)
+  }, [playing])
+
+  const totalSecs = 312 // 5:12
+  const currentSecs = Math.round((progress / 100) * totalSecs)
+  const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+
+  return (
+    <Box sx={{
+      mx: 3, mb: 2, mt: 1, border: `1.5px solid ${accentColor}30`,
+      borderRadius: '8px', overflow: 'hidden',
+      position: 'relative',
+      '& .block-controls': { opacity: 0 },
+      '&:hover .block-controls': { opacity: 1 },
+    }}>
+      {/* Hover controls */}
+      <Box className="block-controls" sx={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 0.5, transition: 'opacity 0.15s', zIndex: 1 }}>
+        <Tooltip title="Move up"><IconButton size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', width: 24, height: 24 }}><KeyboardArrowUpIcon sx={{ fontSize: 14 }} /></IconButton></Tooltip>
+        <Tooltip title="Move down"><IconButton size="small" sx={{ bgcolor: 'rgba(255,255,255,0.9)', width: 24, height: 24 }}><KeyboardArrowDownIcon sx={{ fontSize: 14 }} /></IconButton></Tooltip>
+        <Tooltip title="Remove"><IconButton size="small" onClick={onRemove} sx={{ bgcolor: 'rgba(255,255,255,0.9)', width: 24, height: 24, '&:hover': { color: 'error.main' } }}><DeleteOutlineIcon sx={{ fontSize: 14 }} /></IconButton></Tooltip>
+      </Box>
+
+      {generating ? (
+        /* Generating state */
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 3, gap: 1.5, bgcolor: `${accentColor}06` }}>
+          <CampaignOutlinedIcon sx={{ fontSize: 28, color: accentColor, opacity: 0.5, animation: 'pulse 1.4s ease-in-out infinite', '@keyframes pulse': { '0%,100%': { opacity: 0.3 }, '50%': { opacity: 0.8 } } }} />
+          <Typography sx={{ fontSize: '12px', color: 'text.disabled', fontStyle: 'italic' }}>Generating audiocast…</Typography>
+          <LinearProgress sx={{ width: 120, borderRadius: 4, '& .MuiLinearProgress-bar': { bgcolor: accentColor } }} />
+        </Box>
+      ) : (
+        /* Player state */
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, bgcolor: `${accentColor}06` }}>
+          <IconButton
+            size="small"
+            onClick={onPlayPause}
+            sx={{ width: 32, height: 32, bgcolor: accentColor, color: '#fff', flexShrink: 0, '&:hover': { bgcolor: accentColor, opacity: 0.85 } }}
+          >
+            {playing ? <PauseIcon sx={{ fontSize: 18 }} /> : <PlayArrowIcon sx={{ fontSize: 18 }} />}
+          </IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Slider
+              value={progress}
+              onChange={(_, v) => setProgress(v)}
+              size="small"
+              sx={{
+                color: accentColor, p: 0, height: 3,
+                '& .MuiSlider-thumb': { width: 10, height: 10 },
+                '& .MuiSlider-rail': { opacity: 0.25 },
+              }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.25 }}>
+              <Typography sx={{ fontSize: '10px', color: 'text.secondary' }}>{fmt(currentSecs)}</Typography>
+              <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>{fmt(totalSecs)}</Typography>
+            </Box>
+          </Box>
+          <VolumeUpOutlinedIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />
+        </Box>
+      )}
+    </Box>
+  )
+}
+
+// ── Create Audiocast side panel ───────────────────────────────────────────────
+function AudiocastPanel({ onClose, onAdd, generated, onRegenerate }) {
+  const [maxLength, setMaxLength] = useState(25)
+  const [voice, setVoice] = useState('Sarah')
+  const [tone, setTone] = useState('Professional')
+  const [previewPlaying, setPreviewPlaying] = useState(false)
+
+  return (
+    <Box sx={{ width: 340, flexShrink: 0, display: 'flex', flexDirection: 'column', bgcolor: 'background.paper', borderLeft: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+      {/* Header */}
+      <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CampaignOutlinedIcon sx={{ fontSize: 18, color: TEAL }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '14px' }}>Create Audiocast</Typography>
+        </Box>
+        <IconButton size="small" onClick={onClose} sx={{ color: 'text.disabled' }}>
+          <CloseIcon sx={{ fontSize: 16 }} />
+        </IconButton>
+      </Box>
+
+      {/* Body */}
+      <Box sx={{ flex: 1, overflow: 'auto', px: 2.5, py: 2 }}>
+        <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 2.5, lineHeight: 1.6 }}>
+          Convert your newsletter content into an AI-generated audiocast episode.
+        </Typography>
+
+        {/* Max Length */}
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.primary' }}>Max Length</Typography>
+            <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 600 }}>{maxLength} seconds</Typography>
+          </Box>
+          <Slider
+            value={maxLength}
+            min={10}
+            max={60}
+            onChange={(_, v) => setMaxLength(v)}
+            sx={{ color: TEAL, '& .MuiSlider-thumb': { width: 16, height: 16 }, '& .MuiSlider-rail': { opacity: 0.2 } }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.25 }}>
+            <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>10 seconds</Typography>
+            <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>1 min</Typography>
+          </Box>
+        </Box>
+
+        {/* Voice */}
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ fontSize: '12px' }}>Voice</InputLabel>
+              <Select
+                value={voice}
+                label="Voice"
+                onChange={e => setVoice(e.target.value)}
+                sx={{ fontSize: '13px' }}
+              >
+                {['Sarah', 'James', 'Priya', 'Marcus', 'Elena'].map(v => (
+                  <MenuItem key={v} value={v} sx={{ fontSize: '13px' }}>{v}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Tooltip title="Preview voice">
+              <IconButton
+                size="small"
+                onClick={() => setPreviewPlaying(v => !v)}
+                sx={{ flexShrink: 0, color: previewPlaying ? TEAL : 'text.disabled', border: '1px solid', borderColor: previewPlaying ? TEAL : 'divider', borderRadius: '8px', p: 0.75 }}
+              >
+                {previewPlaying ? <PauseIcon sx={{ fontSize: 16 }} /> : <VolumeUpOutlinedIcon sx={{ fontSize: 16 }} />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+
+        {/* Tone */}
+        <Box sx={{ mb: 2 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ fontSize: '12px' }}>Tone</InputLabel>
+            <Select
+              value={tone}
+              label="Tone"
+              onChange={e => setTone(e.target.value)}
+              sx={{ fontSize: '13px' }}
+            >
+              {['Professional', 'Conversational', 'Energetic', 'Calm', 'Authoritative'].map(t => (
+                <MenuItem key={t} value={t} sx={{ fontSize: '13px' }}>{t}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
+
+      {/* Footer actions */}
+      <Box sx={{ px: 2.5, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', gap: 1 }}>
+        {generated ? (
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<RefreshOutlinedIcon sx={{ fontSize: 15 }} />}
+            onClick={onRegenerate}
+            sx={{ bgcolor: TEAL, color: '#fff', textTransform: 'none', fontWeight: 600, fontSize: '13px', '&:hover': { bgcolor: '#006b68' } }}
+          >
+            Regenerate Audiocast
+          </Button>
+        ) : (
+          <>
+            <Button
+              fullWidth
+              variant="contained"
+              startIcon={<CampaignOutlinedIcon sx={{ fontSize: 15 }} />}
+              onClick={onAdd}
+              sx={{ bgcolor: TEAL, color: '#fff', textTransform: 'none', fontWeight: 600, fontSize: '13px', '&:hover': { bgcolor: '#006b68' } }}
+            >
+              Add Audiocast
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onClose}
+              sx={{ textTransform: 'none', fontSize: '13px', color: 'text.secondary', borderColor: 'divider', flexShrink: 0 }}
+            >
+              Cancel
+            </Button>
+          </>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -902,6 +1112,34 @@ export default function MwNewslettersEditorPage() {
   const [regenerating, setRegenerating] = useState(false)
   const [showAnalyzeWidget, setShowAnalyzeWidget] = useState(false)
 
+  // ── Audiocast state ──
+  const [audioCastPanelOpen, setAudioCastPanelOpen] = useState(false)
+  const [audioCastBlock, setAudioCastBlock] = useState(false)   // visible in canvas
+  const [audioCastGenerating, setAudioCastGenerating] = useState(false)
+  const [audioCastGenerated, setAudioCastGenerated] = useState(false)
+  const [audioCastPlaying, setAudioCastPlaying] = useState(false)
+
+  const handleAddAudiocast = () => {
+    setAudioCastBlock(true)
+    setAudioCastGenerating(true)
+    setAudioCastGenerated(false)
+    setAudioCastPlaying(false)
+    setTimeout(() => {
+      setAudioCastGenerating(false)
+      setAudioCastGenerated(true)
+    }, 2200)
+  }
+
+  const handleRegenerateAudiocast = () => {
+    setAudioCastGenerating(true)
+    setAudioCastGenerated(false)
+    setAudioCastPlaying(false)
+    setTimeout(() => {
+      setAudioCastGenerating(false)
+      setAudioCastGenerated(true)
+    }, 2200)
+  }
+
   // ── Widget state (shared: canvas + right panel) ──
   const [addedWidgets, setAddedWidgets] = useState(AUTO_ADDED_IDS)
   const toggleWidget = id => setAddedWidgets(prev =>
@@ -1126,6 +1364,27 @@ export default function MwNewslettersEditorPage() {
           <Box sx={{ p: 2 }}>
             <Typography sx={{ fontSize: '13px', fontWeight: 700, mb: 1.5 }}>Add Elements</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+              {/* Featured: Add Audiocast */}
+              <Box
+                onClick={() => { setElementsAnchor(null); setAudioCastPanelOpen(true) }}
+                sx={{
+                  gridColumn: '1 / -1',
+                  display: 'flex', alignItems: 'center', gap: 1.5,
+                  p: 1.5, border: `1.5px solid ${TEAL}40`, borderRadius: '8px',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  bgcolor: 'rgba(0,130,127,0.04)',
+                  '&:hover': { borderColor: TEAL, bgcolor: 'rgba(0,130,127,0.08)' },
+                }}
+              >
+                <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: `${TEAL}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CampaignOutlinedIcon sx={{ fontSize: 20, color: TEAL }} />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: '12px', fontWeight: 700, color: TEAL }}>Add Audiocast</Typography>
+                  <Typography sx={{ fontSize: '10px', color: 'text.secondary', lineHeight: 1.4 }}>AI-generated audio version of this newsletter</Typography>
+                </Box>
+              </Box>
+
               {[
                 { label: 'View in Browser Link', Icon: LinkOutlinedIcon },
                 { label: 'Header',               Icon: WebOutlinedIcon },
@@ -1466,6 +1725,18 @@ export default function MwNewslettersEditorPage() {
               </Box>
             )}
 
+            {/* Audiocast block */}
+            {audioCastBlock && (
+              <AudiocastBlock
+                generating={audioCastGenerating}
+                generated={audioCastGenerated}
+                playing={audioCastPlaying}
+                onPlayPause={() => setAudioCastPlaying(v => !v)}
+                onRemove={() => { setAudioCastBlock(false); setAudioCastGenerated(false); setAudioCastPlaying(false) }}
+                accentColor={seriesColor}
+              />
+            )}
+
             {/* Analyze widget — controlled by toolbar toggle */}
             {showAnalyzeWidget && (
               <AnalyzeWidget
@@ -1545,7 +1816,15 @@ export default function MwNewslettersEditorPage() {
           }}
         />
 
-        {/* ── Right: curated articles panel ── */}
+        {/* ── Right panel: Audiocast OR curated articles ── */}
+        {audioCastPanelOpen ? (
+          <AudiocastPanel
+            onClose={() => setAudioCastPanelOpen(false)}
+            onAdd={handleAddAudiocast}
+            generated={audioCastGenerated}
+            onRegenerate={handleRegenerateAudiocast}
+          />
+        ) : (
         <Box sx={{ width: panelWidth, flexShrink: 0, display: 'flex', flexDirection: 'column', bgcolor: 'background.paper', borderLeft: '1px solid', borderColor: 'divider', overflow: 'hidden', userSelect: isDragging ? 'none' : 'auto' }}>
 
           {/* Tabs */}
@@ -1588,6 +1867,7 @@ export default function MwNewslettersEditorPage() {
             <SettingsTabContent />
           )}
         </Box>
+        )}
       </Box>
     </Box>
   )
