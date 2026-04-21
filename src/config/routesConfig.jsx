@@ -1,4 +1,5 @@
 import { Container } from '@mui/material'
+import { Navigate } from 'react-router-dom'
 
 // ============================================
 // CORE PAGES
@@ -246,7 +247,7 @@ import CheckboxGuidedPage from '../pages/uxr/checkbox/CheckboxGuidedPage'
 
 // Core routes
 export const coreRoutes = [
-  { path: '/', element: HomePage, props: ['chatOpen'] },
+  { path: '/', element: () => <Navigate to="/mw-newsletters" replace /> },
   { path: '/insights', element: InsightsPage, props: ['chatOpen'] },
   { path: '/discover', element: DiscoverPage, props: ['chatOpen'] },
   { path: '/workspace', element: WorkspacePage, props: ['chatOpen'] },

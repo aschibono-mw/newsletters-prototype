@@ -134,7 +134,7 @@ function AppContent() {
               element={<RouteElement route={route} chatOpen={false} colorblindType="none" />}
             />
           ))}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/mw-newsletters" replace />} />
         </Routes>
       </Box>
     )
@@ -191,7 +191,7 @@ function AppContent() {
                 }
               />
             ))}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/mw-newsletters" replace />} />
           </Routes>
         </Box>
       </Box>
