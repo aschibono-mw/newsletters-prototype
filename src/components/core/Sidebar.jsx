@@ -188,7 +188,7 @@ function Sidebar({ onExpandChange, colorblindType, onPaletteChange }) {
           // ── Items with nested children ──────────────────────────────────────
           if (hasChildren) {
             return expanded ? (
-              <Box key={item.path}>
+              <Box key={item.path} sx={item.disabled ? { opacity: 0.38, pointerEvents: 'none' } : {}}>
                 <ListItemButton
                   onClick={() => handleSectionToggle(item.path)}
                   selected={childActive && !sectionOpen}
@@ -263,7 +263,7 @@ function Sidebar({ onExpandChange, colorblindType, onPaletteChange }) {
                 </Collapse>
               </Box>
             ) : (
-              <Box key={item.path}>
+              <Box key={item.path} sx={item.disabled ? { opacity: 0.38, pointerEvents: 'none' } : {}}>
                 <Tooltip title={item.label} placement="right">
                   <IconButton
                     onClick={(e) => handlePopoverOpen(e, item)}
@@ -284,7 +284,7 @@ function Sidebar({ onExpandChange, colorblindType, onPaletteChange }) {
 
           // ── Regular items ───────────────────────────────────────────────────
           return expanded ? (
-            <Box key={item.path}>
+            <Box key={item.path} sx={item.disabled ? { opacity: 0.38, pointerEvents: 'none' } : {}}>
               <ListItemButton
                 component={RouterLink}
                 to={item.path}
@@ -333,21 +333,23 @@ function Sidebar({ onExpandChange, colorblindType, onPaletteChange }) {
               )}
             </Box>
           ) : (
-            <Tooltip key={item.path} title={item.label} placement="right">
-              <IconButton
-                component={RouterLink}
-                to={item.path}
-                sx={{
-                  borderRadius: 2,
-                  mb: item.spacerAfter ? 2 : 0.5,
-                  color: active ? 'primary.main' : 'text.secondary',
-                  bgcolor: active ? SELECTED_BG : 'transparent',
-                  '&:hover': { bgcolor: HOVER_BG },
-                }}
-              >
-                {renderIcon(item.iconName)}
-              </IconButton>
-            </Tooltip>
+            <Box key={item.path} sx={item.disabled ? { opacity: 0.38, pointerEvents: 'none' } : {}}>
+              <Tooltip title={item.label} placement="right">
+                <IconButton
+                  component={RouterLink}
+                  to={item.path}
+                  sx={{
+                    borderRadius: 2,
+                    mb: item.spacerAfter ? 2 : 0.5,
+                    color: active ? 'primary.main' : 'text.secondary',
+                    bgcolor: active ? SELECTED_BG : 'transparent',
+                    '&:hover': { bgcolor: HOVER_BG },
+                  }}
+                >
+                  {renderIcon(item.iconName)}
+                </IconButton>
+              </Tooltip>
+            </Box>
           );
         })}
       </List>
