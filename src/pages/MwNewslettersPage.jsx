@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Button, TextField, InputAdornment, Divider,
   IconButton, Tooltip, Menu, MenuItem, LinearProgress, Chip,
-  Dialog, DialogContent, ToggleButton, ToggleButtonGroup,
+  Dialog, DialogContent, DialogTitle, DialogActions, Snackbar,
+  ToggleButton, ToggleButtonGroup,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
@@ -31,9 +32,16 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined'
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import GraphicEqOutlinedIcon from '@mui/icons-material/GraphicEqOutlined'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const ALL_VIEW_ID = '__all__'
+const ALL_VIEW_ID        = '__all__'
+const RECIPIENTS_VIEW_ID = '__recipients__'
 const TEAL        = '#00827F'
 const TEAL_LIGHT  = 'rgba(0,130,127,0.08)'
 const AMBER       = '#b45309'
@@ -812,6 +820,7 @@ function InboxRow({ item }) {
     ? [
         { label: 'Review & Edit',          icon: <OpenInNewIcon sx={{ fontSize: 15 }} />, primary: true },
         { label: 'Schedule send',          icon: <AccessTimeOutlinedIcon sx={{ fontSize: 15 }} /> },
+        { label: 'Generate audio cast',    icon: <GraphicEqOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
         { label: 'Edit series settings',   icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
         { label: 'Manage recipients',      icon: <PeopleOutlineIcon sx={{ fontSize: 15 }} /> },
@@ -822,6 +831,7 @@ function InboxRow({ item }) {
     : [
         { label: 'Open in editor',         icon: <OpenInNewIcon sx={{ fontSize: 15 }} />, primary: true },
         { label: 'Preview draft',          icon: <AllInboxOutlinedIcon sx={{ fontSize: 15 }} /> },
+        { label: 'Generate audio cast',    icon: <GraphicEqOutlinedIcon sx={{ fontSize: 15 }} /> },
         'divider',
         { label: 'Edit series settings',   icon: <SettingsOutlinedIcon sx={{ fontSize: 15 }} /> },
         { label: 'Manage recipients',      icon: <PeopleOutlineIcon sx={{ fontSize: 15 }} /> },
@@ -969,7 +979,11 @@ function InboxRow({ item }) {
             ? <Divider key={`div-${i}`} sx={{ my: 0.5 }} />
             : <MenuItem
                 key={item.label}
-                onClick={closeMenu}
+                onClick={() => {
+                  closeMenu()
+                  if (item.label === 'Manage recipients') navigate('/mw-newsletters/recipients')
+                  else if (item.label === 'Open in editor' || item.label === 'Review & Edit') navigate(`/mw-newsletters/editor/${item.series?.id || ''}`)
+                }}
                 sx={{
                   fontSize: '13px', gap: 1.25, py: 0.9, px: 2,
                   color: item.danger ? 'error.main' : item.primary ? TEAL : 'text.primary',
@@ -983,6 +997,280 @@ function InboxRow({ item }) {
         )}
       </Menu>
     </>
+  )
+}
+
+// ── Recipient list data ───────────────────────────────────────────────────────
+const NEWSLETTERS_LIST = ['The Daily Brief', 'Monthly Round Up', 'Media Coverage Monthly', 'Competitor Digest']
+
+const INITIAL_RECIPIENT_LISTS = [
+  { id: 'external-list',    name: 'External List',      subscribers: 2840, usedIn: ['The Daily Brief', 'Monthly Round Up', 'Media Coverage Monthly'], owner: 'Maricela', updated: 'Mar 25, 2026', contacts: ['sarah.johnson@techcorp.com','michael.chen@mediagroup.com','emily.rodriguez@brandco.com','james.wilson@prweek.com','olivia.martinez@digitalink.com','david.kim@commsplus.com','sophie.taylor@globalpr.com','noah.brown@newsdesk.com','ava.davis@mediawatch.com','liam.miller@brandbeat.com','isabella.moore@coverage.io','mason.jackson@prfirm.com','mia.white@mediahub.com','ethan.harris@brandpulse.com','charlotte.martin@pr24.com','alexander.garcia@mediavault.com','amelia.walker@commslab.com','henry.hall@newspr.com'] },
+  { id: 'c-suite',          name: 'C-Suite Leadership', subscribers: 12,   usedIn: ['Monthly Round Up', 'Media Coverage Monthly'], owner: 'Maricela', updated: 'Mar 25, 2026', contacts: ['ceo@company.com','coo@company.com','cfo@company.com','cmo@company.com','cto@company.com','chro@company.com','cso@company.com','chief.legal@company.com','chief.comm@company.com','evp.strategy@company.com','evp.operations@company.com','vp.brand@company.com'] },
+  { id: 'tech-team',        name: 'Tech Team',          subscribers: 34,   usedIn: ['The Daily Brief', 'Monthly Round Up', 'Media Coverage Monthly', 'Competitor Digest'], owner: 'Maricela', updated: 'Mar 25, 2026', contacts: Array.from({length:34},(_,i)=>`engineer${i+1}@company.com`) },
+  { id: 'media-team',       name: 'Media Team',         subscribers: 2677, usedIn: ['The Daily Brief'], owner: 'Maricela', updated: 'Mar 25, 2026', contacts: Array.from({length:20},(_,i)=>`mediacontact${i+1}@outlet.com`) },
+  { id: 'leadership-team',  name: 'Leadership Team',    subscribers: 111,  usedIn: ['Monthly Round Up'], owner: 'Maricela', updated: 'Mar 25, 2026', contacts: Array.from({length:20},(_,i)=>`leader${i+1}@company.com`) },
+  { id: 'press-contacts',   name: 'Press Contacts',     subscribers: 448,  usedIn: ['Media Coverage Monthly'], owner: 'Tony', updated: 'Apr 2, 2026', contacts: Array.from({length:20},(_,i)=>`press${i+1}@media.com`) },
+  { id: 'partner-network',  name: 'Partner Network',    subscribers: 892,  usedIn: ['Competitor Digest', 'Monthly Round Up'], owner: 'Tony', updated: 'Apr 10, 2026', contacts: Array.from({length:20},(_,i)=>`partner${i+1}@agency.com`) },
+  { id: 'board-members',    name: 'Board Members',      subscribers: 8,    usedIn: ['Monthly Round Up'], owner: 'Maricela', updated: 'Feb 14, 2026', contacts: Array.from({length:8},(_,i)=>`board.member${i+1}@company.com`) },
+]
+
+// ── Recipient Lists panel ─────────────────────────────────────────────────────
+function RecipientListsPanel({ lists, setLists, onSelectList }) {
+  const [search, setSearch] = useState('')
+  const [expandedUsedIn, setExpandedUsedIn] = useState({})
+  const [newListOpen, setNewListOpen] = useState(false)
+  const [newListName, setNewListName] = useState('')
+  const [snackMsg, setSnackMsg] = useState(null)
+
+  const filtered = lists.filter(l => l.name.toLowerCase().includes(search.toLowerCase()))
+  const toggleUsedIn = id => setExpandedUsedIn(prev => ({ ...prev, [id]: !prev[id] }))
+
+  const handleNewList = () => {
+    if (!newListName.trim()) return
+    const id = newListName.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now()
+    setLists(prev => [...prev, { id, name: newListName.trim(), subscribers: 0, usedIn: [], owner: 'Tony', updated: 'Apr 20, 2026', contacts: [] }])
+    setNewListOpen(false); setNewListName(''); setSnackMsg('List created')
+  }
+  const handleDuplicate = list => {
+    setLists(prev => [...prev, { ...list, id: list.id+'-copy', name: list.name+' (Copy)', updated: 'Apr 20, 2026' }])
+    setSnackMsg(`"${list.name}" duplicated`)
+  }
+  const handleDelete = id => {
+    const name = lists.find(l=>l.id===id)?.name
+    setLists(prev => prev.filter(l=>l.id!==id)); setSnackMsg(`"${name}" deleted`)
+  }
+
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'background.paper' }}>
+      {/* Header */}
+      <Box sx={{ px: 3, pt: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: '10px', bgcolor: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PeopleOutlineIcon sx={{ fontSize: 22, color: 'text.secondary' }} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '20px', mb: 0.25 }}>Recipient Lists</Typography>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>{lists.length} lists · {lists.reduce((s,l)=>s+l.subscribers,0).toLocaleString()} total subscribers</Typography>
+            </Box>
+          </Box>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setNewListOpen(true)}
+            sx={{ bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600 }}>
+            New List
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Table */}
+      <Box sx={{ flex: 1, overflow: 'auto', px: 3, py: 2 }}>
+        {/* Toolbar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '13px', color: 'text.secondary' }}>{filtered.length} Lists</Typography>
+          <Box sx={{ flex: 1 }} />
+          <TextField size="small" placeholder="Search lists…" value={search} onChange={e => setSearch(e.target.value)}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 15, color: 'text.disabled' }} /></InputAdornment> }}
+            sx={{ width: 200, '& .MuiOutlinedInput-root': { fontSize: '13px', height: 32 } }}
+          />
+        </Box>
+
+        {/* Column headers */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 110px 200px 110px 150px 110px', px: 1.5, py: 1, bgcolor: 'rgba(0,0,0,0.025)', borderRadius: '6px 6px 0 0', border: '1px solid', borderColor: 'divider', borderBottom: 'none' }}>
+          {['List Name','Subscribers','Used In','Owner','Last Updated','Actions'].map((col,i) => (
+            <Typography key={col} sx={{ fontSize: '11px', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: i >= 4 ? 'right' : 'left' }}>{col}</Typography>
+          ))}
+        </Box>
+
+        {/* Rows */}
+        <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '0 0 6px 6px', overflow: 'hidden' }}>
+          {filtered.map((list, idx) => (
+            <Box key={list.id} sx={{ display: 'grid', gridTemplateColumns: '2fr 110px 200px 110px 150px 110px', px: 1.5, py: 1.5, alignItems: 'center', borderBottom: idx < filtered.length-1 ? '1px solid' : 'none', borderColor: 'divider', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}>
+              <Typography onClick={() => onSelectList(list.id)} sx={{ fontSize: '13px', fontWeight: 600, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>{list.name}</Typography>
+              <Typography sx={{ fontSize: '13px' }}>{list.subscribers.toLocaleString()}</Typography>
+              <Box>
+                {list.usedIn.length === 0
+                  ? <Typography sx={{ fontSize: '12px', color: 'text.disabled', fontStyle: 'italic' }}>Not used</Typography>
+                  : list.usedIn.length === 1
+                    ? <Typography sx={{ fontSize: '12px', color: 'text.primary' }}>{list.usedIn[0]}</Typography>
+                    : <Box>
+                        <Box onClick={() => toggleUsedIn(list.id)} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, cursor: 'pointer', px: 0.75, py: 0.25, borderRadius: '4px', border: '1px solid', borderColor: 'divider', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
+                          <Typography sx={{ fontSize: '12px', fontWeight: 500 }}>{list.usedIn.length} Newsletters</Typography>
+                          <ArrowDropDownIcon sx={{ fontSize: 15, color: 'text.secondary', transform: expandedUsedIn[list.id] ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                        </Box>
+                        {expandedUsedIn[list.id] && <Box sx={{ mt: 0.5 }}>{list.usedIn.map(nl => <Typography key={nl} sx={{ fontSize: '11px', color: 'text.secondary', pl: 0.5 }}>• {nl}</Typography>)}</Box>}
+                      </Box>
+                }
+              </Box>
+              <Typography sx={{ fontSize: '13px', color: 'text.primary' }}>{list.owner}</Typography>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary', textAlign: 'right' }}>{list.updated}</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25 }}>
+                <Tooltip title="View list"><IconButton size="small" onClick={() => onSelectList(list.id)} sx={{ color: 'text.disabled', '&:hover': { color: TEAL } }}><VisibilityOutlinedIcon sx={{ fontSize: 16 }} /></IconButton></Tooltip>
+                <Tooltip title="Duplicate"><IconButton size="small" onClick={() => handleDuplicate(list)} sx={{ color: 'text.disabled', '&:hover': { color: 'text.primary' } }}><ContentCopyIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                <Tooltip title="Delete"><IconButton size="small" onClick={() => handleDelete(list.id)} sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}><DeleteOutlineIcon sx={{ fontSize: 16 }} /></IconButton></Tooltip>
+              </Box>
+            </Box>
+          ))}
+          {filtered.length === 0 && <Box sx={{ py: 5, textAlign: 'center' }}><Typography sx={{ color: 'text.disabled', fontSize: '13px' }}>No lists match "{search}"</Typography></Box>}
+        </Box>
+      </Box>
+
+      {/* New list dialog */}
+      <Dialog open={newListOpen} onClose={() => setNewListOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '16px' }}>New Recipient List</DialogTitle>
+        <DialogContent>
+          <TextField autoFocus fullWidth label="List name" variant="outlined" size="small" value={newListName} onChange={e => setNewListName(e.target.value)} onKeyDown={e => e.key==='Enter' && handleNewList()} sx={{ mt: 1 }} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setNewListOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" onClick={handleNewList} disabled={!newListName.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' } }}>Create List</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={Boolean(snackMsg)} autoHideDuration={3000} onClose={() => setSnackMsg(null)}
+        message={<Box sx={{ display:'flex', alignItems:'center', gap:1 }}><CheckCircleIcon sx={{ fontSize:15, color:'#4caf50' }} />{snackMsg}</Box>}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
+    </Box>
+  )
+}
+
+// ── Recipient detail panel ────────────────────────────────────────────────────
+function RecipientDetailPanel({ listId, lists, setLists, onBack }) {
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const [addOpen, setAddOpen] = useState(false)
+  const [newEmails, setNewEmails] = useState('')
+  const [nlMenuAnchor, setNlMenuAnchor] = useState(null)
+  const [kebabAnchor, setKebabAnchor] = useState(null)
+  const [snackMsg, setSnackMsg] = useState(null)
+  const PAGE_SIZE = 12
+
+  const list = lists.find(l => l.id === listId)
+  const updateList = fn => setLists(prev => prev.map(l => l.id === listId ? fn(l) : l))
+
+  if (!list) return null
+
+  const filtered = list.contacts.filter(c => c.toLowerCase().includes(search.toLowerCase()))
+  const paginated = filtered.slice(page * PAGE_SIZE, (page+1) * PAGE_SIZE)
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+
+  const handleDeleteContact = email => updateList(l => ({ ...l, contacts: l.contacts.filter(c=>c!==email), subscribers: l.subscribers-1 }))
+  const handleAddContacts = () => {
+    const emails = newEmails.split(/[\n,;]+/).map(e=>e.trim()).filter(e=>e.includes('@'))
+    if (!emails.length) return
+    updateList(l => ({ ...l, contacts: [...l.contacts,...emails], subscribers: l.subscribers+emails.length }))
+    setAddOpen(false); setNewEmails(''); setSnackMsg(`${emails.length} contact${emails.length>1?'s':''} added`)
+  }
+  const handleToggleNewsletter = nl => updateList(l => ({ ...l, usedIn: l.usedIn.includes(nl) ? l.usedIn.filter(n=>n!==nl) : [...l.usedIn,nl] }))
+
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'background.paper' }}>
+      {/* Header */}
+      <Box sx={{ px: 3, pt: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
+          <Tooltip title="Back to Recipient Lists">
+            <IconButton size="small" onClick={onBack} sx={{ color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.04)', '&:hover': { bgcolor: 'rgba(0,0,0,0.08)' } }}>
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Typography sx={{ fontWeight: 700, fontSize: '20px' }}>{list.name}</Typography>
+          <IconButton size="small" onClick={e => setKebabAnchor(e.currentTarget)} sx={{ color: 'text.secondary' }}><MoreVertIcon fontSize="small" /></IconButton>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}
+            sx={{ bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600 }}>
+            Add Contacts
+          </Button>
+        </Box>
+        {/* Newsletter chips */}
+        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Typography sx={{ fontSize: '12px', color: 'text.disabled', mr: 0.5 }}>Sent to:</Typography>
+          {list.usedIn.length === 0
+            ? <Typography sx={{ fontSize: '12px', color: 'text.disabled', fontStyle: 'italic' }}>No newsletters assigned</Typography>
+            : list.usedIn.map(nl => <Chip key={nl} label={nl} size="small" sx={{ fontSize: '11px', height: 22, bgcolor: TEAL_LIGHT, color: TEAL, fontWeight: 600 }} />)
+          }
+          <Chip icon={<AddIcon sx={{ fontSize:'12px !important' }} />} label="Add" size="small"
+            onClick={e => setNlMenuAnchor(e.currentTarget)}
+            sx={{ fontSize: '11px', height: 22, cursor: 'pointer', bgcolor: 'transparent', border: '1px dashed rgba(0,0,0,0.2)', color: 'text.secondary', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }} />
+        </Box>
+      </Box>
+
+      {/* Newsletter assignment menu */}
+      <Menu anchorEl={nlMenuAnchor} open={Boolean(nlMenuAnchor)} onClose={() => setNlMenuAnchor(null)}>
+        <Box sx={{ px: 2, py: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Assign to newsletter series</Typography>
+        </Box>
+        {NEWSLETTERS_LIST.map(nl => (
+          <MenuItem key={nl} onClick={() => handleToggleNewsletter(nl)} sx={{ fontSize: '13px', gap: 1 }}>
+            <Box sx={{ width: 15, height: 15, borderRadius: '3px', border: `2px solid ${list.usedIn.includes(nl) ? TEAL : 'rgba(0,0,0,0.25)'}`, bgcolor: list.usedIn.includes(nl) ? TEAL : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {list.usedIn.includes(nl) && <Box sx={{ width: 5, height: 5, bgcolor: '#fff', borderRadius: '1px' }} />}
+            </Box>
+            {nl}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Kebab menu */}
+      <Menu anchorEl={kebabAnchor} open={Boolean(kebabAnchor)} onClose={() => setKebabAnchor(null)}>
+        <MenuItem sx={{ fontSize: '13px' }} onClick={() => setKebabAnchor(null)}>Rename list</MenuItem>
+        <MenuItem sx={{ fontSize: '13px' }} onClick={() => setKebabAnchor(null)}>Export contacts</MenuItem>
+        <MenuItem sx={{ fontSize: '13px' }} onClick={() => setKebabAnchor(null)}>Duplicate list</MenuItem>
+        <Divider />
+        <MenuItem sx={{ fontSize: '13px', color: 'error.main' }} onClick={() => { setKebabAnchor(null); onBack() }}>Delete list</MenuItem>
+      </Menu>
+
+      {/* Table */}
+      <Box sx={{ flex: 1, overflow: 'auto', px: 3, py: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, gap: 1.5 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '13px', color: 'text.secondary' }}>{filtered.length.toLocaleString()} Contacts</Typography>
+          <Box sx={{ flex: 1 }} />
+          <TextField size="small" placeholder="Search contacts…" value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 15, color: 'text.disabled' }} /></InputAdornment> }}
+            sx={{ width: 200, '& .MuiOutlinedInput-root': { fontSize: '13px', height: 32 } }}
+          />
+        </Box>
+
+        <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '6px', overflow: 'hidden' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 70px', px: 1.5, py: 1, bgcolor: 'rgba(0,0,0,0.025)', borderBottom: '1px solid', borderColor: 'divider' }}>
+            {['Email','Actions'].map((col,i) => <Typography key={col} sx={{ fontSize: '11px', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: i===1?'right':'left' }}>{col}</Typography>)}
+          </Box>
+          {paginated.map((email, idx) => (
+            <Box key={email+idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 70px', px: 1.5, py: 1.25, alignItems: 'center', borderBottom: idx < paginated.length-1 ? '1px solid' : 'none', borderColor: 'divider', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' }, '& .del-btn': { opacity: 0 }, '&:hover .del-btn': { opacity: 1 } }}>
+              <Typography sx={{ fontSize: '13px' }}>{email}</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Tooltip title="Remove">
+                  <IconButton className="del-btn" size="small" onClick={() => handleDeleteContact(email)} sx={{ color: 'text.disabled', transition: 'opacity 0.15s', '&:hover': { color: 'error.main' } }}>
+                    <DeleteOutlineIcon sx={{ fontSize: 15 }} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+          ))}
+          {filtered.length === 0 && <Box sx={{ py: 5, textAlign: 'center' }}><Typography sx={{ color: 'text.disabled', fontSize: '13px' }}>{search ? `No contacts match "${search}"` : 'No contacts yet.'}</Typography></Box>}
+          {totalPages > 1 && (
+            <Box sx={{ px: 1.5, py: 1, display: 'flex', alignItems: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', flex: 1 }}>{page*PAGE_SIZE+1}–{Math.min((page+1)*PAGE_SIZE, filtered.length)} of {filtered.length.toLocaleString()}</Typography>
+              <Button size="small" disabled={page===0} onClick={() => setPage(p=>p-1)} sx={{ textTransform: 'none', fontSize: '12px', px: 1 }}>Previous</Button>
+              <Button size="small" disabled={page>=totalPages-1} onClick={() => setPage(p=>p+1)} sx={{ textTransform: 'none', fontSize: '12px', px: 1 }}>Next</Button>
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      {/* Add contacts dialog */}
+      <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '16px' }}>Add Contacts</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>Enter email addresses separated by commas, semicolons, or new lines.</Typography>
+          <TextField autoFocus fullWidth multiline rows={5} placeholder="name@company.com, name2@company.com…" value={newEmails} onChange={e => setNewEmails(e.target.value)} sx={{ '& .MuiOutlinedInput-root': { fontSize: '13px' } }} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setAddOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddContacts} disabled={!newEmails.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, '&:hover': { bgcolor: '#9a1f87' } }}>Add Contacts</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={Boolean(snackMsg)} autoHideDuration={3000} onClose={() => setSnackMsg(null)}
+        message={<Box sx={{ display:'flex', alignItems:'center', gap:1 }}><CheckCircleIcon sx={{ fontSize:15, color:'#4caf50' }} />{snackMsg}</Box>}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
+    </Box>
   )
 }
 
@@ -1496,9 +1784,13 @@ function NewSeriesModal({ open, onClose }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function MwNewslettersPage() {
-  const [selectedId, setSelectedId] = useState(ALL_VIEW_ID)
-  const [search, setSearch]         = useState('')
-  const [newSeriesOpen, setNewSeriesOpen] = useState(false)
+  const [selectedId, setSelectedId]         = useState(ALL_VIEW_ID)
+  const [search, setSearch]                 = useState('')
+  const [newSeriesOpen, setNewSeriesOpen]   = useState(false)
+  const [recipientLists, setRecipientLists] = useState(INITIAL_RECIPIENT_LISTS)
+  const [selectedListId, setSelectedListId] = useState(null) // for drill-down inside recipients view
+
+  const isRecipientsView = selectedId === RECIPIENTS_VIEW_ID
 
   const selectedSeries = SERIES.find(s => s.id === selectedId)
   const filtered       = SERIES.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
@@ -1558,6 +1850,30 @@ export default function MwNewslettersPage() {
             )}
           </Box>
 
+          {/* Recipient Lists nav item */}
+          <Box
+            onClick={() => { setSelectedId(RECIPIENTS_VIEW_ID); setSelectedListId(null) }}
+            sx={{
+              mx: 1.5, mb: 0.5, px: 1.5, py: 1.25,
+              borderRadius: '8px', cursor: 'pointer',
+              bgcolor: isRecipientsView ? 'rgba(0,0,0,0.06)' : 'transparent',
+              display: 'flex', alignItems: 'center', gap: 1.5,
+              '&:hover': { bgcolor: isRecipientsView ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)' },
+            }}
+          >
+            <Box sx={{
+              width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
+              bgcolor: isRecipientsView ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.06)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <PeopleOutlineIcon sx={{ fontSize: 16, color: isRecipientsView ? 'text.primary' : 'text.secondary' }} />
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: isRecipientsView ? 700 : 500, color: isRecipientsView ? 'text.primary' : 'text.primary' }}>Recipient Lists</Typography>
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{recipientLists.length} lists · {recipientLists.reduce((s,l)=>s+l.subscribers,0).toLocaleString()} subscribers</Typography>
+            </Box>
+          </Box>
+
           <Divider sx={{ mx: 1.5, mb: 0.5 }} />
 
           {/* Series section header */}
@@ -1578,8 +1894,12 @@ export default function MwNewslettersPage() {
       </Box>
 
       {/* ── Right panel ── */}
-      <Box sx={{ flex: 1, overflow: 'hidden', bgcolor: isAllView ? 'background.paper' : 'rgba(0,0,0,0.02)' }}>
-        {isAllView
+      <Box sx={{ flex: 1, overflow: 'hidden', bgcolor: (isAllView || isRecipientsView) ? 'background.paper' : 'rgba(0,0,0,0.02)' }}>
+        {isRecipientsView
+          ? selectedListId
+            ? <RecipientDetailPanel listId={selectedListId} lists={recipientLists} setLists={setRecipientLists} onBack={() => setSelectedListId(null)} />
+            : <RecipientListsPanel lists={recipientLists} setLists={setRecipientLists} onSelectList={id => setSelectedListId(id)} />
+          : isAllView
           ? <AllNewslettersInbox />
           : selectedSeries
             ? <SeriesDetail series={selectedSeries} />

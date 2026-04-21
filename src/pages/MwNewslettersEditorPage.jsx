@@ -96,12 +96,13 @@ const SOURCE_CFG = {
 // ── Auto-curated articles data ────────────────────────────────────────────────
 const CURATED_ARTICLES = [
   {
-    id: 1, source: 'Reuters', type: 'News', country: 'GB', date: 'Apr 20, 9:14 AM',
-    headline: 'Global brands report record media coverage in Q1 2026',
-    excerpt: 'Brands across tech, finance and consumer goods saw a 34% increase in earned media coverage compared to the same period last year.',
-    sentiment: 'Positive', reach: '4.2M', origin: 'Explore', added: false,
-    aiSummary: null, similar: 87, ave: '$42K', avatarColor: '#e85d04',
-    aiReason: null,
+    id: 9, source: 'Competitor Monitor', type: 'Monitor', country: '', date: 'Apr 20, 6:00 AM',
+    headline: 'Competitor share-of-voice shift: your brand up 12% this month',
+    excerpt: 'Your Monitor streams detected a significant share-of-voice gain versus key competitors, driven by product launch coverage and exec thought leadership.',
+    sentiment: 'Positive', reach: '—', origin: 'Monitor', added: true,
+    aiSummary: 'Brand share-of-voice increased 12% MoM, outperforming the category average of 4%. Competitor A saw a 7% decline coinciding with a product recall story.',
+    similar: 0, ave: null, avatarColor: '#00827F', matchScore: 97,
+    aiReason: 'Competitive signal your readers can act on — share-of-voice shifts are a consistent click driver in this series.',
   },
   {
     id: 2, source: 'Financial Times', type: 'News', country: 'GB', date: 'Apr 20, 8:30 AM',
@@ -109,47 +110,31 @@ const CURATED_ARTICLES = [
     excerpt: 'Leading companies are shifting from reactive to proactive media management using AI-powered monitoring platforms.',
     sentiment: 'Positive', reach: '2.8M', origin: 'Explore', added: true,
     aiSummary: 'AI-powered media monitoring is enabling enterprise PR teams to shift from reactive to proactive strategies, with leading brands reporting significant gains in coverage quality and stakeholder engagement.',
-    similar: 34, ave: '$28K', avatarColor: '#c9a14a',
+    similar: 34, ave: '$28K', avatarColor: '#c9a14a', matchScore: 94,
     aiReason: 'High reach & strong positive sentiment on a topic your audience consistently engages with.',
-  },
-  {
-    id: 3, source: 'TechCrunch', type: 'News', country: 'US', date: 'Apr 19, 4:00 PM',
-    headline: 'Meltwater study: 67% of comms teams now use AI for content curation',
-    excerpt: 'New research shows rapid adoption of AI tools in communications departments, with newsletter automation cited as a top use case.',
-    sentiment: 'Positive', reach: '1.6M', origin: 'Explore', added: false,
-    aiSummary: null, similar: 22, ave: '$16K', avatarColor: '#0d9b5b',
-    aiReason: null,
-  },
-  {
-    id: 4, source: 'Bloomberg', type: 'News', country: 'US', date: 'Apr 19, 2:15 PM',
-    headline: 'Competitor media spend analysis: Q1 2026 industry report',
-    excerpt: 'New analysis reveals significant shifts in competitor media investment and earned media strategies across key verticals.',
-    sentiment: 'Neutral', reach: '3.1M', origin: 'Analyze', added: false,
-    aiSummary: null, similar: 61, ave: '$31K', avatarColor: '#4a90d9',
-    aiReason: null,
   },
   {
     id: 5, source: 'Brand Watch Monitor', type: 'Monitor', country: '', date: 'Apr 20, 7:00 AM',
     headline: 'Top trending brand conversations this week',
     excerpt: 'Your Monitor view surfaced 847 new brand mentions this week, with 73% rated positive sentiment. Key topics: sustainability, product launches.',
     sentiment: 'Positive', reach: '—', origin: 'Monitor', added: true,
-    aiSummary: null, similar: 0, ave: null, avatarColor: '#00827F',
+    aiSummary: null, similar: 0, ave: null, avatarColor: '#00827F', matchScore: 91,
     aiReason: 'Surfaces your highest-volume brand signal this week — keeps readers close to real-time brand health.',
   },
   {
-    id: 6, source: 'Wired', type: 'News', country: 'US', date: 'Apr 18, 11:00 AM',
-    headline: 'The newsletter renaissance: why brands are doubling down on email',
-    excerpt: 'Despite social media dominance, branded newsletters are seeing a resurgence with open rates exceeding 40% for curated content.',
-    sentiment: 'Positive', reach: '900k', origin: 'Explore', added: false,
-    aiSummary: null, similar: 11, ave: '$9K', avatarColor: '#7B68EE',
-    aiReason: null,
+    id: 10, source: 'Wall Street Journal', type: 'News', country: 'US', date: 'Apr 17, 9:00 AM',
+    headline: 'Enterprise software brands gain share as legacy vendors struggle',
+    excerpt: 'A wave of enterprise software consolidation is reshaping competitive dynamics, with AI-first vendors gaining significant ground in Q1 2026.',
+    sentiment: 'Neutral', reach: '5.4M', origin: 'Analyze', added: true,
+    aiSummary: null, similar: 143, ave: '$54K', avatarColor: '#003a6e', matchScore: 89,
+    aiReason: 'Highest reach article this cycle — broad industry context that sets up your competitive coverage.',
   },
   {
     id: 7, source: 'PR Week', type: 'News', country: 'GB', date: 'Apr 19, 10:30 AM',
     headline: 'Earned media value hits five-year high as trust in paid ads declines',
     excerpt: 'New industry data shows earned media is generating 3× more trust than paid placements, pushing comms teams to invest heavily in coverage quality.',
     sentiment: 'Positive', reach: '780k', origin: 'Explore', added: true,
-    aiSummary: null, similar: 19, ave: '$7.8K', avatarColor: '#e91e8c',
+    aiSummary: null, similar: 19, ave: '$7.8K', avatarColor: '#e91e8c', matchScore: 86,
     aiReason: "Directly relevant to your audience's KPIs — earned media ROI is a top recurring theme in past editions.",
   },
   {
@@ -157,46 +142,61 @@ const CURATED_ARTICLES = [
     headline: 'Why media relations is back at the top of the CMO agenda',
     excerpt: 'After years of social-first thinking, marketing leaders are returning to earned media as a core brand-building lever in 2026.',
     sentiment: 'Positive', reach: '1.1M', origin: 'Explore', added: true,
-    aiSummary: null, similar: 8, ave: '$11K', avatarColor: '#1da1f2',
+    aiSummary: null, similar: 8, ave: '$11K', avatarColor: '#1da1f2', matchScore: 82,
     aiReason: "Aligns with the edition's theme and mirrors topics your subscribers clicked most in the last 3 editions.",
   },
   {
-    id: 9, source: 'Competitor Monitor', type: 'Monitor', country: '', date: 'Apr 20, 6:00 AM',
-    headline: 'Competitor share-of-voice shift: your brand up 12% this month',
-    excerpt: 'Your Monitor streams detected a significant share-of-voice gain versus key competitors, driven by product launch coverage and exec thought leadership.',
-    sentiment: 'Positive', reach: '—', origin: 'Monitor', added: true,
-    aiSummary: 'Brand share-of-voice increased 12% MoM, outperforming the category average of 4%. Competitor A saw a 7% decline coinciding with a product recall story.',
-    similar: 0, ave: null, avatarColor: '#00827F',
-    aiReason: 'Competitive signal your readers can act on — share-of-voice shifts are a consistent click driver in this series.',
+    id: 3, source: 'TechCrunch', type: 'News', country: 'US', date: 'Apr 19, 4:00 PM',
+    headline: 'Meltwater study: 67% of comms teams now use AI for content curation',
+    excerpt: 'New research shows rapid adoption of AI tools in communications departments, with newsletter automation cited as a top use case.',
+    sentiment: 'Positive', reach: '1.6M', origin: 'Explore', added: false,
+    aiSummary: null, similar: 22, ave: '$16K', avatarColor: '#0d9b5b', matchScore: 74,
+    aiReason: null,
   },
   {
-    id: 10, source: 'Wall Street Journal', type: 'News', country: 'US', date: 'Apr 17, 9:00 AM',
-    headline: 'Enterprise software brands gain share as legacy vendors struggle',
-    excerpt: 'A wave of enterprise software consolidation is reshaping competitive dynamics, with AI-first vendors gaining significant ground in Q1 2026.',
-    sentiment: 'Neutral', reach: '5.4M', origin: 'Analyze', added: true,
-    aiSummary: null, similar: 143, ave: '$54K', avatarColor: '#003a6e',
-    aiReason: 'Highest reach article this cycle — broad industry context that sets up your competitive coverage.',
+    id: 4, source: 'Bloomberg', type: 'News', country: 'US', date: 'Apr 19, 2:15 PM',
+    headline: 'Competitor media spend analysis: Q1 2026 industry report',
+    excerpt: 'New analysis reveals significant shifts in competitor media investment and earned media strategies across key verticals.',
+    sentiment: 'Neutral', reach: '3.1M', origin: 'Analyze', added: false,
+    aiSummary: null, similar: 61, ave: '$31K', avatarColor: '#4a90d9', matchScore: 69,
+    aiReason: null,
   },
   {
-    id: 11, source: 'Marketing Week', type: 'News', country: 'GB', date: 'Apr 17, 2:00 PM',
-    headline: 'Brands that publish more than 3× weekly see 28% higher brand recall',
-    excerpt: 'A longitudinal study of 500 mid-market brands finds consistent content cadence is a stronger predictor of brand recall than spend alone.',
-    sentiment: 'Positive', reach: '620k', origin: 'Explore', added: false,
-    aiSummary: null, similar: 6, ave: '$6.2K', avatarColor: '#ff4081',
+    id: 1, source: 'Reuters', type: 'News', country: 'GB', date: 'Apr 20, 9:14 AM',
+    headline: 'Global brands report record media coverage in Q1 2026',
+    excerpt: 'Brands across tech, finance and consumer goods saw a 34% increase in earned media coverage compared to the same period last year.',
+    sentiment: 'Positive', reach: '4.2M', origin: 'Explore', added: false,
+    aiSummary: null, similar: 87, ave: '$42K', avatarColor: '#e85d04', matchScore: 65,
+    aiReason: null,
   },
   {
     id: 12, source: 'The Guardian', type: 'News', country: 'GB', date: 'Apr 20, 6:45 AM',
     headline: 'Media trust reaches decade high as audiences return to established outlets',
     excerpt: 'New survey data shows readers are gravitating back to premium editorial brands, with newsletter subscriptions up 41% year-on-year.',
     sentiment: 'Positive', reach: '3.8M', origin: 'Searches', added: false,
-    aiSummary: null, similar: 29, ave: '$38K', avatarColor: '#1a6b3c',
+    aiSummary: null, similar: 29, ave: '$38K', avatarColor: '#1a6b3c', matchScore: 61,
   },
   {
     id: 13, source: 'Campaign', type: 'News', country: 'GB', date: 'Apr 19, 3:30 PM',
     headline: 'CMOs rank earned media as top channel for brand credibility in 2026',
     excerpt: 'A global survey of 300 senior marketers places earned media ahead of paid and owned channels for building long-term brand equity.',
     sentiment: 'Positive', reach: '1.4M', origin: 'Searches', added: false,
-    aiSummary: null, similar: 17, ave: '$14K', avatarColor: '#b45309',
+    aiSummary: null, similar: 17, ave: '$14K', avatarColor: '#b45309', matchScore: 57,
+  },
+  {
+    id: 6, source: 'Wired', type: 'News', country: 'US', date: 'Apr 18, 11:00 AM',
+    headline: 'The newsletter renaissance: why brands are doubling down on email',
+    excerpt: 'Despite social media dominance, branded newsletters are seeing a resurgence with open rates exceeding 40% for curated content.',
+    sentiment: 'Positive', reach: '900k', origin: 'Explore', added: false,
+    aiSummary: null, similar: 11, ave: '$9K', avatarColor: '#7B68EE', matchScore: 52,
+    aiReason: null,
+  },
+  {
+    id: 11, source: 'Marketing Week', type: 'News', country: 'GB', date: 'Apr 17, 2:00 PM',
+    headline: 'Brands that publish more than 3× weekly see 28% higher brand recall',
+    excerpt: 'A longitudinal study of 500 mid-market brands finds consistent content cadence is a stronger predictor of brand recall than spend alone.',
+    sentiment: 'Positive', reach: '620k', origin: 'Explore', added: false,
+    aiSummary: null, similar: 6, ave: '$6.2K', avatarColor: '#ff4081', matchScore: 44,
   },
 ]
 
@@ -309,6 +309,20 @@ function CuratedArticleCard({ article, onToggleAdd, onGenerateSummary }) {
             </Box>
           </Box>
           <Box sx={{ flex: 1 }} />
+          {/* Match score badge */}
+          {article.matchScore != null && (() => {
+            const score = article.matchScore
+            const color = score >= 80 ? TEAL : score >= 65 ? '#b45309' : 'rgba(0,0,0,0.35)'
+            const bg = score >= 80 ? 'rgba(0,130,127,0.09)' : score >= 65 ? 'rgba(180,83,9,0.09)' : 'rgba(0,0,0,0.05)'
+            return (
+              <Tooltip title={`AI match score: how well this article fits your newsletter's topics, audience and past performance`} placement="top">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, px: 0.7, py: 0.2, bgcolor: bg, borderRadius: '4px', flexShrink: 0, cursor: 'default' }}>
+                  <AutoAwesomeIcon sx={{ fontSize: 9, color }} />
+                  <Typography sx={{ fontSize: '10.5px', fontWeight: 700, color, lineHeight: 1 }}>{score}%</Typography>
+                </Box>
+              </Tooltip>
+            )
+          })()}
           <Typography sx={{ fontSize: '10px', color: 'text.disabled', whiteSpace: 'nowrap', flexShrink: 0 }}>{article.date}</Typography>
         </Box>
 
@@ -805,6 +819,70 @@ function CurationModeOption({ id, label, sub, accentColor, selected, onSelect })
   )
 }
 
+// ── Canvas widget card (added widgets shown inside the newsletter) ─────────────
+function CanvasWidget({ widget, accentColor, onRemove }) {
+  const [aiOpen, setAiOpen] = useState(true) // open by default in canvas
+  const isAutoAdded = AUTO_ADDED_IDS.includes(widget.id)
+
+  return (
+    <Box sx={{ mx: 3, my: 2, borderRadius: '8px', overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+      {/* Canvas widget header */}
+      <Box sx={{
+        display: 'flex', alignItems: 'center', gap: 0.75, px: 2, py: 1.25,
+        borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.02)',
+      }}>
+        <BarChartOutlinedIcon sx={{ fontSize: 14, color: accentColor }} />
+        <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.primary', flex: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {widget.title}
+        </Typography>
+        {isAutoAdded && (
+          <Box sx={{ px: 0.6, py: 0.15, bgcolor: 'rgba(0,130,127,0.1)', borderRadius: '3px', display: 'inline-flex', alignItems: 'center', gap: 0.4, mr: 0.5 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 9, color: TEAL }} />
+            <Typography sx={{ fontSize: '9px', fontWeight: 700, color: TEAL, letterSpacing: '0.04em' }}>Auto-added</Typography>
+          </Box>
+        )}
+        <Tooltip title="Remove widget">
+          <IconButton size="small" onClick={onRemove} sx={{ p: 0.3, color: 'text.disabled', '&:hover': { color: 'error.main' } }}>
+            <CloseIcon sx={{ fontSize: 12 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* Full-width dashboard preview */}
+      <Box sx={{ px: 2, pt: 1.5, pb: 1 }}>
+        <DashboardWidgetPreview widget={widget} />
+      </Box>
+
+      {/* Why AI picked this — inline, collapsible */}
+      <Box sx={{ borderTop: '1px solid rgba(0,130,127,0.15)', mx: 2, mb: 1.5 }}>
+        <Box
+          onClick={() => setAiOpen(v => !v)}
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 0.6, py: 0.75, cursor: 'pointer',
+            '&:hover .ai-label': { opacity: 0.8 },
+          }}
+        >
+          <AutoAwesomeIcon sx={{ fontSize: 11, color: TEAL }} />
+          <Typography className="ai-label" sx={{ fontSize: '10.5px', fontWeight: 600, color: TEAL, flex: 1 }}>Why AI picked this</Typography>
+          <Box sx={{ transform: aiOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'flex' }}>
+            <ArrowDropDownIcon sx={{ fontSize: 16, color: TEAL }} />
+          </Box>
+        </Box>
+        {aiOpen && (
+          <Box sx={{
+            bgcolor: 'rgba(0,130,127,0.05)', borderRadius: '6px',
+            px: 1.25, py: 1, borderLeft: `3px solid ${TEAL}`,
+          }}>
+            <Typography sx={{ fontSize: '11.5px', color: 'text.secondary', lineHeight: 1.6 }}>
+              {widget.aiReason}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  )
+}
+
 // ── Main editor page ───────────────────────────────────────────────────────────
 export default function MwNewslettersEditorPage() {
   const navigate = useNavigate()
@@ -823,6 +901,12 @@ export default function MwNewslettersEditorPage() {
   const [showOverview, setShowOverview] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
   const [showAnalyzeWidget, setShowAnalyzeWidget] = useState(false)
+
+  // ── Widget state (shared: canvas + right panel) ──
+  const [addedWidgets, setAddedWidgets] = useState(AUTO_ADDED_IDS)
+  const toggleWidget = id => setAddedWidgets(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  )
 
   // ── Panel resize ──
   const [panelWidth, setPanelWidth] = useState(420)
@@ -1390,6 +1474,16 @@ export default function MwNewslettersEditorPage() {
               />
             )}
 
+            {/* AI-added widgets — rendered in the newsletter canvas */}
+            {addedWidgets.length > 0 && RECOMMENDED_WIDGETS.filter(w => addedWidgets.includes(w.id)).map(widget => (
+              <CanvasWidget
+                key={widget.id}
+                widget={widget}
+                accentColor={seriesColor}
+                onRemove={() => toggleWidget(widget.id)}
+              />
+            ))}
+
             {/* Section blocks — driven by sections state so dropped articles appear */}
             <Box sx={{ p: 2.5 }}>
               {sections.map(section => (
@@ -1481,7 +1575,7 @@ export default function MwNewslettersEditorPage() {
 
           {/* Tab: AI Curated */}
           {rightTab === 0 && (
-            <AiCuratedPanel articles={articles} addedCount={addedCount} toggleAdd={toggleAdd} generateSummary={generateSummary} />
+            <AiCuratedPanel articles={articles} addedCount={addedCount} toggleAdd={toggleAdd} generateSummary={generateSummary} addedWidgets={addedWidgets} toggleWidget={toggleWidget} />
           )}
 
           {/* Tab: Search */}
@@ -1500,11 +1594,11 @@ export default function MwNewslettersEditorPage() {
 }
 
 // ── AI Curated panel — articles + widgets sub-tabs ────────────────────────────
-function AiCuratedPanel({ articles, addedCount, toggleAdd, generateSummary }) {
+function AiCuratedPanel({ articles, addedCount, toggleAdd, generateSummary, addedWidgets, toggleWidget }) {
   const [subTab, setSubTab] = useState('articles') // 'articles' | 'widgets'
   const [populating, setPopulating] = useState(false)
   const [populated, setPopulated] = useState(false)
-  const WIDGET_COUNT = 3
+  const availableWidgetCount = RECOMMENDED_WIDGETS.filter(w => !addedWidgets.includes(w.id)).length
 
   const handleAutoPopulate = () => {
     setPopulating(true)
@@ -1568,7 +1662,7 @@ function AiCuratedPanel({ articles, addedCount, toggleAdd, generateSummary }) {
         <SubTabBtn
           id="widgets"
           label="widgets"
-          count={WIDGET_COUNT}
+          count={availableWidgetCount}
           icon={<WidgetsOutlinedIcon sx={{ fontSize: 13, color: subTab === 'widgets' ? '#e86c5a' : 'text.disabled' }} />}
         />
         <Box sx={{ flex: 1 }} />
@@ -1600,27 +1694,41 @@ function AiCuratedPanel({ articles, addedCount, toggleAdd, generateSummary }) {
 
       </Box>
 
-      {/* Added count banner — articles view only */}
-      {subTab === 'articles' && addedCount > 0 && (
-        <Box sx={{ px: 1.5, py: 0.875, bgcolor: 'rgba(0,130,127,0.06)', borderBottom: '1px solid rgba(0,130,127,0.12)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <CheckCircleIcon sx={{ fontSize: 13, color: TEAL }} />
-          <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 500 }}>
-            <Box component="span" sx={{ fontWeight: 700 }}>{addedCount} of {articles.length} articles</Box> curated into this edition
+      {/* AI match score explanation banner */}
+      {subTab === 'articles' && (
+        <Box sx={{ px: 1.5, py: 0.875, bgcolor: 'rgba(0,130,127,0.05)', borderBottom: '1px solid rgba(0,130,127,0.1)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <AutoAwesomeIcon sx={{ fontSize: 11, color: TEAL, flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4 }}>
+            Articles ranked by <Box component="span" sx={{ fontWeight: 700, color: TEAL }}>AI match score</Box>. The top {addedCount} were auto-added to this edition.
           </Typography>
         </Box>
       )}
 
       {/* Content */}
       <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-        {subTab === 'articles' && articles.map(article => (
-          <CuratedArticleCard
-            key={article.id}
-            article={article}
-            onToggleAdd={toggleAdd}
-            onGenerateSummary={generateSummary}
-          />
-        ))}
-        {subTab === 'widgets' && <WidgetsTab />}
+        {subTab === 'articles' && articles.map((article, idx) => {
+          const prevAdded = idx > 0 && articles[idx - 1].added
+          const showThreshold = !article.added && prevAdded
+          return (
+            <Box key={article.id}>
+              {showThreshold && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: 'rgba(0,0,0,0.02)', borderTop: '1px dashed rgba(0,0,0,0.12)', borderBottom: '1px dashed rgba(0,0,0,0.12)' }}>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(0,0,0,0.1)' }} />
+                  <Typography sx={{ fontSize: '10px', color: 'text.disabled', whiteSpace: 'nowrap', px: 0.5 }}>
+                    Below auto-add threshold
+                  </Typography>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(0,0,0,0.1)' }} />
+                </Box>
+              )}
+              <CuratedArticleCard
+                article={article}
+                onToggleAdd={toggleAdd}
+                onGenerateSummary={generateSummary}
+              />
+            </Box>
+          )
+        })}
+        {subTab === 'widgets' && <WidgetsTab addedWidgets={addedWidgets} toggleWidget={toggleWidget} />}
       </Box>
     </Box>
   )
@@ -1631,193 +1739,367 @@ const RECOMMENDED_WIDGETS = [
   {
     id: 'mention-volume',
     title: 'Mention Volume',
-    description: 'Track how often your brand or topics are mentioned over time.',
-    category: 'Analyze',
-    recommended: true,
-    preview: 'line',
+    subtitle: 'Last 30 days | Mentions',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '12.4K',
+    metricLabel: 'total mentions',
+    metricDelta: '+18%',
+    metricUp: true,
+    preview: 'mentionTrend',
+    aiReason: 'Mention volume spiked +18% this period, driven by your Q1 earnings coverage. This gives readers immediate context on how much conversation your brand generated during the edition window.',
   },
   {
     id: 'share-of-voice',
     title: 'Share of Voice',
-    description: 'See how your brand compares to competitors in total coverage.',
-    category: 'Analyze',
-    recommended: true,
-    preview: 'donut',
+    subtitle: 'Last 30 days | Coverage',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '42%',
+    metricLabel: 'share of voice',
+    metricDelta: '+5pp',
+    metricUp: true,
+    preview: 'sov',
+    aiReason: 'Your brand holds the leading share this period. Including this helps readers benchmark competitive position at a glance — especially relevant given the competitive coverage in this edition.',
   },
   {
     id: 'sentiment-breakdown',
-    title: 'Sentiment Breakdown',
-    description: 'Positive, neutral and negative sentiment split across your coverage.',
-    category: 'Analyze',
-    recommended: true,
-    preview: 'bar',
+    title: 'Total Avg. Sentiment',
+    subtitle: 'Last 30 days | Net Sentiment',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '+15.39',
+    metricLabel: 'net sentiment',
+    metricDelta: '+3.2',
+    metricUp: true,
+    preview: 'sentiment',
+    aiReason: 'Sentiment improved significantly vs. last period, largely tied to the positive product launch coverage curated in this edition. This widget gives readers the "so what" behind the article selection.',
   },
   {
     id: 'top-sources',
     title: 'Top Sources',
-    description: 'The publications driving the most coverage this period.',
-    category: 'Analyze',
-    recommended: false,
-    preview: 'list',
+    subtitle: 'Last 30 days | Mentions',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '17',
+    metricLabel: 'sources tracked',
+    preview: 'topSources',
+    aiReason: 'Reuters, AP, and TechCrunch drove the majority of coverage this period. Including source attribution helps readers evaluate the quality and reach of the media attention.',
   },
   {
-    id: 'top-journalists',
-    title: 'Top Journalists',
-    description: 'Most active journalists covering your brand and topics.',
-    category: 'Analyze',
-    recommended: false,
-    preview: 'list',
-  },
-  {
-    id: 'word-cloud',
-    title: 'Word Cloud',
-    description: 'Most frequent keywords and themes from your coverage.',
-    category: 'Analyze',
-    recommended: false,
-    preview: 'cloud',
-  },
-  {
-    id: 'geo-distribution',
-    title: 'Geographic Distribution',
-    description: 'Where your coverage is coming from around the world.',
-    category: 'Analyze',
-    recommended: false,
-    preview: 'map',
+    id: 'sentiment-by-source',
+    title: 'Sentiment by Source Type',
+    subtitle: 'Last 30 days | Mentions',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: 'X / News',
+    metricLabel: 'top sources',
+    preview: 'sentimentBySource',
+    aiReason: 'X (Twitter) and News-Online dominate coverage volume, and both skew positive this period. This context helps readers understand which channels are amplifying your brand story.',
   },
   {
     id: 'reach-trend',
     title: 'Reach Over Time',
-    description: 'Total audience reach of your earned media coverage.',
-    category: 'Analyze',
-    recommended: false,
-    preview: 'area',
+    subtitle: 'Last 30 days | Audience reach',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '84M',
+    metricLabel: 'total reach',
+    metricDelta: '+22%',
+    metricUp: true,
+    preview: 'reachArea',
+    aiReason: 'Audience reach hit a 90-day high this period, correlating with the high-reach Reuters and AP articles selected for this edition. This adds tangible proof of impact for readers.',
+  },
+  {
+    id: 'word-cloud',
+    title: 'Top Keywords',
+    subtitle: 'Last 30 days | Mentions',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '142',
+    metricLabel: 'unique themes',
+    preview: 'wordCloud',
+    aiReason: '"AI", "Earnings", and "Product Launch" are the dominant themes this period — all reflected in the curated articles. This widget surfaces the narrative thread running through the edition.',
+  },
+  {
+    id: 'geo-distribution',
+    title: 'Geographic Distribution',
+    subtitle: 'Last 30 days | Coverage origin',
+    snapshot: 'Mar 22 – Apr 20, 2026',
+    metricValue: '38',
+    metricLabel: 'countries',
+    preview: 'geo',
+    aiReason: 'Coverage is concentrated in the US, UK, and Germany — matching the regional focus of this edition\'s audience segments. Useful context for newsletters sent to regional stakeholders.',
   },
 ]
 
-// Mini chart previews
-function WidgetPreview({ type, color = TEAL }) {
-  const amber = '#e86c5a'
+// ── Dashboard-style widget preview ──────────────────────────────────────────
+function DashboardWidgetPreview({ widget }) {
+  const teal = TEAL
+  const green = '#4caf50'
+  const red = '#e53935'
+  const grey = '#bdbdbd'
   const purple = '#B627A1'
-  if (type === 'line' || type === 'area') return (
-    <Box component="svg" viewBox="0 0 80 40" sx={{ width: '100%', height: 40 }}>
-      <polyline points="0,32 12,26 24,28 36,14 48,18 60,8 72,12 80,10"
-        fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      {type === 'area' && (
-        <polygon points="0,32 12,26 24,28 36,14 48,18 60,8 72,12 80,10 80,40 0,40"
-          fill={`${color}22`} />
-      )}
-    </Box>
-  )
-  if (type === 'donut') return (
-    <Box component="svg" viewBox="0 0 80 44" sx={{ width: '100%', height: 44 }}>
-      <circle cx="40" cy="22" r="16" fill="none" stroke={color} strokeWidth="10" strokeDasharray="60 40" strokeDashoffset="0" />
-      <circle cx="40" cy="22" r="16" fill="none" stroke={purple} strokeWidth="10" strokeDasharray="25 75" strokeDashoffset="-60" />
-      <circle cx="40" cy="22" r="16" fill="none" stroke={amber} strokeWidth="10" strokeDasharray="15 85" strokeDashoffset="-85" />
-      <circle cx="40" cy="22" r="7" fill="white" />
-    </Box>
-  )
-  if (type === 'bar') return (
-    <Box component="svg" viewBox="0 0 80 40" sx={{ width: '100%', height: 40 }}>
-      {[{x:4,h:28,c:color},{x:20,h:18,c:'#e0e0e0'},{x:36,h:10,c:'#e0e0e0'},{x:52,h:24,c:color},{x:68,h:14,c:'#e0e0e0'}].map((b,i)=>(
-        <rect key={i} x={b.x} y={40-b.h} width="12" height={b.h} rx="2" fill={b.c} />
-      ))}
-    </Box>
-  )
-  if (type === 'list') return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, py: 0.5 }}>
-      {[72, 58, 44, 30].map((w, i) => (
-        <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ height: 6, width: `${w}%`, bgcolor: i === 0 ? color : 'rgba(0,0,0,0.1)', borderRadius: '3px' }} />
-          <Typography sx={{ fontSize: '9px', color: 'text.disabled', ml: 'auto' }}>{[34,28,19,12][i]}%</Typography>
+  const amber = '#e86c5a'
+
+  const renderChart = () => {
+    if (widget.preview === 'mentionTrend') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.25 }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75, mb: 0.75 }}>
+          <Typography sx={{ fontSize: '20px', fontWeight: 700, color: 'text.primary', lineHeight: 1 }}>{widget.metricValue}</Typography>
+          <Typography sx={{ fontSize: '10px', color: 'text.secondary' }}>{widget.metricLabel}</Typography>
+          {widget.metricDelta && (
+            <Typography sx={{ fontSize: '10px', fontWeight: 600, color: widget.metricUp ? green : red, ml: 'auto' }}>{widget.metricDelta}</Typography>
+          )}
         </Box>
-      ))}
-    </Box>
-  )
-  if (type === 'cloud') return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.25 }}>
-      {[['PR strategy',14],[`Brand`,11],['Media',10],['Coverage',9],['Reach',8],['Sentiment',8],['Earned',7]].map(([word, size]) => (
-        <Typography key={word} sx={{ fontSize: `${size}px`, color: color, fontWeight: 600, opacity: 0.5 + size * 0.04 }}>{word}</Typography>
-      ))}
-    </Box>
-  )
-  if (type === 'map') return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 0.5 }}>
-      <MapOutlinedIcon sx={{ fontSize: 36, color: `${color}60` }} />
-      <Box sx={{ position: 'absolute', display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
-        {[60,85,40,70,55].map((o,i)=>(
-          <Box key={i} sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: color, opacity: o/100 }} />
+        <Box component="svg" viewBox="0 0 200 52" sx={{ width: '100%', height: 52 }}>
+          {/* Area fill */}
+          <polygon points="0,44 20,40 40,42 60,30 80,34 100,22 120,18 140,24 160,14 180,10 200,12 200,52 0,52"
+            fill={`${teal}18`} />
+          {/* Line */}
+          <polyline points="0,44 20,40 40,42 60,30 80,34 100,22 120,18 140,24 160,14 180,10 200,12"
+            fill="none" stroke={teal} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        </Box>
+      </Box>
+    )
+
+    if (widget.preview === 'sentiment') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.25 }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75, mb: 1 }}>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: teal, lineHeight: 1 }}>{widget.metricValue}</Typography>
+          <Typography sx={{ fontSize: '10px', color: 'text.secondary' }}>{widget.metricLabel}</Typography>
+        </Box>
+        {/* Stacked bar chart */}
+        <Box component="svg" viewBox="0 0 200 50" sx={{ width: '100%', height: 50 }}>
+          {/* Grouped bars per date */}
+          {[
+            [50,30,18],[42,26,20],[38,22,14],[30,28,16],[55,20,12],
+            [34,32,18],[28,24,14],[45,28,16],[40,30,14],[22,18,12],
+          ].map(([g,pos,neg], i) => {
+            const x = i * 20 + 2
+            const total = g + pos + neg
+            const scale = 44 / total
+            const gh = g * scale, ph = pos * scale, nh = neg * scale
+            return (
+              <g key={i}>
+                <rect x={x} y={50-nh-ph-gh} width="14" height={gh} fill={grey} rx="1" />
+                <rect x={x} y={50-nh-ph} width="14" height={ph} fill={green} rx="1" />
+                <rect x={x} y={50-nh} width="14" height={nh} fill={red} rx="1" />
+              </g>
+            )
+          })}
+        </Box>
+        {/* Legend */}
+        <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5 }}>
+          {[['Neutral', grey],['Positive', green],['Negative', red]].map(([l,c]) => (
+            <Box key={l} sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: c }} />
+              <Typography sx={{ fontSize: '9px', color: 'text.secondary' }}>{l}</Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    )
+
+    if (widget.preview === 'sov') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.25, display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Box component="svg" viewBox="0 0 72 72" sx={{ width: 72, height: 72, flexShrink: 0 }}>
+          <circle cx="36" cy="36" r="26" fill="none" stroke={teal} strokeWidth="14" strokeDasharray="69 31" strokeDashoffset="25" />
+          <circle cx="36" cy="36" r="26" fill="none" stroke={purple} strokeWidth="14" strokeDasharray="22 78" strokeDashoffset="-44" />
+          <circle cx="36" cy="36" r="26" fill="none" stroke={amber} strokeWidth="14" strokeDasharray="9 91" strokeDashoffset="-66" />
+          <circle cx="36" cy="36" r="20" fill="white" />
+          <text x="36" y="33" textAnchor="middle" fontSize="11" fontWeight="700" fill={teal}>42%</text>
+          <text x="36" y="44" textAnchor="middle" fontSize="7.5" fill="#888">your brand</text>
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.6 }}>
+          {[['Your Brand', teal, '42%'],['Competitor A', purple, '28%'],['Competitor B', amber, '18%'],['Others', grey, '12%']].map(([name,color,pct]) => (
+            <Box key={name} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
+              <Typography sx={{ fontSize: '9.5px', color: 'text.secondary', minWidth: 70 }}>{name}</Typography>
+              <Typography sx={{ fontSize: '9.5px', fontWeight: 700, color: 'text.primary' }}>{pct}</Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    )
+
+    if (widget.preview === 'topSources') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.5 }}>
+        {[['X', '158K'],['News - Online', null],['Pinterest', null],['YouTube', null],['Reddit', null]].map(([src, a], i) => (
+          <Box key={src} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: i < 4 ? 0.6 : 0 }}>
+            <Typography sx={{ fontSize: '9px', color: 'text.disabled', width: 10 }}>{i+1}</Typography>
+            <Typography sx={{ fontSize: '10px', color: 'text.primary', flex: 1 }}>{src}</Typography>
+            {a ? (
+              <Box sx={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                <Box sx={{ height: 6, width: 28, bgcolor: grey, borderRadius: '2px' }} />
+                <Box sx={{ height: 6, width: 44, bgcolor: teal, borderRadius: '2px' }} />
+                <Box sx={{ height: 6, width: 10, bgcolor: red, borderRadius: '2px' }} />
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                <Box sx={{ height: 6, width: 6, bgcolor: green, borderRadius: '2px' }} />
+                <Box sx={{ height: 6, width: 6, bgcolor: teal, borderRadius: '2px' }} />
+                <Box sx={{ height: 6, width: 6, bgcolor: red, borderRadius: '2px' }} />
+              </Box>
+            )}
+          </Box>
         ))}
+      </Box>
+    )
+
+    if (widget.preview === 'sentimentBySource') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.5 }}>
+        {[['X', 78, 14],['News - Online', 60, 28],['Pinterest', 55, 30],['YouTube', 52, 33],['Reddit', 48, 38]].map(([src, pos, neg], i) => (
+          <Box key={src} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: i < 4 ? 0.6 : 0 }}>
+            <Typography sx={{ fontSize: '9px', color: 'text.disabled', width: 10 }}>{i+1}</Typography>
+            <Typography sx={{ fontSize: '10px', color: 'text.primary', width: 65, flexShrink: 0 }}>{src}</Typography>
+            <Box sx={{ flex: 1, height: 8, borderRadius: '3px', overflow: 'hidden', display: 'flex', bgcolor: 'rgba(0,0,0,0.05)' }}>
+              <Box sx={{ height: '100%', width: `${pos}%`, bgcolor: green }} />
+              <Box sx={{ height: '100%', width: `${100-pos-neg}%`, bgcolor: teal }} />
+              <Box sx={{ height: '100%', width: `${neg}%`, bgcolor: red }} />
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    )
+
+    if (widget.preview === 'reachArea') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.25 }}>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75, mb: 0.75 }}>
+          <Typography sx={{ fontSize: '20px', fontWeight: 700, color: 'text.primary', lineHeight: 1 }}>{widget.metricValue}</Typography>
+          <Typography sx={{ fontSize: '10px', color: 'text.secondary' }}>{widget.metricLabel}</Typography>
+          {widget.metricDelta && (
+            <Typography sx={{ fontSize: '10px', fontWeight: 600, color: green, ml: 'auto' }}>{widget.metricDelta}</Typography>
+          )}
+        </Box>
+        <Box component="svg" viewBox="0 0 200 52" sx={{ width: '100%', height: 52 }}>
+          <polygon points="0,48 20,44 40,38 60,42 80,28 100,30 120,20 140,16 160,10 180,6 200,8 200,52 0,52"
+            fill={`${purple}18`} />
+          <polyline points="0,48 20,44 40,38 60,42 80,28 100,30 120,20 140,16 160,10 180,6 200,8"
+            fill="none" stroke={purple} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        </Box>
+      </Box>
+    )
+
+    if (widget.preview === 'wordCloud') return (
+      <Box sx={{ px: 1, pt: 0.75, pb: 0.5, display: 'flex', flexWrap: 'wrap', gap: 0.6, alignItems: 'center' }}>
+        {[['AI',16],['Earnings',14],['Product Launch',13],['Media',11],['PR',10],['Coverage',10],['Reach',9],['Strategy',9],['Brand',8],['Digital',8]].map(([word, size]) => (
+          <Typography key={word} sx={{ fontSize: `${size}px`, color: teal, fontWeight: 600, opacity: 0.4 + (size - 8) * 0.07, lineHeight: 1.3 }}>{word}</Typography>
+        ))}
+      </Box>
+    )
+
+    if (widget.preview === 'geo') return (
+      <Box sx={{ px: 1, pt: 0.5, pb: 0.5 }}>
+        {[['United States', 38],['United Kingdom', 22],['Germany', 14],['Australia', 10],['Canada', 8]].map(([country, pct], i) => (
+          <Box key={country} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: i < 4 ? 0.5 : 0 }}>
+            <Typography sx={{ fontSize: '10px', color: 'text.primary', flex: 1 }}>{country}</Typography>
+            <Box sx={{ width: 60, height: 6, bgcolor: 'rgba(0,0,0,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+              <Box sx={{ height: '100%', width: `${pct / 38 * 100}%`, bgcolor: teal, borderRadius: '3px' }} />
+            </Box>
+            <Typography sx={{ fontSize: '9.5px', color: 'text.secondary', width: 24, textAlign: 'right' }}>{pct}%</Typography>
+          </Box>
+        ))}
+      </Box>
+    )
+
+    return null
+  }
+
+  return (
+    <Box sx={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: '6px', overflow: 'hidden', bgcolor: 'background.paper' }}>
+      {/* Widget header — matches dashboard style */}
+      <Box sx={{ px: 1.25, pt: 1, pb: 0.75, borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <Box>
+          <Typography sx={{ fontSize: '11px', fontWeight: 600, color: 'text.primary', lineHeight: 1.2 }}>{widget.title}</Typography>
+          <Typography sx={{ fontSize: '9.5px', color: 'text.secondary', mt: 0.2 }}>{widget.subtitle}</Typography>
+        </Box>
+        <MoreVertIcon sx={{ fontSize: 13, color: 'text.disabled', mt: 0.25 }} />
+      </Box>
+      {/* Chart body */}
+      <Box sx={{ bgcolor: 'rgba(0,0,0,0.01)' }}>
+        {renderChart()}
+      </Box>
+      {/* Snapshot footer */}
+      <Box sx={{ px: 1.25, py: 0.6, bgcolor: 'rgba(0,130,127,0.04)', borderTop: '1px solid rgba(0,130,127,0.1)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <CalendarMonthOutlinedIcon sx={{ fontSize: 10, color: TEAL }} />
+        <Typography sx={{ fontSize: '9px', color: TEAL, fontWeight: 500 }}>Snapshot: {widget.snapshot}</Typography>
       </Box>
     </Box>
   )
-  return null
 }
 
 const AUTO_ADDED_IDS = ['mention-volume', 'share-of-voice', 'sentiment-breakdown']
 
-function WidgetsTab() {
-  const [added, setAdded] = useState(AUTO_ADDED_IDS)
+function WidgetsTab({ addedWidgets }) {
+  const [expandedAi, setExpandedAi] = useState({})
+  const toggleAi = id => setExpandedAi(prev => ({ ...prev, [id]: !prev[id] }))
 
-  const toggle = id => setAdded(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
-  const autoAdded = id => AUTO_ADDED_IDS.includes(id)
+  const available = RECOMMENDED_WIDGETS.filter(w => !addedWidgets.includes(w.id))
+
+  if (available.length === 0) return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5, px: 3, gap: 1 }}>
+      <CheckCircleIcon sx={{ fontSize: 28, color: TEAL, opacity: 0.6 }} />
+      <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'text.primary', textAlign: 'center' }}>
+        All widgets added
+      </Typography>
+      <Typography sx={{ fontSize: '11.5px', color: 'text.secondary', textAlign: 'center', lineHeight: 1.5 }}>
+        All recommended widgets have been added to this edition. You can remove them from the newsletter canvas.
+      </Typography>
+    </Box>
+  )
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {/* Widget cards */}
-      <Box sx={{ px: 1.5, py: 1.25, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-        {RECOMMENDED_WIDGETS.map(widget => {
-          const isAdded = added.includes(widget.id)
-          const isAuto = autoAdded(widget.id)
+      <Box sx={{ px: 1.5, py: 1.25, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {available.map(widget => {
+          const aiOpen = expandedAi[widget.id]
           return (
             <Box
               key={widget.id}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = 'copy'
+                e.dataTransfer.setData('widgetId', widget.id)
+              }}
               sx={{
-                border: `1.5px solid ${isAdded ? TEAL : 'rgba(0,0,0,0.1)'}`,
-                borderRadius: '8px', overflow: 'hidden',
-                bgcolor: isAdded ? 'rgba(0,130,127,0.03)' : 'background.paper',
-                transition: 'border-color 0.15s',
+                border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden',
+                bgcolor: 'background.paper', position: 'relative', cursor: 'grab',
+                '&:active': { opacity: 0.7 },
+                '& .widget-drag-handle': { opacity: 0 },
+                '&:hover .widget-drag-handle': { opacity: 1 },
               }}
             >
-              {/* Widget preview area */}
-              <Box sx={{ px: 1.5, pt: 1.25, pb: 0.75, bgcolor: 'rgba(0,0,0,0.018)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                <WidgetPreview type={widget.preview} color={TEAL} />
+              {/* Drag handle — left edge, hover only */}
+              <Box className="widget-drag-handle" sx={{
+                position: 'absolute', left: 0, top: 0, bottom: 0, width: 20,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'opacity 0.15s', pointerEvents: 'none', zIndex: 1,
+                bgcolor: 'rgba(255,255,255,0.85)',
+              }}>
+                <DragIndicatorIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
               </Box>
 
-              {/* Widget info + action */}
-              <Box sx={{ px: 1.5, py: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 0.4 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, flexWrap: 'wrap' }}>
-                    <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.primary' }}>{widget.title}</Typography>
-                    {isAuto && (
-                      <Box sx={{ px: 0.6, py: 0.15, bgcolor: 'rgba(0,130,127,0.1)', borderRadius: '3px', display: 'inline-flex', alignItems: 'center', gap: 0.4 }}>
-                        <AutoAwesomeIcon sx={{ fontSize: 9, color: TEAL }} />
-                        <Typography sx={{ fontSize: '9px', fontWeight: 700, color: TEAL, letterSpacing: '0.04em' }}>Auto-added</Typography>
-                      </Box>
-                    )}
+              {/* Dashboard-style widget preview */}
+              <Box sx={{ px: 1.25, pt: 1.25, pb: 1 }}>
+                <DashboardWidgetPreview widget={widget} />
+              </Box>
+
+              {/* Why AI picked this — collapsible */}
+              <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <Box
+                  onClick={() => toggleAi(widget.id)}
+                  sx={{
+                    px: 1.5, py: 0.6, display: 'flex', alignItems: 'center', gap: 0.6, cursor: 'pointer',
+                    bgcolor: aiOpen ? 'rgba(0,130,127,0.05)' : 'transparent',
+                    '&:hover': { bgcolor: 'rgba(0,130,127,0.05)' }, transition: 'background 0.15s',
+                  }}
+                >
+                  <AutoAwesomeIcon sx={{ fontSize: 11, color: TEAL }} />
+                  <Typography sx={{ fontSize: '10.5px', fontWeight: 600, color: TEAL, flex: 1 }}>Why AI picked this</Typography>
+                  <Box sx={{ transform: aiOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'flex' }}>
+                    <ArrowDropDownIcon sx={{ fontSize: 16, color: TEAL }} />
                   </Box>
-                  <Button
-                    size="small"
-                    variant={isAdded ? 'outlined' : 'text'}
-                    onClick={() => toggle(widget.id)}
-                    startIcon={isAdded
-                      ? <CheckCircleOutlineIcon sx={{ fontSize: 13 }} />
-                      : <AddIcon sx={{ fontSize: 13 }} />
-                    }
-                    sx={{
-                      textTransform: 'none', fontSize: '11px', py: 0.3, px: 1, flexShrink: 0,
-                      fontWeight: 600, minWidth: 0,
-                      ...(isAdded
-                        ? { borderColor: TEAL, color: TEAL }
-                        : { color: 'text.secondary' }
-                      ),
-                    }}
-                  >
-                    {isAdded ? 'Added' : 'Add'}
-                  </Button>
                 </Box>
-                <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.45 }}>
-                  {widget.description}
-                </Typography>
+                {aiOpen && (
+                  <Box sx={{ px: 1.5, pb: 1, pt: 0.25, bgcolor: 'rgba(0,130,127,0.03)' }}>
+                    <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.55 }}>{widget.aiReason}</Typography>
+                  </Box>
+                )}
               </Box>
             </Box>
           )
@@ -1825,14 +2107,6 @@ function WidgetsTab() {
       </Box>
 
       {/* Footer — added count */}
-      {added.length > 0 && (
-        <Box sx={{ px: 1.5, py: 1, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,130,127,0.04)', display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <CheckCircleIcon sx={{ fontSize: 13, color: TEAL }} />
-          <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 500 }}>
-            <Box component="span" sx={{ fontWeight: 700 }}>{added.length} widget{added.length > 1 ? 's' : ''}</Box> added to this edition
-          </Typography>
-        </Box>
-      )}
     </Box>
   )
 }

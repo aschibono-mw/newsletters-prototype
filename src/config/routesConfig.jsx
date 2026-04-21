@@ -31,6 +31,7 @@ import DigestReportsPage from '../pages/DigestReportsPage'
 import MwNewslettersPage from '../pages/MwNewslettersPage'
 import MwNewslettersCreatePage from '../pages/MwNewslettersCreatePage'
 import MwNewslettersEditorPage from '../pages/MwNewslettersEditorPage'
+import { MwNewslettersRecipientsPage, MwNewslettersRecipientDetailPage } from '../pages/MwNewslettersRecipientsPage'
 import MwAlertsPage from '../pages/MwAlertsPage'
 import MwMonitorPage from '../pages/MwMonitorPage'
 import MwMonitorViewsPage from '../pages/MwMonitorViewsPage'
@@ -280,6 +281,8 @@ export const coreRoutes = [
   { path: '/mw-newsletters', element: MwNewslettersPage },
   { path: '/mw-newsletters/create', element: MwNewslettersCreatePage },
   { path: '/mw-newsletters/editor/:id', element: MwNewslettersEditorPage },
+  { path: '/mw-newsletters/recipients', element: MwNewslettersRecipientsPage },
+  { path: '/mw-newsletters/recipients/:listId', element: MwNewslettersRecipientDetailPage },
   { path: '/mw-alerts', element: MwAlertsPage },
   { path: '/mw-monitor', element: MwMonitorPage },
   { path: '/mw-monitor/views/:viewId', element: MwMonitorViewsPage },
