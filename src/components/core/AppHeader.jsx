@@ -177,7 +177,7 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
                   </Box>
                 ) : (
                   <Typography variant="h6" sx={{ fontWeight: 800, fontSize: 20 }}>
-                    {parentName} <span style={{ fontWeight: 400 }}>{pageName}</span>
+                    {parentName} <span style={{ fontWeight: 800 }}>{pageName}</span>
                   </Typography>
                 )}
               </Box>

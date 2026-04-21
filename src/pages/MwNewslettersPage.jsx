@@ -1139,7 +1139,7 @@ function StackedThumbnails() {
 // ── All Newsletters inbox ─────────────────────────────────────────────────────
 
 const STATUS_ORDER = { ready: 0, curating: 1, sent: 2 }
-const COL_GRID = '2fr 140px 90px 90px 90px 90px 140px'
+const COL_GRID = '2fr 130px 140px 90px 90px 90px 90px 180px'
 
 // Date→numeric map for sorting mock data
 const DATE_SORT = {
@@ -1284,26 +1284,28 @@ function InboxRow({ item }) {
             sx={{ flexShrink: 0 }}
           />
           <Box sx={{ minWidth: 0 }}>
-            {/* Date title + status badge on same line */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.4 }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 1, minWidth: 0 }}>
+            {/* Date title */}
+            <Box sx={{ mb: 0.4 }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {item.editionLabel}
               </Typography>
-              <Box sx={{ flexShrink: 0 }}>
-                {isSent
-                  ? <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px', px: 0.75, py: 0.2 }}>
-                      <SendOutlinedIcon sx={{ fontSize: 10, color: 'text.disabled' }} />
-                      <Typography sx={{ fontSize: '10px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>Sent</Typography>
-                    </Box>
-                  : <StatusBadge status={item.status} />
-                }
-              </Box>
             </Box>
             {/* Series name alone on second line — full width, no crowding */}
             <Typography sx={{ fontSize: '11px', color: 'text.secondary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {item.series.name}
             </Typography>
           </Box>
+        </Box>
+
+        {/* Status */}
+        <Box>
+          {isSent
+            ? <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px', px: 0.75, py: 0.2 }}>
+                <SendOutlinedIcon sx={{ fontSize: 10, color: 'text.disabled' }} />
+                <Typography sx={{ fontSize: '10px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>Sent</Typography>
+              </Box>
+            : <StatusBadge status={item.status} />
+          }
         </Box>
 
         {/* Send Date */}
@@ -1344,23 +1346,8 @@ function InboxRow({ item }) {
 
         {/* Action: primary CTA + hover kebab */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
-          {!isSent
-            ? <Button
-                size="small"
-                variant={isReady ? 'contained' : 'outlined'}
-                onClick={e => { e.stopPropagation(); navigate(`/mw-newsletters/editor/${item.series.id}`) }}
-                sx={{
-                  textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
-                  fontWeight: 600, whiteSpace: 'nowrap',
-                  ...(isReady
-                    ? { bgcolor: AMBER, '&:hover': { bgcolor: '#9a4e08' }, color: '#fff' }
-                    : { borderColor: 'divider', color: 'text.secondary' }
-                  ),
-                }}
-              >
-                {isReady ? 'Review & Edit' : 'Preview'}
-              </Button>
-            : <Tooltip title="View edition">
+          {isSent
+            ? <Tooltip title="View edition">
                 <IconButton
                   size="small"
                   onClick={e => e.stopPropagation()}
@@ -1369,6 +1356,64 @@ function InboxRow({ item }) {
                   <OpenInNewIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               </Tooltip>
+            : isReady
+            ? <>
+                {/* Preview button for ready editions */}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${item.series.id}`, '_blank') }}
+                  sx={{
+                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    fontWeight: 600, whiteSpace: 'nowrap',
+                    borderColor: 'divider', color: 'text.secondary',
+                  }}
+                >
+                  Preview
+                </Button>
+                {/* Review & Edit button for ready editions */}
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={e => { e.stopPropagation(); navigate(`/mw-newsletters/editor/${item.series.id}`) }}
+                  sx={{
+                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    fontWeight: 600, whiteSpace: 'nowrap',
+                    bgcolor: AMBER, '&:hover': { bgcolor: '#9a4e08' }, color: '#fff',
+                  }}
+                >
+                  Review &amp; Edit
+                </Button>
+              </>
+            : <>
+                {/* Preview button for curating editions */}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${item.series.id}`, '_blank') }}
+                  sx={{
+                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    fontWeight: 600, whiteSpace: 'nowrap',
+                    borderColor: 'divider', color: 'text.secondary',
+                  }}
+                >
+                  Preview
+                </Button>
+                {/* Edit button for curating editions */}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={e => { e.stopPropagation(); navigate(`/mw-newsletters/editor/${item.series.id}`) }}
+                  sx={{
+                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    fontWeight: 600, whiteSpace: 'nowrap',
+                    borderColor: TEAL, color: TEAL,
+                    '&:hover': { bgcolor: 'rgba(0,130,127,0.06)', borderColor: TEAL },
+                  }}
+                >
+                  Edit
+                </Button>
+              </>
           }
           <Tooltip title="More options">
             <IconButton
@@ -1726,8 +1771,8 @@ function RecipientDetailPanel({ listId, lists, setLists, onBack }) {
 // ── All Newsletters main view ─────────────────────────────────────────────────
 function AllNewslettersInbox() {
   const [filter,  setFilter]  = useState('all')
-  const [sortCol, setSortCol] = useState('date')
-  const [sortDir, setSortDir] = useState('desc')
+  const [sortCol, setSortCol] = useState('status')
+  const [sortDir, setSortDir] = useState('asc')
 
   const handleSort = col => {
     if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -1756,12 +1801,17 @@ function AllNewslettersInbox() {
       case 'clicks':     av = a.clicks ?? -1;                          bv = b.clicks ?? -1;                        break
       default: return 0
     }
-    if (typeof av === 'string') return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
-    return sortDir === 'asc' ? av - bv : bv - av
+    const primary = typeof av === 'string'
+      ? (sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av))
+      : (sortDir === 'asc' ? av - bv : bv - av)
+    // Secondary sort by date descending within same status group
+    if (primary === 0 && sortCol === 'status') return b.dateSortVal - a.dateSortVal
+    return primary
   })
 
   const HEADER_COLS = [
     { key: 'edition',    label: 'Edition',     align: 'left'  },
+    { key: 'status',     label: 'Status',      align: 'left'  },
     { key: 'date',       label: 'Send Date',   align: 'left'  },
     { key: 'recipients', label: 'Recipients',  align: 'right' },
     { key: 'articles',   label: 'Articles',    align: 'right' },

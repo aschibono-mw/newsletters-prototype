@@ -122,7 +122,7 @@ function AppContent() {
   }
 
   // Full-screen routes bypass the main AppHeader + Sidebar
-  if (location.pathname.startsWith('/genai-lens-v2')) {
+  if (location.pathname.startsWith('/genai-lens-v2') || location.pathname.startsWith('/mw-newsletters/preview')) {
     return (
       <Box sx={{ height: '100vh', overflow: 'hidden' }}>
         <ScrollToTop />
