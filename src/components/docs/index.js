@@ -1,0 +1,5 @@
+export { default as AccessibilitySection } from './AccessibilitySection'
+export { default as FeaturesSection } from './FeaturesSection'
+export { default as ComponentMetadata } from './ComponentMetadata'
+export { default as ResourceLinksSection } from './ResourceLinksSection'
+export { default as RelatedComponentsSection } from './RelatedComponentsSection'
