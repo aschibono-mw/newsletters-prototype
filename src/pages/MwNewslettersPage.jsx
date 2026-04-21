@@ -223,10 +223,14 @@ function NlStackIcon({ size = 20, color }) {
 
 // ── Atoms ─────────────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
+  const badgeSx = { display: 'inline-flex', alignItems: 'center', gap: 0.5, borderRadius: '4px', px: 1, py: 0.5 }
+  const iconSx  = { fontSize: 12, flexShrink: 0 }
+  const textSx  = { fontSize: '11px', fontWeight: 600, lineHeight: 1 }
+
   if (status === 'curating') return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.6, bgcolor: TEAL_LIGHT, borderRadius: '4px', px: 0.9, py: 0.3 }}>
+    <Box sx={{ ...badgeSx, bgcolor: TEAL_LIGHT }}>
       <AutoAwesomeIcon sx={{
-        fontSize: 11, color: TEAL, flexShrink: 0,
+        ...iconSx, color: TEAL,
         '@keyframes ai-pulse': {
           '0%':   { opacity: 1,   transform: 'scale(1)' },
           '50%':  { opacity: 0.5, transform: 'scale(0.85)' },
@@ -234,19 +238,19 @@ function StatusBadge({ status }) {
         },
         animation: 'ai-pulse 1.8s ease-in-out infinite',
       }} />
-      <Typography sx={{ fontSize: '11px', color: TEAL, fontWeight: 600, lineHeight: 1 }}>Auto-curating</Typography>
+      <Typography sx={{ ...textSx, color: TEAL }}>Auto-curating</Typography>
     </Box>
   )
   if (status === 'ready') return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.6, bgcolor: AMBER_LIGHT, borderRadius: '4px', px: 0.9, py: 0.3 }}>
-      <CheckCircleOutlineIcon sx={{ fontSize: 11, color: AMBER }} />
-      <Typography sx={{ fontSize: '11px', color: AMBER, fontWeight: 600, lineHeight: 1 }}>Ready for review</Typography>
+    <Box sx={{ ...badgeSx, bgcolor: AMBER_LIGHT }}>
+      <CheckCircleOutlineIcon sx={{ ...iconSx, color: AMBER }} />
+      <Typography sx={{ ...textSx, color: AMBER }}>Ready for review</Typography>
     </Box>
   )
   if (status === 'scheduled') return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.6, bgcolor: 'rgba(182,39,161,0.08)', borderRadius: '4px', px: 0.9, py: 0.3 }}>
-      <ScheduleIcon sx={{ fontSize: 11, color: PURPLE }} />
-      <Typography sx={{ fontSize: '11px', color: PURPLE, fontWeight: 600, lineHeight: 1 }}>Scheduled</Typography>
+    <Box sx={{ ...badgeSx, bgcolor: 'rgba(182,39,161,0.08)' }}>
+      <ScheduleIcon sx={{ ...iconSx, color: PURPLE }} />
+      <Typography sx={{ ...textSx, color: PURPLE }}>Scheduled</Typography>
     </Box>
   )
   return null
@@ -397,7 +401,7 @@ function SeriesListItem({ series, selected, onClick }) {
           </Box>
           <Typography sx={{ fontSize: '11px', color: series.status === 'ready' ? AMBER : 'text.disabled', mt: 0.5 }}>
             {series.status === 'curating' && `${series.articlesCount} articles curated so far`}
-            {series.status === 'ready' && `${series.articlesCount} articles · send by ${series.daysUntil}d`}
+            {series.status === 'ready' && `${series.articlesCount} articles · Send in ${series.daysUntil}d`}
           </Typography>
         </Box>
         <IconButton
@@ -1154,7 +1158,7 @@ function StackedThumbnails() {
 // ── All Newsletters inbox ─────────────────────────────────────────────────────
 
 const STATUS_ORDER = { ready: 0, curating: 1, sent: 2 }
-const COL_GRID = '2fr 130px 140px 90px 90px 90px 90px 180px'
+const COL_GRID = '2fr 130px 140px 90px 90px 90px 90px 220px'
 
 // Date→numeric map for sorting mock data
 const DATE_SORT = {
@@ -1313,9 +1317,9 @@ function InboxRow({ item }) {
         {/* Status */}
         <Box>
           {isSent
-            ? <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px', px: 0.75, py: 0.2 }}>
-                <SendOutlinedIcon sx={{ fontSize: 10, color: 'text.disabled' }} />
-                <Typography sx={{ fontSize: '10px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>Sent</Typography>
+            ? <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px', px: 1, py: 0.5 }}>
+                <SendOutlinedIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
+                <Typography sx={{ fontSize: '11px', color: 'text.secondary', fontWeight: 600, lineHeight: 1 }}>Sent</Typography>
               </Box>
             : <StatusBadge status={item.status} />
           }
@@ -1377,7 +1381,7 @@ function InboxRow({ item }) {
                   variant="outlined"
                   onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${item.series.id}`, '_blank') }}
                   sx={{
-                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    textTransform: 'none', fontSize: '11px', py: 0.5, px: 1.5,
                     fontWeight: 600, whiteSpace: 'nowrap',
                     borderColor: 'divider', color: 'text.secondary',
                   }}
@@ -1385,18 +1389,20 @@ function InboxRow({ item }) {
                   Preview
                 </Button>
                 {/* Review & Edit button for ready editions */}
-                <Button
-                  size="small"
-                  variant="contained"
+                <Box
+                  component="button"
                   onClick={e => { e.stopPropagation(); navigate(`/mw-newsletters/editor/${item.series.id}`) }}
                   sx={{
-                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
-                    fontWeight: 600, whiteSpace: 'nowrap',
-                    bgcolor: AMBER, '&:hover': { bgcolor: '#9a4e08' }, color: '#fff',
+                    display: 'inline-flex', alignItems: 'center',
+                    border: 'none', borderRadius: '6px', cursor: 'pointer',
+                    padding: '0px 12px', height: '30px',
+                    fontSize: '11px', fontWeight: 600, whiteSpace: 'nowrap',
+                    bgcolor: AMBER, color: '#fff',
+                    '&:hover': { bgcolor: '#9a4e08' },
                   }}
                 >
                   Review &amp; Edit
-                </Button>
+                </Box>
               </>
             : <>
                 {/* Preview button for curating editions */}
@@ -1405,7 +1411,7 @@ function InboxRow({ item }) {
                   variant="outlined"
                   onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${item.series.id}`, '_blank') }}
                   sx={{
-                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    textTransform: 'none', fontSize: '11px', py: 0.5, px: 1.5,
                     fontWeight: 600, whiteSpace: 'nowrap',
                     borderColor: 'divider', color: 'text.secondary',
                   }}
@@ -1418,7 +1424,7 @@ function InboxRow({ item }) {
                   variant="outlined"
                   onClick={e => { e.stopPropagation(); navigate(`/mw-newsletters/editor/${item.series.id}`) }}
                   sx={{
-                    textTransform: 'none', fontSize: '11px', py: 0.4, px: 1.25,
+                    textTransform: 'none', fontSize: '11px', py: 0.5, px: 1.5,
                     fontWeight: 600, whiteSpace: 'nowrap',
                     borderColor: TEAL, color: TEAL,
                     '&:hover': { bgcolor: 'rgba(0,130,127,0.06)', borderColor: TEAL },
@@ -2435,20 +2441,21 @@ export default function MwNewslettersPage() {
             sx={{
               mx: 1.5, mb: 0.5, px: 1.5, py: 1.25,
               borderRadius: '8px', cursor: 'pointer',
-              bgcolor: isRecipientsView ? 'rgba(0,0,0,0.06)' : 'transparent',
+              bgcolor: isRecipientsView ? TEAL_LIGHT : 'transparent',
+              border: `1px solid ${isRecipientsView ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
               display: 'flex', alignItems: 'center', gap: 1.5,
-              '&:hover': { bgcolor: isRecipientsView ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.04)' },
+              '&:hover': { bgcolor: isRecipientsView ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
             }}
           >
             <Box sx={{
               width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
-              bgcolor: isRecipientsView ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.06)',
+              bgcolor: isRecipientsView ? 'rgba(0,130,127,0.15)' : 'rgba(0,0,0,0.06)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <PeopleOutlineIcon sx={{ fontSize: 16, color: isRecipientsView ? 'text.primary' : 'text.secondary' }} />
+              <PeopleOutlineIcon sx={{ fontSize: 16, color: isRecipientsView ? TEAL : 'text.secondary' }} />
             </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: isRecipientsView ? 700 : 500, color: isRecipientsView ? 'text.primary' : 'text.primary' }}>Recipient Lists</Typography>
+              <Typography sx={{ fontSize: '13px', fontWeight: isRecipientsView ? 700 : 500, color: isRecipientsView ? TEAL : 'text.primary' }}>Recipient Lists</Typography>
               <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{recipientLists.length} lists · {recipientLists.reduce((s,l)=>s+l.subscribers,0).toLocaleString()} subscribers</Typography>
             </Box>
           </Box>
