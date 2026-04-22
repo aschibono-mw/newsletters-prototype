@@ -47,12 +47,12 @@ const PURPLE_LIGHT = 'rgba(182,39,161,0.10)'
 const MW_AQUA = '#00B4AF'
 
 const ALERTS_DATA = [
-  { id: 1, type: 'Spike Detection',  title: 'Unusual spike detected',             desc: '847 mentions in the last hour vs. 120 average',                     source: 'Brand Mentions Search',    time: '2m ago',  Icon: BoltIcon,                unread: true  },
-  { id: 2, type: 'Sentiment Shift',  title: 'Sentiment shifted to positive',      desc: 'Overall sentiment changed from neutral to positive (78%)',           source: 'Product Launch Campaign',  time: '15m ago', Icon: TrendingUpIcon,          unread: true  },
-  { id: 3, type: 'Top Reach',        title: 'Wall Street Journal mention',        desc: 'Major coverage in WSJ with estimated reach of 2.4M',                source: 'Industry News Search',     time: '32m ago', Icon: CampaignOutlinedIcon,    unread: true  },
-  { id: 4, type: 'X Influencer',     title: '@TechAnalyst posted about your search', desc: 'High-influence account (1.2M followers) mentioned your brand',   source: 'Competitor Monitoring',    time: '1h ago',  Icon: XIcon,                   unread: false },
-  { id: 5, type: 'Company Events',   title: 'Acquisition announced',              desc: 'Acme Corp announced acquisition of TechStartup Inc.',               source: 'Competitor Watch',         time: '2h ago',  Icon: ApartmentIcon,           unread: false },
-  { id: 6, type: 'Breakout Post',    title: 'Breakout post detected',             desc: 'Facebook post reached 45K engagements vs. 2K weekly average',      source: 'Social Monitoring',        time: '3h ago',  Icon: LocalFireDepartmentIcon, unread: false },
+  { id: 1, type: 'Spike Detection',  title: 'Unusual spike detected',             desc: '847 mentions in the last hour vs. 120 average',                   tracker: 'The Morning News Update', time: '2m ago',  Icon: BoltIcon,                unread: true  },
+  { id: 2, type: 'Sentiment Shift',  title: 'Sentiment shifted to positive',      desc: 'Overall sentiment changed from neutral to positive (78%)',         tracker: 'The Morning News Update', time: '15m ago', Icon: TrendingUpIcon,          unread: true  },
+  { id: 3, type: 'Top Reach',        title: 'Wall Street Journal mention',        desc: 'Major coverage in WSJ with estimated reach of 2.4M',              tracker: 'ESG & Regulatory',        time: '32m ago', Icon: CampaignOutlinedIcon,    unread: true  },
+  { id: 4, type: 'X Influencer',     title: '@TechAnalyst posted about your search', desc: 'High-influence account (1.2M followers) mentioned your brand', tracker: 'Competitor Watch',        time: '1h ago',  Icon: XIcon,                   unread: false },
+  { id: 5, type: 'Company Events',   title: 'Acquisition announced',              desc: 'Acme Corp announced acquisition of TechStartup Inc.',             tracker: 'Competitor Watch',        time: '2h ago',  Icon: ApartmentIcon,           unread: false },
+  { id: 6, type: 'Breakout Post',    title: 'Breakout post detected',             desc: 'Facebook post reached 45K engagements vs. 2K weekly average',    tracker: 'Executive Monitoring',    time: '3h ago',  Icon: LocalFireDepartmentIcon, unread: false },
 ]
 
 const NOTIFS_DATA = [
@@ -144,7 +144,19 @@ function NotificationDropdown({ anchorEl, onClose, onViewAll }) {
                 </Box>
                 <Typography sx={{ fontSize: '13px', fontWeight: 600, lineHeight: 1.3, mb: 0.25 }}>{item.title}</Typography>
                 <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4 }}>{item.desc}</Typography>
-                {item.source && <Typography sx={{ fontSize: '10px', color: 'text.disabled', mt: 0.5 }}>{item.source}</Typography>}
+                {item.tracker && (
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                    <Box component="svg" viewBox="0 0 20 20" sx={{ width: 10, height: 10, flexShrink: 0, color: 'text.disabled' }} fill="none">
+                      <circle cx="10" cy="10" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="10" cy="10" r="1.75" fill="currentColor" />
+                      <line x1="10" y1="1.5" x2="10" y2="4"    stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <line x1="10" y1="16"  x2="10" y2="18.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <line x1="1.5" y1="10" x2="4"   y2="10"  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <line x1="16"  y1="10" x2="18.5" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </Box>
+                    <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>{item.tracker}</Typography>
+                  </Box>
+                )}
                 {item.action && (
                   <Typography sx={{ fontSize: '11px', fontWeight: 600, color: accent, mt: 0.5, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
                     {item.action}
@@ -160,9 +172,9 @@ function NotificationDropdown({ anchorEl, onClose, onViewAll }) {
       {/* Footer */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderTop: '1px solid', borderColor: 'divider', px: 2, py: 1.75, gap: 0 }}>
         {[
-          { label: 'View all', onClick: () => { onClose(); onViewAll() } },
+          { label: 'View all', onClick: () => { onClose(); onViewAll(tab === 'alerts' ? '/mw-alerts' : '/mw-notifications') } },
           { label: 'Mark all as read', onClick: markAllRead },
-          { label: tab === 'alerts' ? 'Manage alerts' : 'Manage notifications', onClick: () => { onClose(); onViewAll('manage') } },
+          { label: tab === 'alerts' ? 'Manage alerts' : 'Manage notifications', onClick: () => { onClose(); onViewAll(tab === 'alerts' ? '/mw-alerts' : '/mw-notifications') } },
         ].map((link, i, arr) => (
           <Box key={link.label} sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography
@@ -559,7 +571,7 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
             <NotificationDropdown
               anchorEl={notifAnchorEl}
               onClose={() => setNotifAnchorEl(null)}
-              onViewAll={(tab) => { navigate('/mw-alerts') }}
+              onViewAll={(path) => { navigate(path) }}
             />
 
             {/* Help Button */}

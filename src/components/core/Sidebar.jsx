@@ -41,6 +41,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 
 import { NAV_ITEMS } from '../../config/navigationConfig';
 
@@ -83,7 +84,31 @@ const ICON_MAP = {
   NotificationsNoneOutlined: NotificationsNoneOutlinedIcon,
   PersonOutlined:           PersonOutlinedIcon,
   SettingsOutlined:         SettingsOutlinedIcon,
+  FolderOutlined:           FolderOutlinedIcon,
 };
+
+// Custom Tracker icon — crosshair/target
+function TrackerIcon() {
+  return (
+    <Box
+      component="svg"
+      viewBox="0 0 20 20"
+      sx={{ width: 20, height: 20, display: 'block', flexShrink: 0 }}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Outer ring */}
+      <circle cx="10" cy="10" r="6" stroke="currentColor" strokeWidth="1.5" />
+      {/* Center dot */}
+      <circle cx="10" cy="10" r="1.75" fill="currentColor" />
+      {/* Tick marks */}
+      <line x1="10" y1="1.5" x2="10" y2="4"   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="10" y1="16"  x2="10" y2="18.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="1.5" y1="10" x2="4"   y2="10"  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16"  y1="10" x2="18.5" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </Box>
+  )
+}
 
 // Custom Mira Studio icon — circular gradient badge with MW mark
 function MiraStudioIcon() {
@@ -109,6 +134,7 @@ function MiraStudioIcon() {
 
 const renderIcon = (iconName) => {
   if (iconName === 'MiraStudio') return <MiraStudioIcon />;
+  if (iconName === 'Tracker') return <TrackerIcon />;
   const Icon = ICON_MAP[iconName];
   return Icon ? <Icon sx={{ fontSize: 20 }} /> : null;
 };

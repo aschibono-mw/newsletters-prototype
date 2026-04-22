@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Button, Divider, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Chip, IconButton, Switch,
-  Tooltip, Menu, MenuItem, Dialog, Slider, Avatar, Select,
+  Tooltip, Menu, MenuItem, Dialog, Slider, Avatar, Select, TextField,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
@@ -13,6 +14,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined'
 import XIcon from '@mui/icons-material/X'
 import ApartmentIcon from '@mui/icons-material/Apartment'
+import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
@@ -41,6 +43,29 @@ import ReplyIcon from '@mui/icons-material/Reply'
 import EqualizerIcon from '@mui/icons-material/Equalizer'
 import GroupsIcon from '@mui/icons-material/Groups'
 import ApiIcon from '@mui/icons-material/Api'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import LayersIcon from '@mui/icons-material/Layers'
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
+
+// ── Tracker icon — crosshair/target ───────────────────────────────────────────
+function TrackerIcon({ size = 18, color = 'currentColor' }) {
+  return (
+    <Box
+      component="svg"
+      viewBox="0 0 20 20"
+      sx={{ width: size, height: size, display: 'block', flexShrink: 0 }}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="10" cy="10" r="6" stroke={color} strokeWidth="1.5" />
+      <circle cx="10" cy="10" r="1.75" fill={color} />
+      <line x1="10" y1="1.5" x2="10" y2="4"    stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="10" y1="16"  x2="10" y2="18.5"  stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="1.5" y1="10" x2="4"   y2="10"   stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16"  y1="10" x2="18.5" y2="10"  stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </Box>
+  )
+}
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const TEAL = '#00827F'
@@ -51,32 +76,32 @@ const ALL_ALERTS = [
   {
     id: 1, type: 'Spike Detection', title: 'Unusual spike detected',
     desc: '847 mentions in the last hour vs. 120 average',
-    source: 'Brand Mentions Search', time: '2m ago', Icon: BoltIcon, unread: true,
+    group: 'Nike Core Monitoring', time: '2m ago', Icon: BoltIcon, unread: true,
   },
   {
     id: 2, type: 'Sentiment Shift', title: 'Sentiment shifted to positive',
     desc: 'Overall sentiment changed from neutral to positive (78%)',
-    source: 'Product Launch Campaign', time: '15m ago', Icon: TrendingUpIcon, unread: true,
+    group: 'Nike Core Monitoring', time: '15m ago', Icon: TrendingUpIcon, unread: true,
   },
   {
     id: 3, type: 'Top Reach', title: 'Wall Street Journal mention',
     desc: 'Major coverage in WSJ with estimated reach of 2.4M',
-    source: 'Industry News Search', time: '32m ago', Icon: CampaignOutlinedIcon, unread: true,
+    group: 'ESG & Regulatory', time: '32m ago', Icon: CampaignOutlinedIcon, unread: true,
   },
   {
     id: 4, type: 'X Influencer', title: '@TechAnalyst posted about your search',
     desc: 'High-influence account (1.2M followers) mentioned your brand',
-    source: 'Competitor Monitoring', time: '1h ago', Icon: XIcon, unread: false,
+    group: 'Competitor Watch', time: '1h ago', Icon: XIcon, unread: false,
   },
   {
     id: 5, type: 'Company Events', title: 'Acquisition announced',
     desc: 'Acme Corp announced acquisition of TechStartup Inc.',
-    source: 'Competitor Watch', time: '2h ago', Icon: ApartmentIcon, unread: false,
+    group: 'Competitor Watch', time: '2h ago', Icon: ApartmentIcon, unread: false,
   },
   {
     id: 6, type: 'Breakout Post', title: 'Breakout post detected',
     desc: 'A post is gaining unusual traction across social platforms',
-    source: 'Social Monitoring', time: '3h ago', Icon: LocalFireDepartmentIcon, unread: false,
+    group: 'Executive Monitoring', time: '3h ago', Icon: LocalFireDepartmentIcon, unread: false,
   },
 ]
 
@@ -120,17 +145,69 @@ const DELIVERY_CHANNELS = {
   InApp:  { label: 'In-app', Icon: NotificationsNoneOutlinedIcon },
 }
 
-const MANAGE_ALERTS_ROWS = [
-  { id:  1, alertType: 'Spike Detection',  Icon: BoltIcon,                      iconBg: '#FFF3E0', iconColor: '#E65100', search: 'Nike Sustainability',           delivery: ['Email','Slack','InApp'], triggered: 'Apr 9, 2026 · 9:14 AM',  active: true,  digest: 'Weekly Brand Monitor' },
-  { id:  2, alertType: 'Sentiment Shift',  Icon: TrendingUpIcon,                iconBg: '#FCE4EC', iconColor: '#C2185B', search: 'Nike Brand Health',             delivery: ['Email','InApp'],         triggered: 'Apr 9, 2026 · 8:30 AM',  active: true,  digest: null },
-  { id:  3, alertType: 'Top Reach',        Icon: CampaignOutlinedIcon,          iconBg: '#E0F2F1', iconColor: '#00827F', search: 'Sportswear Industry',           delivery: ['Email'],                  triggered: 'Apr 9, 2026 · 7:45 AM',  active: false, digest: null },
-  { id:  4, alertType: 'X Influencers',    Icon: XIcon,                         iconBg: '#F5F5F5', iconColor: '#424242', search: 'Nike Sustainability',           delivery: ['Slack','InApp'],          triggered: 'Apr 9, 2026 · 6:20 AM',  active: false, digest: null },
-  { id:  5, alertType: 'Company Events',   Icon: ApartmentIcon,                 iconBg: '#E3F2FD', iconColor: '#1565C0', search: 'Nike Corporate',                delivery: ['Email','Slack'],          triggered: 'Apr 8, 2026 · 4:00 PM',  active: true,  digest: null },
-  { id:  6, alertType: 'Industry Events',  Icon: CalendarMonthOutlinedIcon,     iconBg: '#EDE7F6', iconColor: '#6A1B9A', search: 'EU Regulatory News',            delivery: ['Email'],                  triggered: 'Apr 8, 2026 · 2:00 PM',  active: true,  digest: 'ESG & Sustainability Tracker' },
-  { id:  7, alertType: 'Every Mention',    Icon: NotificationsNoneOutlinedIcon, iconBg: '#E0F7FA', iconColor: '#00838F', search: 'Brand Mentions — Exec',         delivery: ['InApp'],                  triggered: 'Apr 8, 2026 · 3:45 PM',  active: false, digest: null },
-  { id:  8, alertType: 'Follow Post',      Icon: BookmarkBorderOutlinedIcon,    iconBg: '#E8EAF6', iconColor: '#3949AB', search: 'Followed — Sports Journalists', delivery: ['Email','InApp'],          triggered: 'Apr 7, 2026 · 11:30 AM', active: true,  digest: null },
-  { id:  9, alertType: 'Likely Boosted',   Icon: RocketLaunchOutlinedIcon,      iconBg: '#FCE4EC', iconColor: '#AD1457', search: 'Competitor — Adidas',           delivery: ['Slack','InApp'],          triggered: 'Apr 6, 2026 · 9:00 AM',  active: true,  digest: null },
-  { id: 10, alertType: 'RSS Feed',         Icon: RssFeedIcon,                   iconBg: '#FFF3E0', iconColor: '#E65100', search: 'Sustainability Journals',        delivery: ['Email'],                  triggered: 'Apr 6, 2026 · 8:00 AM',  active: true,  digest: null },
+// Source chip styles by type
+const SOURCE_TYPE_STYLES = {
+  search: { bgcolor: 'rgba(0,130,127,0.08)',   color: '#00827F', Icon: SearchIcon },
+  brand:  { bgcolor: 'rgba(182,39,161,0.08)',  color: '#B627A1', Icon: DiamondOutlinedIcon },
+  rss:    { bgcolor: 'rgba(230,81,0,0.08)',    color: '#E65100', Icon: RssFeedIcon },
+}
+
+const MANAGE_ALERT_GROUPS = [
+  {
+    id: 1,
+    name: 'The Morning News Update',
+    sources: [
+      { label: 'Nike Sustainability', type: 'search' },
+      { label: 'Nike Brand Health',   type: 'search' },
+      { label: 'Nike',                type: 'brand'  },
+    ],
+    digest: { cadence: 'Weekly' },
+    alerts: [
+      { id: 1, alertType: 'Spike Detection', Icon: BoltIcon,             delivery: ['Email', 'Slack', 'In-app'], active: true,  triggeredAgo: '12m ago', ai: true  },
+      { id: 2, alertType: 'Sentiment Shift', Icon: TrendingUpIcon,       delivery: ['Email', 'In-app'],          active: true,  triggeredAgo: '2h ago',  ai: true  },
+      { id: 3, alertType: 'Top Reach',       Icon: CampaignOutlinedIcon, delivery: ['Email'],                    active: true,  triggeredAgo: '45m ago', ai: false },
+    ],
+  },
+  {
+    id: 2,
+    name: 'Competitor Watch',
+    sources: [
+      { label: 'Sportswear Industry', type: 'search' },
+      { label: 'Adidas',              type: 'brand'  },
+    ],
+    digest: null,
+    alerts: [
+      { id: 4, alertType: 'X Influencers',  Icon: XIcon,                    delivery: ['Slack', 'In-app'],  active: false, triggeredAgo: '6h ago',  ai: false },
+      { id: 5, alertType: 'Company Events', Icon: ApartmentIcon,            delivery: ['Email', 'Slack'],   active: true,  triggeredAgo: '2h ago',  ai: false },
+      { id: 6, alertType: 'Likely Boosted', Icon: RocketLaunchOutlinedIcon, delivery: ['Slack', 'In-app'],  active: true,  triggeredAgo: '1d ago',  ai: false },
+    ],
+  },
+  {
+    id: 3,
+    name: 'ESG & Regulatory',
+    sources: [
+      { label: 'EU Regulatory News',      type: 'search' },
+      { label: 'Sustainability Journals', type: 'rss'    },
+    ],
+    digest: { cadence: 'Daily' },
+    alerts: [
+      { id: 7, alertType: 'Industry Events', Icon: CalendarMonthOutlinedIcon, delivery: ['Email'], active: true, triggeredAgo: '2h ago', ai: false },
+      { id: 8, alertType: 'RSS Feed',        Icon: RssFeedIcon,              delivery: ['Email'], active: true, triggeredAgo: '8h ago', ai: false },
+    ],
+  },
+  {
+    id: 4,
+    name: 'Executive Monitoring',
+    sources: [
+      { label: 'Brand Mentions — Exec', type: 'search' },
+      { label: 'Sports Journalists',    type: 'search' },
+    ],
+    digest: null,
+    alerts: [
+      { id:  9, alertType: 'Every Mention', Icon: NotificationsNoneOutlinedIcon, delivery: ['In-app'],          active: false, triggeredAgo: '5m ago',  ai: false },
+      { id: 10, alertType: 'Follow Post',   Icon: BookmarkBorderOutlinedIcon,    delivery: ['Email', 'In-app'], active: true,  triggeredAgo: '11h ago', ai: false },
+    ],
+  },
 ]
 
 const MANAGE_NOTIF_ROWS = [
@@ -142,6 +219,25 @@ const MANAGE_NOTIF_ROWS = [
   { id: 6, name: 'Alerts Error',             desc: "Alert me if an alert doesn't run properly",                            active: true  },
 ]
 
+
+// ── Alert group stack icon (3 bells offset like newsletter stack) ─────────────
+function AlertStackIcon({ size = 18, color = TEAL }) {
+  const offset = Math.round(size * 0.22)
+  const total = size + offset * 2
+  return (
+    <Box sx={{ position: 'relative', width: total, height: total, flexShrink: 0 }}>
+      <Box sx={{ position: 'absolute', top: offset * 2, left: offset * 2, opacity: 0.3 }}>
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: size, color, display: 'block' }} />
+      </Box>
+      <Box sx={{ position: 'absolute', top: offset, left: offset, opacity: 0.6 }}>
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: size, color, display: 'block' }} />
+      </Box>
+      <Box sx={{ position: 'absolute', top: 0, left: 0 }}>
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: size, color, display: 'block' }} />
+      </Box>
+    </Box>
+  )
+}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -205,7 +301,7 @@ function TabGroup({ tabs, activeTab, onTabChange }) {
 }
 
 function AlertFeedCard({ item }) {
-  const { Icon, type, title, desc, source, time, unread, action } = item
+  const { Icon, type, title, desc, group, time, unread, action } = item
   return (
     <Box
       sx={{
@@ -249,10 +345,11 @@ function AlertFeedCard({ item }) {
             {action}
           </Typography>
         )}
-        {source && !action && (
-          <Typography sx={{ fontSize: '12px', color: 'text.disabled', mt: 0.5 }}>
-            {source}
-          </Typography>
+        {group && (
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 0.75 }}>
+            <NotificationsNoneOutlinedIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
+            <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>{group}</Typography>
+          </Box>
         )}
       </Box>
 
@@ -296,134 +393,168 @@ function AllAlertsTab() {
 }
 
 function ManageAlertsTab() {
-  const [rows, setRows] = useState(MANAGE_ALERTS_ROWS)
-  const [anchorEl, setAnchorEl] = useState(null)
+  const [trackerMenuAnchor, setTrackerMenuAnchor] = useState(null)
+  const [alertMenuAnchor, setAlertMenuAnchor] = useState(null)
 
-  const toggleActive = (id) => setRows(prev => prev.map(r => r.id === id ? { ...r, active: !r.active } : r))
+  // Keep active flags separate so group data (digest etc.) is always read fresh from the constant
+  const [groupActive, setGroupActive] = useState(() =>
+    Object.fromEntries(MANAGE_ALERT_GROUPS.map(g => [g.id, true]))
+  )
+  const [alertActive, setAlertActive] = useState(() =>
+    Object.fromEntries(MANAGE_ALERT_GROUPS.flatMap(g => g.alerts.map(a => [a.id, a.active])))
+  )
+
+  const toggleGroup = (groupId) =>
+    setGroupActive(prev => ({ ...prev, [groupId]: !prev[groupId] }))
+
+  const toggleAlert = (alertId) =>
+    setAlertActive(prev => ({ ...prev, [alertId]: !prev[alertId] }))
+
+  const switchSx = {
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#00B4AF', opacity: 1 },
+    '& .MuiSwitch-switchBase.Mui-checked': { color: '#fff' },
+  }
 
   return (
     <Box>
-      {/* Filter bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>Filter:</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.25, py: 0.5, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}>
-          <Typography sx={{ fontSize: '13px', color: 'text.primary', fontWeight: 500 }}>All types</Typography>
-          <KeyboardArrowDownIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-        </Box>
+      {/* Column headers */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 150px 90px 130px 40px', px: 3, py: 1.25, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.secondary' }}>Tracker</Typography>
+        <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.secondary' }}>Delivery</Typography>
+        <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.secondary' }}>Status</Typography>
+        <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.secondary' }}>Last triggered</Typography>
+        <Box />
       </Box>
 
-      {/* Table */}
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ '& th': { fontSize: '12px', fontWeight: 700, color: 'text.secondary', py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' } }}>
-              <TableCell sx={{ pl: 3 }}>Alert Type</TableCell>
-              <TableCell>Saved Search</TableCell>
-              <TableCell>Delivery</TableCell>
-              <TableCell>Triggered</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created via</TableCell>
-              <TableCell sx={{ pr: 2, width: 40 }} />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map(row => {
-              const { Icon } = row
-              return (
-                <TableRow
-                  key={row.id}
-                  sx={{ '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' }, '& td': { py: 2, borderBottom: '1px solid', borderColor: 'divider', verticalAlign: 'middle' } }}
+      {/* Groups */}
+      {MANAGE_ALERT_GROUPS.map((group, gi) => {
+        const isGroupOn = groupActive[group.id] ?? true
+        return (
+        <Box key={group.id} sx={{ borderBottom: gi < MANAGE_ALERT_GROUPS.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
+
+          {/* Group header — same grid as alert rows so switch lines up under Status */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 150px 90px 130px 40px', alignItems: 'center', px: 3, py: 1.75, bgcolor: 'rgba(0,0,0,0.02)', borderBottom: '1px solid', borderColor: 'divider' }}>
+            {/* Col 1: icon + name + chips */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.375 }}>
+                <Box sx={{ mr: 0.75, display: 'flex', alignItems: 'center' }}>
+                  <TrackerIcon size={18} color={isGroupOn ? TEAL : 'rgba(0,0,0,0.26)'} />
+                </Box>
+                <Typography sx={{ fontSize: '14px', fontWeight: 700, color: isGroupOn ? 'text.primary' : 'text.disabled' }}>
+                  {group.name}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 0.625, flexWrap: 'wrap', opacity: isGroupOn ? 1 : 0.4 }}>
+                {group.sources.map(src => {
+                  const s = SOURCE_TYPE_STYLES[src.type]
+                  return (
+                    <Box key={src.label} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: s.bgcolor, borderRadius: '20px', px: 1, py: 0.375 }}>
+                      <s.Icon sx={{ fontSize: 12, color: s.color }} />
+                      <Typography sx={{ fontSize: '12px', color: s.color, fontWeight: 500, lineHeight: 1 }}>{src.label}</Typography>
+                    </Box>
+                  )
+                })}
+              </Box>
+            </Box>
+            {/* Col 2: empty (Delivery) */}
+            <Box />
+            {/* Col 3: Status switch */}
+            <Switch
+              checked={isGroupOn}
+              onChange={() => toggleGroup(group.id)}
+              size="small"
+              sx={switchSx}
+            />
+            {/* Col 4: digest cadence */}
+            <Box>
+              {group.digest ? (
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, opacity: isGroupOn ? 1 : 0.4 }}>
+                  <ArticleOutlinedIcon sx={{ fontSize: 14, color: TEAL }} />
+                  <Typography sx={{ fontSize: '13px', color: TEAL, fontWeight: 700 }}>{group.digest.cadence} digest</Typography>
+                </Box>
+              ) : (
+                <Box
+                  className="no-digest-cell"
+                  sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, cursor: 'default', '&:hover .add-digest': { opacity: 1 } }}
                 >
-                  {/* Alert Type */}
-                  <TableCell sx={{ pl: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                      <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: row.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Icon sx={{ fontSize: 16, color: row.iconColor }} />
-                      </Box>
-                      <Typography sx={{ fontSize: '13px', fontWeight: 500, whiteSpace: 'nowrap' }}>{row.alertType}</Typography>
-                    </Box>
-                  </TableCell>
+                  <Typography sx={{ fontSize: '13px', color: 'text.disabled', fontWeight: 700 }}>No digest</Typography>
+                  <Typography className="add-digest" sx={{ fontSize: '13px', color: TEAL, fontWeight: 500, opacity: 0, cursor: 'pointer', transition: 'opacity 0.15s', '&:hover': { textDecoration: 'underline' } }}>
+                    + Add
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+            {/* Col 5: tracker menu */}
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setTrackerMenuAnchor(e.currentTarget)}>
+                <MoreVertIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          </Box>
 
-                  {/* Saved Search */}
-                  <TableCell>
-                    <Typography sx={{ fontSize: '13px', color: 'text.primary' }}>{row.search}</Typography>
-                  </TableCell>
+          {/* Alert rows */}
+          {group.alerts.map((alert, ai) => {
+            const isAlertOn = alertActive[alert.id] ?? alert.active
+            return (
+            <Box
+              key={alert.id}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 150px 90px 130px 40px',
+                alignItems: 'center',
+                px: 3,
+                py: 1.25,
+                borderBottom: ai < group.alerts.length - 1 ? '1px solid' : 'none',
+                borderColor: 'rgba(0,0,0,0.06)',
+                opacity: isGroupOn ? 1 : 0.45,
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' },
+              }}
+            >
+              {/* Alert type + AI badge */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <NotificationsNoneOutlinedIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+                <Typography sx={{ fontSize: '13px', fontWeight: 500 }}>{alert.alertType}</Typography>
+              </Box>
+              {/* Delivery */}
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>{alert.delivery.join(', ')}</Typography>
+              {/* Status switch */}
+              <Switch
+                checked={isAlertOn}
+                onChange={() => toggleAlert(alert.id)}
+                size="small"
+                disabled={!isGroupOn}
+                sx={switchSx}
+              />
+              {/* Last triggered */}
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>{alert.triggeredAgo}</Typography>
+              {/* Row menu */}
+              <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setAlertMenuAnchor(e.currentTarget)}>
+                <MoreVertIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          )})}
+        </Box>
+      )})}
 
-                  {/* Delivery — stacked icons */}
-                  <TableCell>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      {row.delivery.map(key => {
-                        const ch = DELIVERY_CHANNELS[key]
-                        return (
-                          <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                            <ch.Icon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                            <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{ch.label}</Typography>
-                          </Box>
-                        )
-                      })}
-                    </Box>
-                  </TableCell>
 
-                  {/* Triggered */}
-                  <TableCell>
-                    <Typography sx={{ fontSize: '13px', color: 'text.secondary', whiteSpace: 'nowrap' }}>{row.triggered}</Typography>
-                  </TableCell>
-
-                  {/* Status */}
-                  <TableCell>
-                    <Switch
-                      checked={row.active}
-                      onChange={() => toggleActive(row.id)}
-                      size="small"
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': { color: '#fff' },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL },
-                      }}
-                    />
-                  </TableCell>
-
-                  {/* Created via */}
-                  <TableCell>
-                    {row.digest ? (
-                      <Box sx={{ display: 'inline-flex', flexDirection: 'column', border: '1px solid', borderColor: TEAL, borderRadius: '6px', px: 1.25, py: 0.6, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,130,127,0.04)' } }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <ArticleOutlinedIcon sx={{ fontSize: 13, color: TEAL }} />
-                          <Typography sx={{ fontSize: '12px', fontWeight: 700, color: TEAL }}>Digest setup</Typography>
-                        </Box>
-                        <Typography sx={{ fontSize: '11px', color: TEAL, opacity: 0.75, mt: 0.25, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {row.digest}
-                        </Typography>
-                      </Box>
-                    ) : (
-                      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.25, py: 0.6, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}>
-                        <SyncIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
-                        <Typography sx={{ fontSize: '12px', fontWeight: 500, color: 'text.secondary' }}>Alert setup</Typography>
-                      </Box>
-                    )}
-                  </TableCell>
-
-                  {/* Menu */}
-                  <TableCell sx={{ pr: 2 }}>
-                    <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
-                      <MoreVertIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Pagination */}
+      {/* Footer */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 3, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
-        <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>1–{rows.length} of {rows.length}</Typography>
+        <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>
+          {MANAGE_ALERT_GROUPS.reduce((acc, g) => acc + g.alerts.length, 0)} alerts across {MANAGE_ALERT_GROUPS.length} groups
+        </Typography>
       </Box>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => setAnchorEl(null)} sx={{ fontSize: '14px' }}>Edit</MenuItem>
-        <MenuItem onClick={() => setAnchorEl(null)} sx={{ fontSize: '14px' }}>Duplicate</MenuItem>
-        <MenuItem onClick={() => setAnchorEl(null)} sx={{ fontSize: '14px', color: 'error.main' }}>Delete</MenuItem>
+      {/* Tracker-level menu */}
+      <Menu anchorEl={trackerMenuAnchor} open={Boolean(trackerMenuAnchor)} onClose={() => setTrackerMenuAnchor(null)}>
+        <MenuItem onClick={() => setTrackerMenuAnchor(null)} sx={{ fontSize: '14px' }}>Edit</MenuItem>
+        <MenuItem onClick={() => setTrackerMenuAnchor(null)} sx={{ fontSize: '14px' }}>Duplicate</MenuItem>
+        <MenuItem onClick={() => setTrackerMenuAnchor(null)} sx={{ fontSize: '14px', color: 'error.main' }}>Delete</MenuItem>
+      </Menu>
+
+      {/* Alert-level menu */}
+      <Menu anchorEl={alertMenuAnchor} open={Boolean(alertMenuAnchor)} onClose={() => setAlertMenuAnchor(null)}>
+        <MenuItem onClick={() => setAlertMenuAnchor(null)} sx={{ fontSize: '14px' }}>Edit</MenuItem>
+        <MenuItem onClick={() => setAlertMenuAnchor(null)} sx={{ fontSize: '14px', color: 'error.main' }}>Delete</MenuItem>
       </Menu>
     </Box>
   )
@@ -554,7 +685,7 @@ const DELIVERY_CHANNEL_OPTIONS = [
 ]
 
 function StepIndicator({ currentStep }) {
-  const steps = ['Searches', 'Alert Types', 'Details', 'Preview']
+  const steps = ['Searches', 'Output', 'Configure', 'Preview']
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       {steps.map((label, i) => {
@@ -611,32 +742,57 @@ function CustomRadio({ checked, onChange }) {
   )
 }
 
-function CreateAlertModal({ open, onClose }) {
+function CreateTrackerModal({ open, onClose }) {
   const [step, setStep] = useState(1)
+  const [trackerName, setTrackerName] = useState('')
   const [selectedSearchIds, setSelectedSearchIds] = useState([])
+  const [outputType, setOutputType] = useState(null) // 'alerts' | 'digest' | 'both'
   const [selectedTypeIds, setSelectedTypeIds] = useState([])
-  const [relevanceBoost, setRelevanceBoost] = useState(false)
-  const [urgency, setUrgency] = useState(50)
+  const [digestSchedule, setDigestSchedule] = useState('weekly')
   const [channels, setChannels] = useState({ email: true, inapp: true, slack: false, teams: false, webhook: false })
-  const [notifyMode, setNotifyMode] = useState('immediate')
   const [frequency, setFrequency] = useState('immediate')
   const [quietHours, setQuietHours] = useState(false)
-  const [showImages, setShowImages] = useState(true)
 
   const toggleSearch = (id) => setSelectedSearchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
   const toggleType = (id) => setSelectedTypeIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
   const toggleChannel = (key) => setChannels(p => ({ ...p, [key]: !p[key] }))
 
-  const handleClose = () => { onClose(); setStep(1); setSelectedSearchIds([]); setSelectedTypeIds([]) }
+  const handleClose = () => { onClose(); setStep(1); setTrackerName(''); setSelectedSearchIds([]); setSelectedTypeIds([]); setOutputType(null) }
 
-  const urgencyText = urgency < 30
-    ? { label: 'All coverage', desc: 'You will receive all alerts as they happen' }
-    : urgency < 70
-    ? { label: 'Important only', desc: "We'll filter out low-relevance mentions using AI ranking" }
-    : { label: 'Urgent spikes only', desc: 'Only alerts with significant volume spikes will be sent' }
+  const nextDisabled =
+    (step === 1 && (!trackerName.trim() || selectedSearchIds.length === 0)) ||
+    (step === 2 && !outputType) ||
+    (step === 3 && outputType !== 'digest' && selectedTypeIds.length === 0)
 
-  const previewTypeIds = selectedTypeIds.length > 0 ? selectedTypeIds : ['likely_boosted', 'every_mention']
+  const previewTypeIds = selectedTypeIds.length > 0 ? selectedTypeIds : ['spike_detection', 'sentiment_shift']
   const allTypes = ALERT_TYPE_GROUPS.flatMap(g => g.types)
+
+  const OUTPUT_OPTIONS = [
+    {
+      value: 'alerts',
+      Icon: NotificationsNoneOutlinedIcon,
+      label: 'Alerts only',
+      desc: 'Get notified in real-time when specific events happen across your searches',
+    },
+    {
+      value: 'digest',
+      Icon: ArticleOutlinedIcon,
+      label: 'Digest only',
+      desc: 'Receive a curated email summary of your searches on a regular schedule',
+    },
+    {
+      value: 'both',
+      label: 'Alerts & Digest',
+      desc: 'Combine real-time alerts with a scheduled digest for full coverage',
+      both: true,
+    },
+  ]
+
+  const digestScheduleDesc = {
+    daily: 'Delivered every morning at 8am',
+    weekly: 'Delivered every Monday at 8am',
+    monthly: 'Delivered on the 1st of each month',
+  }
 
   return (
     <Dialog
@@ -652,7 +808,7 @@ function CreateAlertModal({ open, onClose }) {
             <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: TEAL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <AddIcon sx={{ fontSize: 18, color: '#fff' }} />
             </Box>
-            <Typography sx={{ fontSize: '18px', fontWeight: 700 }}>Create alert</Typography>
+            <Typography sx={{ fontSize: '18px', fontWeight: 700 }}>Create tracker</Typography>
           </Box>
           <IconButton onClick={handleClose} size="small"><CloseIcon sx={{ fontSize: 20 }} /></IconButton>
         </Box>
@@ -665,6 +821,19 @@ function CreateAlertModal({ open, onClose }) {
         {/* ── STEP 1: Searches ── */}
         {step === 1 && (
           <Box>
+            {/* Tracker name */}
+            <Box sx={{ mb: 2.5 }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 0.75 }}>Tracker name</Typography>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="e.g. Nike Core Monitoring"
+                value={trackerName}
+                onChange={e => setTrackerName(e.target.value)}
+                sx={{ '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: TEAL } }}
+              />
+            </Box>
+
             {selectedSearchIds.length > 0 && (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1.5 }}>
                 {selectedSearchIds.map(id => {
@@ -698,203 +867,187 @@ function CreateAlertModal({ open, onClose }) {
           </Box>
         )}
 
-        {/* ── STEP 2: Alert Types ── */}
+        {/* ── STEP 2: Output type ── */}
         {step === 2 && (
-          <SectionCard>
-            <Typography sx={{ fontSize: '15px', fontWeight: 700, mb: 0.5 }}>Alert types</Typography>
-            <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2.5 }}>Select one or more alert types to create</Typography>
-            {ALERT_TYPE_GROUPS.map(group => (
-              <Box key={group.section} sx={{ mb: 2.5, '&:last-child': { mb: 0 } }}>
-                <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', mb: 1.25 }}>
-                  {group.section}
-                </Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
-                  {group.types.map(type => {
-                    const { Icon } = type
-                    const sel = selectedTypeIds.includes(type.id)
-                    return (
-                      <Box key={type.id} onClick={() => toggleType(type.id)} sx={{ border: '1px solid', borderRadius: '8px', borderColor: sel ? TEAL : 'divider', bgcolor: sel ? 'rgba(0,130,127,0.04)' : 'transparent', p: 1.75, cursor: 'pointer', '&:hover': { borderColor: sel ? TEAL : 'rgba(0,0,0,0.3)' } }}>
-                        <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: sel ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.25 }}>
-                          <Icon sx={{ fontSize: 18, color: sel ? TEAL : 'text.secondary' }} />
-                        </Box>
-                        <Typography sx={{ fontSize: '13px', fontWeight: 600, color: sel ? TEAL : 'text.primary', mb: 0.5 }}>{type.name}</Typography>
-                        <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.45 }}>{type.desc}</Typography>
-                      </Box>
-                    )
-                  })}
-                </Box>
-              </Box>
-            ))}
-          </SectionCard>
-        )}
-
-        {/* ── STEP 3: Details ── */}
-        {step === 3 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box>
-              <Typography sx={{ fontSize: '16px', fontWeight: 700, mb: 0.75 }}>Configure details for Likely Boosted alert</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <SearchIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
-                  {selectedSearchIds.length > 0 ? SAVED_SEARCHES_LIST.find(s => s.id === selectedSearchIds[0])?.name : 'Brand Coverage'}
-                </Typography>
-              </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+            <Box sx={{ mb: 1 }}>
+              <Typography sx={{ fontSize: '15px', fontWeight: 700, mb: 0.5 }}>What do you want from this tracker?</Typography>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>You can change this later from the tracker settings.</Typography>
             </Box>
-
-            {/* Relevance Boost */}
-            <Box sx={{ border: `1.5px solid ${TEAL}`, borderRadius: '8px', p: 2.5, bgcolor: 'rgba(0,130,127,0.02)' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-                <AutoAwesomeIcon sx={{ fontSize: 15, color: TEAL }} />
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Relevance Boost</Typography>
-                <Box sx={{ bgcolor: 'rgba(0,130,127,0.12)', borderRadius: '4px', px: 0.75, py: 0.2 }}>
-                  <Typography sx={{ fontSize: '10px', fontWeight: 700, color: TEAL, lineHeight: 1.4 }}>Beta</Typography>
-                </Box>
-              </Box>
-              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>Reduce noise by prioritizing mentions that match your intent.</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: '#fff', border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.75, py: 1.25 }}>
-                <Typography sx={{ fontSize: '14px' }}>Enable relevance filtering</Typography>
-                <Switch checked={relevanceBoost} onChange={() => setRelevanceBoost(v => !v)} size="small" sx={{ '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL } }} />
-              </Box>
-            </Box>
-
-            {/* Urgency Level */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <BoltIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Urgency level</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5, px: 0.5 }}>
-                {['All coverage', 'Important only', 'Urgent spikes only'].map(l => (
-                  <Typography key={l} sx={{ fontSize: '11px', color: 'text.secondary' }}>{l}</Typography>
-                ))}
-              </Box>
-              <Slider value={urgency} onChange={(_, v) => setUrgency(v)} step={50} marks={[{ value: 0 }, { value: 50 }, { value: 100 }]} sx={{ color: TEAL, '& .MuiSlider-mark': { bgcolor: TEAL, opacity: 0.4 }, mb: 0.5 }} />
-              <Box sx={{ bgcolor: 'rgba(0,0,0,0.04)', borderRadius: '6px', px: 1.5, py: 1, mt: 0.5 }}>
-                <Typography sx={{ fontSize: '13px' }}>
-                  <strong>{urgencyText.label}:</strong> {urgencyText.desc}
-                </Typography>
-              </Box>
-            </SectionCard>
-
-            {/* Settings */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 2 }}>
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Settings</Typography>
-                <HelpOutlineIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
-              </Box>
-              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', mb: 1 }}>SIMILAR MENTIONS</Typography>
-              <Select value="exclude" size="small" fullWidth sx={{ fontSize: '14px', mb: 2 }}>
-                <MenuItem value="exclude">Exclude similar mentions</MenuItem>
-                <MenuItem value="include">Include similar mentions</MenuItem>
-              </Select>
-              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', mb: 1 }}>DISPLAY</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={() => setShowImages(v => !v)}>
-                <CustomCheckbox checked={showImages} onChange={() => setShowImages(v => !v)} />
-                <Typography sx={{ fontSize: '14px' }}>Images</Typography>
-              </Box>
-            </SectionCard>
-
-            {/* Delivery Channels */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <MailOutlineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Delivery channels</Typography>
-              </Box>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
-                {DELIVERY_CHANNEL_OPTIONS.map(ch => {
-                  const { Icon } = ch
-                  const on = channels[ch.key]
-                  return (
-                    <Box key={ch.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid', borderRadius: '8px', px: 1.5, py: 1.25, borderColor: on ? TEAL : 'divider', bgcolor: on ? 'rgba(0,130,127,0.04)' : 'transparent' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                        <Icon sx={{ fontSize: 16, color: on ? TEAL : 'text.secondary' }} />
-                        <Typography sx={{ fontSize: '14px', color: on ? TEAL : 'text.primary' }}>{ch.label}</Typography>
+            {OUTPUT_OPTIONS.map(opt => {
+              const sel = outputType === opt.value
+              return (
+                <Box
+                  key={opt.value}
+                  onClick={() => setOutputType(opt.value)}
+                  sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, border: '1.5px solid', borderRadius: '10px', p: 2, cursor: 'pointer', borderColor: sel ? TEAL : 'divider', bgcolor: sel ? 'rgba(0,130,127,0.04)' : 'transparent', '&:hover': { borderColor: sel ? TEAL : 'rgba(0,0,0,0.25)' } }}
+                >
+                  {/* Icon */}
+                  <Box sx={{ width: 40, height: 40, borderRadius: '8px', bgcolor: sel ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {opt.both ? (
+                      <Box sx={{ display: 'flex', gap: 0.25 }}>
+                        <NotificationsNoneOutlinedIcon sx={{ fontSize: 16, color: sel ? TEAL : 'text.secondary' }} />
+                        <ArticleOutlinedIcon sx={{ fontSize: 16, color: sel ? TEAL : 'text.secondary' }} />
                       </Box>
-                      <Switch checked={on} onChange={() => toggleChannel(ch.key)} size="small" sx={{ '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL } }} />
-                    </Box>
-                  )
-                })}
-              </Box>
-            </SectionCard>
-
-            {/* When to notify me */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 2 }}>
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>When to notify me</Typography>
-                <HelpOutlineIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
-              </Box>
-              {[
-                { value: 'immediate', label: 'Immediately (every mention)', desc: 'You will receive notification for every single mention as they happen' },
-                { value: 'daily',     label: 'Daily threshold (last 24 hours)', desc: 'Sends an alert as soon as mentions exceed your threshold (24-hour window is fixed)' },
-              ].map(opt => (
-                <Box key={opt.value} onClick={() => setNotifyMode(opt.value)} sx={{ display: 'flex', gap: 1.5, mb: 1.5, cursor: 'pointer', '&:last-child': { mb: 0 } }}>
-                  <CustomRadio checked={notifyMode === opt.value} onChange={() => setNotifyMode(opt.value)} />
-                  <Box>
-                    <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>{opt.label}</Typography>
-                    <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25 }}>{opt.desc}</Typography>
+                    ) : (
+                      <opt.Icon sx={{ fontSize: 20, color: sel ? TEAL : 'text.secondary' }} />
+                    )}
+                  </Box>
+                  {/* Text */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 600, color: sel ? TEAL : 'text.primary', mb: 0.375 }}>{opt.label}</Typography>
+                    <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.5 }}>{opt.desc}</Typography>
+                  </Box>
+                  {/* Radio dot */}
+                  <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid', borderColor: sel ? TEAL : 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25 }}>
+                    {sel && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: TEAL }} />}
                   </Box>
                 </Box>
-              ))}
-            </SectionCard>
+              )
+            })}
+          </Box>
+        )}
 
-            {/* Timing */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Timing</Typography>
-              </Box>
-              <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 1 }}>Frequency</Typography>
-              <Box sx={{ display: 'flex', gap: 0.75, mb: 2.5 }}>
-                {['Immediate', 'Hourly', 'Daily'].map(f => {
-                  const active = frequency === f.toLowerCase()
-                  return (
-                    <Box key={f} onClick={() => setFrequency(f.toLowerCase())} sx={{ px: 1.75, py: 0.625, borderRadius: '20px', border: '1px solid', cursor: 'pointer', borderColor: active ? TEAL : 'divider', color: active ? TEAL : 'text.secondary', bgcolor: active ? 'rgba(0,130,127,0.06)' : 'transparent', fontSize: '13px', fontWeight: active ? 600 : 400 }}>
-                      {f}
+        {/* ── STEP 3: Configure ── */}
+        {step === 3 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+
+            {/* ── Alerts section ── */}
+            {(outputType === 'alerts' || outputType === 'both') && (
+              <>
+                {outputType === 'both' && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <NotificationsNoneOutlinedIcon sx={{ fontSize: 16, color: TEAL }} />
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, color: TEAL }}>Alerts</Typography>
+                    <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider', ml: 1 }} />
+                  </Box>
+                )}
+
+                {/* Alert type grid */}
+                <SectionCard>
+                  <Typography sx={{ fontSize: '14px', fontWeight: 700, mb: 0.5 }}>Alert types</Typography>
+                  <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>Select one or more types to trigger alerts</Typography>
+                  {ALERT_TYPE_GROUPS.map(group => (
+                    <Box key={group.section} sx={{ mb: 2, '&:last-child': { mb: 0 } }}>
+                      <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', mb: 1 }}>{group.section}</Typography>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.875 }}>
+                        {group.types.map(type => {
+                          const { Icon } = type
+                          const sel = selectedTypeIds.includes(type.id)
+                          return (
+                            <Box key={type.id} onClick={() => toggleType(type.id)} sx={{ border: '1px solid', borderRadius: '8px', borderColor: sel ? TEAL : 'divider', bgcolor: sel ? 'rgba(0,130,127,0.04)' : 'transparent', p: 1.5, cursor: 'pointer', '&:hover': { borderColor: sel ? TEAL : 'rgba(0,0,0,0.25)' } }}>
+                              <Box sx={{ width: 32, height: 32, borderRadius: '6px', bgcolor: sel ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+                                <Icon sx={{ fontSize: 16, color: sel ? TEAL : 'text.secondary' }} />
+                              </Box>
+                              <Typography sx={{ fontSize: '13px', fontWeight: 600, color: sel ? TEAL : 'text.primary', mb: 0.375 }}>{type.name}</Typography>
+                              <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4 }}>{type.desc}</Typography>
+                            </Box>
+                          )
+                        })}
+                      </Box>
                     </Box>
-                  )
-                })}
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Quiet hours</Typography>
-                  <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>Pause alerts between 10pm – 7am</Typography>
-                </Box>
-                <Switch checked={quietHours} onChange={() => setQuietHours(v => !v)} size="small" sx={{ '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL } }} />
-              </Box>
-            </SectionCard>
+                  ))}
+                </SectionCard>
 
-            {/* Recipients */}
-            <SectionCard>
-              <Typography sx={{ fontSize: '14px', fontWeight: 700, mb: 0.5 }}>Recipients</Typography>
-              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>Send alerts to the following people</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.5, py: 1, mb: 1 }}>
-                <SearchIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
-                <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>Search by name or enter an email address</Typography>
-              </Box>
-              <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1 }}>1/10</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.5, py: 1.25 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(0,130,127,0.15)', color: TEAL, fontSize: '11px', fontWeight: 700 }}>MT</Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Mariano Titanti</Typography>
-                  <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>mariano.titanti@meltwater.com</Typography>
-                </Box>
-                <IconButton size="small"><CloseIcon sx={{ fontSize: 14 }} /></IconButton>
-              </Box>
-            </SectionCard>
+                {/* Delivery channels */}
+                <SectionCard>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <MailOutlineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Delivery channels</Typography>
+                  </Box>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.875 }}>
+                    {DELIVERY_CHANNEL_OPTIONS.map(ch => {
+                      const { Icon } = ch
+                      const on = channels[ch.key]
+                      return (
+                        <Box key={ch.key} onClick={() => toggleChannel(ch.key)} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid', borderRadius: '8px', px: 1.5, py: 1.125, borderColor: on ? TEAL : 'divider', bgcolor: on ? 'rgba(0,130,127,0.04)' : 'transparent', cursor: 'pointer' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <Icon sx={{ fontSize: 15, color: on ? TEAL : 'text.secondary' }} />
+                            <Typography sx={{ fontSize: '13px', color: on ? TEAL : 'text.primary' }}>{ch.label}</Typography>
+                          </Box>
+                          <Switch checked={on} onChange={() => toggleChannel(ch.key)} size="small" sx={{ '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL } }} />
+                        </Box>
+                      )
+                    })}
+                  </Box>
+                </SectionCard>
 
-            {/* Delivery Method */}
-            <SectionCard>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-                <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Delivery method</Typography>
-                <HelpOutlineIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
-              </Box>
-              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>How would you like to receive alerts?</Typography>
-              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', mb: 1 }}>STANDARD</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CustomCheckbox checked onChange={() => {}} />
-                <Typography sx={{ fontSize: '14px' }}>Email</Typography>
-              </Box>
-            </SectionCard>
+                {/* Timing */}
+                <SectionCard>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <AccessTimeOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Frequency</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 0.75, mb: 2 }}>
+                    {['Immediate', 'Hourly', 'Daily'].map(f => {
+                      const active = frequency === f.toLowerCase()
+                      return (
+                        <Box key={f} onClick={() => setFrequency(f.toLowerCase())} sx={{ px: 1.75, py: 0.625, borderRadius: '20px', border: '1px solid', cursor: 'pointer', borderColor: active ? TEAL : 'divider', color: active ? TEAL : 'text.secondary', bgcolor: active ? 'rgba(0,130,127,0.06)' : 'transparent', fontSize: '13px', fontWeight: active ? 600 : 400 }}>
+                          {f}
+                        </Box>
+                      )
+                    })}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Quiet hours</Typography>
+                      <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>Pause alerts between 10pm – 7am</Typography>
+                    </Box>
+                    <Switch checked={quietHours} onChange={() => setQuietHours(v => !v)} size="small" sx={{ '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL } }} />
+                  </Box>
+                </SectionCard>
+              </>
+            )}
+
+            {/* ── Digest section ── */}
+            {(outputType === 'digest' || outputType === 'both') && (
+              <>
+                {outputType === 'both' && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, mb: 0.5 }}>
+                    <ArticleOutlinedIcon sx={{ fontSize: 16, color: TEAL }} />
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, color: TEAL }}>Digest</Typography>
+                    <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider', ml: 1 }} />
+                  </Box>
+                )}
+
+                {/* Schedule */}
+                <SectionCard>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <CalendarMonthOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>Schedule</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 0.75, mb: 1.5 }}>
+                    {['Daily', 'Weekly', 'Monthly'].map(f => {
+                      const active = digestSchedule === f.toLowerCase()
+                      return (
+                        <Box key={f} onClick={() => setDigestSchedule(f.toLowerCase())} sx={{ px: 1.75, py: 0.625, borderRadius: '20px', border: '1px solid', cursor: 'pointer', borderColor: active ? TEAL : 'divider', color: active ? TEAL : 'text.secondary', bgcolor: active ? 'rgba(0,130,127,0.06)' : 'transparent', fontSize: '13px', fontWeight: active ? 600 : 400 }}>
+                          {f}
+                        </Box>
+                      )
+                    })}
+                  </Box>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{digestScheduleDesc[digestSchedule]}</Typography>
+                </SectionCard>
+
+                {/* Recipients */}
+                <SectionCard>
+                  <Typography sx={{ fontSize: '14px', fontWeight: 700, mb: 0.5 }}>Recipients</Typography>
+                  <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>Who receives this digest</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.5, py: 1, mb: 1 }}>
+                    <SearchIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
+                    <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>Search by name or email address</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: '6px', px: 1.5, py: 1.25 }}>
+                    <Avatar sx={{ width: 30, height: 30, bgcolor: 'rgba(0,130,127,0.15)', color: TEAL, fontSize: '11px', fontWeight: 700 }}>MT</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Mariano Titanti</Typography>
+                      <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>mariano.titanti@meltwater.com</Typography>
+                    </Box>
+                    <IconButton size="small"><CloseIcon sx={{ fontSize: 13 }} /></IconButton>
+                  </Box>
+                </SectionCard>
+              </>
+            )}
           </Box>
         )}
 
@@ -1054,7 +1207,7 @@ function CreateAlertModal({ open, onClose }) {
           </Button>
         )}
         {step < 4 ? (
-          <Button variant="contained" onClick={() => setStep(s => s + 1)} disabled={step === 1 && selectedSearchIds.length === 0}
+          <Button variant="contained" onClick={() => setStep(s => s + 1)} disabled={nextDisabled}
             sx={{ bgcolor: TEAL, color: '#fff', textTransform: 'none', fontWeight: 600, '&:hover': { bgcolor: '#006e6b' }, '&.Mui-disabled': { bgcolor: 'rgba(0,130,127,0.3)', color: '#fff' } }}
           >
             Next
@@ -1073,68 +1226,37 @@ function CreateAlertModal({ open, onClose }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function MwAlertsPage() {
-  const [activeTab, setActiveTab] = useState('allAlerts')
-  const [createOpen, setCreateOpen] = useState(false)
-
-  const alertsTabs = [
-    { key: 'allAlerts',    label: 'All Alerts',    count: 3 },
-    { key: 'manageAlerts', label: 'Manage Alerts', count: null },
-  ]
-  const notifTabs = [
-    { key: 'allNotifications',    label: 'All Notifications',    count: 3 },
-    { key: 'manageNotifications', label: 'Manage Notifications', count: null },
-  ]
+  const navigate = useNavigate()
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: 'background.default' }}>
       {/* Page header */}
-      <Box sx={{ px: 3, pt: 3, pb: 2, bgcolor: 'background.default', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <Box sx={{ px: 3, pt: 3, pb: 2.5, bgcolor: 'background.default', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '24px', mb: 0.5 }}>Alerts &amp; Notifications</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Trackers</Typography>
           <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
-            Stay informed with real-time notifications from your searches
+            Stay on top of your searches with real-time alerts and scheduled digests
           </Typography>
         </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setCreateOpen(true)}
+          onClick={() => navigate('/mw-alerts/create')}
           sx={{
             bgcolor: TEAL, color: '#fff', textTransform: 'none', fontWeight: 500,
             '&:hover': { bgcolor: '#006e6b' }, borderRadius: '8px', px: 2.5,
           }}
         >
-          Create Alert
+          Create Tracker
         </Button>
-      </Box>
-
-      {/* Tab bar + icons */}
-      <Box sx={{ px: 3, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'background.default' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <TabGroup tabs={alertsTabs} activeTab={activeTab} onTabChange={setActiveTab} />
-          <TabGroup tabs={notifTabs}  activeTab={activeTab} onTabChange={setActiveTab} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <IconButton size="small" sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '6px', p: 0.75 }}>
-            <SearchIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-          <IconButton size="small" sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '6px', p: 0.75 }}>
-            <FilterListIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Box>
       </Box>
 
       {/* Content card */}
       <Box sx={{ flex: 1, overflow: 'auto', px: 3, pb: 3 }}>
         <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper', overflow: 'hidden' }}>
-          {activeTab === 'allAlerts'            && <AllAlertsTab />}
-          {activeTab === 'manageAlerts'         && <ManageAlertsTab />}
-          {activeTab === 'allNotifications'     && <AllNotificationsTab />}
-          {activeTab === 'manageNotifications'  && <ManageNotificationsTab />}
+          <ManageAlertsTab />
         </Box>
       </Box>
-
-      <CreateAlertModal open={createOpen} onClose={() => setCreateOpen(false)} />
     </Box>
   )
 }
