@@ -1038,6 +1038,7 @@ function CurationModeOption({ id, label, sub, accentColor, selected, onSelect })
 // ── Canvas widget card (added widgets shown inside the newsletter) ─────────────
 function CanvasWidget({ widget, accentColor, onRemove }) {
   const [aiOpen, setAiOpen] = useState(true) // open by default in canvas
+  const [thumbVote, setThumbVote] = useState(null) // 'up' | 'down' | null
   const isAutoAdded = AUTO_ADDED_IDS.includes(widget.id)
 
   return (
@@ -1089,9 +1090,24 @@ function CanvasWidget({ widget, accentColor, onRemove }) {
             bgcolor: 'rgba(0,130,127,0.05)', borderRadius: '6px',
             px: 1.25, py: 1, borderLeft: `3px solid ${TEAL}`,
           }}>
-            <Typography sx={{ fontSize: '11.5px', color: 'text.secondary', lineHeight: 1.6 }}>
+            <Typography sx={{ fontSize: '11.5px', color: 'text.secondary', lineHeight: 1.6, mb: 0.75 }}>
               {widget.aiReason}
             </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, pt: 0.75, borderTop: '1px solid rgba(0,130,127,0.1)' }}>
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled', mr: 0.25 }}>Tune AI for this series:</Typography>
+              <Tooltip title="More like this" placement="bottom">
+                <IconButton size="small" onClick={() => setThumbVote(v => v === 'up' ? null : 'up')}
+                  sx={{ p: 0.4, borderRadius: '4px', color: thumbVote === 'up' ? TEAL : 'text.disabled', bgcolor: thumbVote === 'up' ? 'rgba(0,130,127,0.1)' : 'transparent', '&:hover': { color: TEAL, bgcolor: 'rgba(0,130,127,0.08)' } }}>
+                  {thumbVote === 'up' ? <ThumbUpIcon sx={{ fontSize: 13 }} /> : <ThumbUpOutlinedIcon sx={{ fontSize: 13 }} />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Less like this" placement="bottom">
+                <IconButton size="small" onClick={() => setThumbVote(v => v === 'down' ? null : 'down')}
+                  sx={{ p: 0.4, borderRadius: '4px', color: thumbVote === 'down' ? 'error.main' : 'text.disabled', bgcolor: thumbVote === 'down' ? 'rgba(211,47,47,0.08)' : 'transparent', '&:hover': { color: 'error.main', bgcolor: 'rgba(211,47,47,0.06)' } }}>
+                  {thumbVote === 'down' ? <ThumbDownIcon sx={{ fontSize: 13 }} /> : <ThumbDownOutlinedIcon sx={{ fontSize: 13 }} />}
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
         )}
       </Box>
@@ -1386,8 +1402,13 @@ export default function MwNewslettersEditorPage() {
                 <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: `${TEAL}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <CampaignOutlinedIcon sx={{ fontSize: 20, color: TEAL }} />
                 </Box>
-                <Box>
-                  <Typography sx={{ fontSize: '12px', fontWeight: 700, color: TEAL }}>Add Audiocast</Typography>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 700, color: TEAL }}>Add Audiocast</Typography>
+                    <Box sx={{ bgcolor: PURPLE, borderRadius: '4px', px: 0.6, py: 0.15 }}>
+                      <Typography sx={{ fontSize: '9px', fontWeight: 700, color: '#fff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>New</Typography>
+                    </Box>
+                  </Box>
                   <Typography sx={{ fontSize: '10px', color: 'text.secondary', lineHeight: 1.4 }}>AI-generated audio version of this newsletter</Typography>
                 </Box>
               </Box>
@@ -2313,7 +2334,9 @@ const AUTO_ADDED_IDS = ['mention-volume', 'share-of-voice', 'sentiment-breakdown
 
 function WidgetsTab({ addedWidgets }) {
   const [expandedAi, setExpandedAi] = useState({})
+  const [thumbVotes, setThumbVotes] = useState({}) // { [widgetId]: 'up' | 'down' | null }
   const toggleAi = id => setExpandedAi(prev => ({ ...prev, [id]: !prev[id] }))
+  const toggleThumb = (id, dir) => setThumbVotes(prev => ({ ...prev, [id]: prev[id] === dir ? null : dir }))
 
   const available = RECOMMENDED_WIDGETS.filter(w => !addedWidgets.includes(w.id))
 
@@ -2384,7 +2407,22 @@ function WidgetsTab({ addedWidgets }) {
                 </Box>
                 {aiOpen && (
                   <Box sx={{ px: 1.5, pb: 1, pt: 0.25, bgcolor: 'rgba(0,130,127,0.03)' }}>
-                    <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.55 }}>{widget.aiReason}</Typography>
+                    <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.55, mb: 0.75 }}>{widget.aiReason}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, pt: 0.75, borderTop: '1px solid rgba(0,130,127,0.1)' }}>
+                      <Typography sx={{ fontSize: '11px', color: 'text.disabled', mr: 0.25 }}>Tune AI for this series:</Typography>
+                      <Tooltip title="More like this" placement="bottom">
+                        <IconButton size="small" onClick={() => toggleThumb(widget.id, 'up')}
+                          sx={{ p: 0.4, borderRadius: '4px', color: thumbVotes[widget.id] === 'up' ? TEAL : 'text.disabled', bgcolor: thumbVotes[widget.id] === 'up' ? 'rgba(0,130,127,0.1)' : 'transparent', '&:hover': { color: TEAL, bgcolor: 'rgba(0,130,127,0.08)' } }}>
+                          {thumbVotes[widget.id] === 'up' ? <ThumbUpIcon sx={{ fontSize: 13 }} /> : <ThumbUpOutlinedIcon sx={{ fontSize: 13 }} />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Less like this" placement="bottom">
+                        <IconButton size="small" onClick={() => toggleThumb(widget.id, 'down')}
+                          sx={{ p: 0.4, borderRadius: '4px', color: thumbVotes[widget.id] === 'down' ? 'error.main' : 'text.disabled', bgcolor: thumbVotes[widget.id] === 'down' ? 'rgba(211,47,47,0.08)' : 'transparent', '&:hover': { color: 'error.main', bgcolor: 'rgba(211,47,47,0.06)' } }}>
+                          {thumbVotes[widget.id] === 'down' ? <ThumbDownIcon sx={{ fontSize: 13 }} /> : <ThumbDownOutlinedIcon sx={{ fontSize: 13 }} />}
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
                 )}
               </Box>

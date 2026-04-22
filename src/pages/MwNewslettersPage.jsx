@@ -155,26 +155,26 @@ const SERIES = [
 
 const EDITION_HISTORY = {
   'daily-brief': [
-    { label: 'April 19, 2026', sent: 'Apr 19', articles: 6, open: '51%', clicks: '12%' },
-    { label: 'April 18, 2026', sent: 'Apr 18', articles: 8, open: '47%', clicks: '9%'  },
-    { label: 'April 17, 2026', sent: 'Apr 17', articles: 5, open: '44%', clicks: '11%' },
-    { label: 'April 16, 2026', sent: 'Apr 16', articles: 7, open: '39%', clicks: '8%'  },
+    { label: 'April 19, 2026', sent: 'Apr 19', time: '7:02 AM', articles: 6, open: '51%', clicks: '12%' },
+    { label: 'April 18, 2026', sent: 'Apr 18', time: '7:01 AM', articles: 8, open: '47%', clicks: '9%'  },
+    { label: 'April 17, 2026', sent: 'Apr 17', time: '7:00 AM', articles: 5, open: '44%', clicks: '11%' },
+    { label: 'April 16, 2026', sent: 'Apr 16', time: '7:03 AM', articles: 7, open: '39%', clicks: '8%'  },
   ],
   'monthly-roundup': [
-    { label: 'March 2026',    sent: 'Mar 1', articles: 8,  open: '42%', clicks: '14%' },
-    { label: 'February 2026', sent: 'Feb 1', articles: 12, open: '38%', clicks: '11%' },
-    { label: 'January 2026',  sent: 'Jan 1', articles: 10, open: '29%', clicks: '9%'  },
-    { label: 'December 2025', sent: 'Dec 2', articles: 14, open: '35%', clicks: '12%' },
+    { label: 'March 2026',    sent: 'Mar 1',  time: '9:00 AM', articles: 8,  open: '42%', clicks: '14%' },
+    { label: 'February 2026', sent: 'Feb 1',  time: '9:00 AM', articles: 12, open: '38%', clicks: '11%' },
+    { label: 'January 2026',  sent: 'Jan 1',  time: '9:00 AM', articles: 10, open: '29%', clicks: '9%'  },
+    { label: 'December 2025', sent: 'Dec 2',  time: '9:00 AM', articles: 14, open: '35%', clicks: '12%' },
   ],
   'media-coverage': [
-    { label: 'March 2026',    sent: 'Mar 3', articles: 9,  open: '44%', clicks: '16%' },
-    { label: 'February 2026', sent: 'Feb 3', articles: 7,  open: '36%', clicks: '13%' },
-    { label: 'January 2026',  sent: 'Jan 2', articles: 11, open: '41%', clicks: '15%' },
+    { label: 'March 2026',    sent: 'Mar 3',  time: '8:30 AM', articles: 9,  open: '44%', clicks: '16%' },
+    { label: 'February 2026', sent: 'Feb 3',  time: '8:30 AM', articles: 7,  open: '36%', clicks: '13%' },
+    { label: 'January 2026',  sent: 'Jan 2',  time: '8:30 AM', articles: 11, open: '41%', clicks: '15%' },
   ],
   'competitor-digest': [
-    { label: 'Week of Apr 7',  sent: 'Apr 7',  articles: 9,  open: '48%', clicks: '17%' },
-    { label: 'Week of Mar 31', sent: 'Mar 31', articles: 11, open: '52%', clicks: '19%' },
-    { label: 'Week of Mar 24', sent: 'Mar 24', articles: 8,  open: '44%', clicks: '15%' },
+    { label: 'Week of Apr 7',  sent: 'Apr 7',  time: '8:00 AM', articles: 9,  open: '48%', clicks: '17%' },
+    { label: 'Week of Mar 31', sent: 'Mar 31', time: '8:00 AM', articles: 11, open: '52%', clicks: '19%' },
+    { label: 'Week of Mar 24', sent: 'Mar 24', time: '8:00 AM', articles: 8,  open: '44%', clicks: '15%' },
   ],
 }
 
@@ -540,7 +540,7 @@ function EditionRow({ edition, seriesId }) {
       <NlIcon size={20} color={TEAL} sx={{ mr: 1.5, opacity: 0.7 }} />
       <Box sx={{ flex: 1 }}>
         <Typography sx={{ fontSize: '14px', fontWeight: 600 }}>{edition.label}</Typography>
-        <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>Sent {edition.sent} · {edition.articles} articles</Typography>
+        <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>Sent {edition.sent}{edition.time ? ` · ${edition.time}` : ''} · {edition.articles} articles</Typography>
       </Box>
       <Box sx={{ display: 'flex', gap: 3, mr: 2 }}>
         {[{ val: edition.open, label: 'Open' }, { val: edition.clicks, label: 'Clicks' }].map(m => (
@@ -1022,7 +1022,7 @@ function SeriesDetail({ series }) {
       {/* Content */}
       <Box sx={{ p: 3 }}>
         <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 1.5 }}>
-          Next Edition
+          Next {series.cadence} Edition
         </Typography>
         <LatestEditionCard series={series} onEdit={() => navigate(`/mw-newsletters/editor/${series.id}`)} />
 
@@ -1158,7 +1158,7 @@ function StackedThumbnails() {
 // ── All Newsletters inbox ─────────────────────────────────────────────────────
 
 const STATUS_ORDER = { ready: 0, curating: 1, sent: 2 }
-const COL_GRID = '2fr 130px 140px 90px 90px 90px 90px 220px'
+const COL_GRID = '1.6fr 140px 150px 1fr 1fr 1fr 1fr 210px'
 
 // Date→numeric map for sorting mock data
 const DATE_SORT = {
@@ -1702,7 +1702,7 @@ function RecipientDetailPanel({ listId, lists, setLists, onBack }) {
             ? <Typography sx={{ fontSize: '12px', color: 'text.disabled', fontStyle: 'italic' }}>No newsletters assigned</Typography>
             : list.usedIn.map(nl => <Chip key={nl} label={nl} size="small" sx={{ fontSize: '11px', height: 22, bgcolor: TEAL_LIGHT, color: TEAL, fontWeight: 600 }} />)
           }
-          <Chip icon={<AddIcon sx={{ fontSize:'12px !important' }} />} label="Add" size="small"
+          <Chip icon={<AddIcon sx={{ fontSize:'12px !important' }} />} label="Assign to series" size="small"
             onClick={e => setNlMenuAnchor(e.currentTarget)}
             sx={{ fontSize: '11px', height: 22, cursor: 'pointer', bgcolor: 'transparent', border: '1px dashed rgba(0,0,0,0.2)', color: 'text.secondary', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }} />
         </Box>

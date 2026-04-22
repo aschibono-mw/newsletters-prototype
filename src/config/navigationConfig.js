@@ -2,7 +2,7 @@
 // Icons are imported where this config is used
 
 export const NAV_ITEMS = [
-  { iconName: 'HomeOutlined',              path: '/mw-home',           label: 'Home',         disabled: true },
+  { iconName: 'HomeOutlined',              path: '/mw-home',           label: 'Home' },
   { iconName: 'ExploreOutlined',           path: '/explore',           label: 'Explore',      disabled: true },
   {
     iconName: 'ShowChartOutlined',

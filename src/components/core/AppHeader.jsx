@@ -16,14 +16,170 @@ import {
   useMediaQuery,
   useTheme,
   Popover,
-  Badge,
+  Button,
+  Switch,
 } from '@mui/material'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import MenuIcon from '@mui/icons-material/Menu'
 import SearchIcon from '@mui/icons-material/Search'
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
 import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined'
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined'
+import BoltIcon from '@mui/icons-material/Bolt'
+import TrendingUpIcon from '@mui/icons-material/TrendingUp'
+import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined'
+import XIcon from '@mui/icons-material/X'
+import ApartmentIcon from '@mui/icons-material/Apartment'
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined'
+
+// ── Notification dropdown data ──────────────────────────────────────────────────
+const TEAL = '#00827F'
+const TEAL_LIGHT = 'rgba(0,130,127,0.10)'
+const PURPLE = '#B627A1'
+const PURPLE_LIGHT = 'rgba(182,39,161,0.10)'
+// Meltwater aqua — brighter than brand teal, used for the badge gradient
+const MW_AQUA = '#00B4AF'
+
+const ALERTS_DATA = [
+  { id: 1, type: 'Spike Detection',  title: 'Unusual spike detected',             desc: '847 mentions in the last hour vs. 120 average',                     source: 'Brand Mentions Search',    time: '2m ago',  Icon: BoltIcon,                unread: true  },
+  { id: 2, type: 'Sentiment Shift',  title: 'Sentiment shifted to positive',      desc: 'Overall sentiment changed from neutral to positive (78%)',           source: 'Product Launch Campaign',  time: '15m ago', Icon: TrendingUpIcon,          unread: true  },
+  { id: 3, type: 'Top Reach',        title: 'Wall Street Journal mention',        desc: 'Major coverage in WSJ with estimated reach of 2.4M',                source: 'Industry News Search',     time: '32m ago', Icon: CampaignOutlinedIcon,    unread: true  },
+  { id: 4, type: 'X Influencer',     title: '@TechAnalyst posted about your search', desc: 'High-influence account (1.2M followers) mentioned your brand',   source: 'Competitor Monitoring',    time: '1h ago',  Icon: XIcon,                   unread: false },
+  { id: 5, type: 'Company Events',   title: 'Acquisition announced',              desc: 'Acme Corp announced acquisition of TechStartup Inc.',               source: 'Competitor Watch',         time: '2h ago',  Icon: ApartmentIcon,           unread: false },
+  { id: 6, type: 'Breakout Post',    title: 'Breakout post detected',             desc: 'Facebook post reached 45K engagements vs. 2K weekly average',      source: 'Social Monitoring',        time: '3h ago',  Icon: LocalFireDepartmentIcon, unread: false },
+]
+
+const NOTIFS_DATA = [
+  { id: 1, type: 'Export Complete',  title: 'Export complete',              desc: 'Your "Q4 Brand Report" PDF export is ready to download.',              action: 'Download',    time: '5m ago',  Icon: FileDownloadOutlinedIcon, unread: true  },
+  { id: 2, type: 'Shared With You',  title: 'Dashboard shared with you',   desc: 'Sarah Johnson shared "Competitor Analysis 2025" with you.',            action: 'View',        time: '1h ago',  Icon: ShareOutlinedIcon,       unread: true  },
+  { id: 3, type: 'New Feature',      title: 'New: AI-powered summaries',   desc: 'Generate instant summaries of your searches with our new AI feature.', action: 'Try it',      time: '3h ago',  Icon: AutoAwesomeIcon,         unread: true  },
+  { id: 4, type: 'Report Ready',     title: 'Weekly report generated',     desc: 'Your scheduled "Brand Health Weekly" report is ready.',                 action: 'View report', time: '6h ago',  Icon: DescriptionOutlinedIcon, unread: false },
+  { id: 5, type: 'Limit Warning',    title: 'Approaching search limit',    desc: "You've used 85% of your monthly search quota.",                         action: 'Upgrade',     time: '1d ago',  Icon: WarningAmberIcon,        unread: false },
+  { id: 6, type: 'Team Invite',      title: 'Team invitation',             desc: 'Michael Chen invited you to join the "PR Team" workspace.',             action: null,          time: '1d ago',  Icon: PersonAddOutlinedIcon,   unread: false },
+]
+
+// ── Notification Dropdown ───────────────────────────────────────────────────────
+function NotificationDropdown({ anchorEl, onClose, onViewAll }) {
+  const [tab, setTab] = useState('alerts')
+  const [alerts, setAlerts] = useState(ALERTS_DATA)
+  const [notifs, setNotifs] = useState(NOTIFS_DATA)
+
+  const unreadAlerts = alerts.filter(a => a.unread).length
+  const unreadNotifs = notifs.filter(n => n.unread).length
+
+  const markAllRead = () => {
+    if (tab === 'alerts') setAlerts(a => a.map(x => ({ ...x, unread: false })))
+    else setNotifs(n => n.map(x => ({ ...x, unread: false })))
+  }
+
+  const items = tab === 'alerts' ? alerts : notifs
+  const accent = tab === 'alerts' ? TEAL : PURPLE
+  const accentLight = tab === 'alerts' ? TEAL_LIGHT : PURPLE_LIGHT
+  const accentBg = tab === 'alerts' ? 'rgba(0,130,127,0.04)' : 'rgba(182,39,161,0.04)'
+
+  return (
+    <Popover
+      open={Boolean(anchorEl)}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      PaperProps={{ sx: { width: 400, borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.14)', mt: 0.5, display: 'flex', flexDirection: 'column', overflow: 'hidden' } }}
+    >
+      {/* Tabs */}
+      <Box sx={{ display: 'flex', borderBottom: '1px solid', borderColor: 'divider' }}>
+        {[{ key: 'alerts', label: 'Alerts', count: unreadAlerts }, { key: 'notifs', label: 'Notifications', count: unreadNotifs }].map(t => {
+          const tabAccent = t.key === 'alerts' ? TEAL : PURPLE
+          const isActive = tab === t.key
+          return (
+            <Box
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              sx={{
+                flex: 1, py: 1.25, px: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75,
+                cursor: 'pointer', borderBottom: `2px solid ${isActive ? tabAccent : 'transparent'}`,
+                color: isActive ? tabAccent : 'text.secondary',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.03)' },
+              }}
+            >
+              <Typography sx={{ fontSize: '13px', fontWeight: isActive ? 700 : 500 }}>{t.label}</Typography>
+              {t.count > 0 && (
+                <Box sx={{ bgcolor: isActive ? tabAccent : 'rgba(0,0,0,0.12)', borderRadius: '10px', px: 0.75, minWidth: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Typography sx={{ fontSize: '10px', fontWeight: 700, color: isActive ? '#fff' : 'text.secondary' }}>{t.count}</Typography>
+                </Box>
+              )}
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Feed */}
+      <Box sx={{ maxHeight: 420, overflowY: 'auto' }}>
+        {items.map((item, i) => {
+          const { Icon } = item
+          return (
+            <Box
+              key={item.id}
+              sx={{
+                px: 2, py: 1.5, display: 'flex', gap: 1.5, alignItems: 'flex-start',
+                bgcolor: item.unread ? accentBg : 'transparent',
+                borderBottom: i < items.length - 1 ? '1px solid' : 'none',
+                borderColor: 'divider',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.03)' },
+              }}
+            >
+              <Box sx={{ width: 34, height: 34, borderRadius: '50%', bgcolor: item.unread ? accentLight : 'rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25 }}>
+                <Icon sx={{ fontSize: 16, color: item.unread ? accent : 'text.secondary' }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.25 }}>
+                  <Typography sx={{ fontSize: '11px', fontWeight: 700, color: item.unread ? accent : 'text.disabled' }}>{item.type}</Typography>
+                  <Typography sx={{ fontSize: '10px', color: 'text.disabled', flexShrink: 0, ml: 1 }}>{item.time}</Typography>
+                </Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, lineHeight: 1.3, mb: 0.25 }}>{item.title}</Typography>
+                <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4 }}>{item.desc}</Typography>
+                {item.source && <Typography sx={{ fontSize: '10px', color: 'text.disabled', mt: 0.5 }}>{item.source}</Typography>}
+                {item.action && (
+                  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: accent, mt: 0.5, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                    {item.action}
+                  </Typography>
+                )}
+              </Box>
+              {item.unread && <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: accent, flexShrink: 0, mt: 1 }} />}
+            </Box>
+          )
+        })}
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderTop: '1px solid', borderColor: 'divider', px: 2, py: 1.75, gap: 0 }}>
+        {[
+          { label: 'View all', onClick: () => { onClose(); onViewAll() } },
+          { label: 'Mark all as read', onClick: markAllRead },
+          { label: tab === 'alerts' ? 'Manage alerts' : 'Manage notifications', onClick: () => { onClose(); onViewAll('manage') } },
+        ].map((link, i, arr) => (
+          <Box key={link.label} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              onClick={link.onClick}
+              sx={{ fontSize: '13px', color: 'text.secondary', cursor: 'pointer', px: 2, '&:hover': { color: 'text.primary', textDecoration: 'underline' } }}
+            >
+              {link.label}
+            </Typography>
+            {i < arr.length - 1 && (
+              <Box sx={{ width: '1px', height: 14, bgcolor: 'divider' }} />
+            )}
+          </Box>
+        ))}
+      </Box>
+    </Popover>
+  )
+}
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined'
@@ -48,10 +204,18 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, onChatToggle = () => {} }) {
   const theme = useTheme()
   const location = useLocation()
+  const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
   const [appsAnchorEl, setAppsAnchorEl] = useState(null)
+  const [notifAnchorEl, setNotifAnchorEl] = useState(null)
 
+  const unreadAlertCount = ALERTS_DATA.filter(a => a.unread).length
+  const unreadNotifCount = NOTIFS_DATA.filter(n => n.unread).length
+  const totalUnread = unreadAlertCount + unreadNotifCount
+  // Smooth gradient — midpoint shifts based on alerts-to-notifications ratio
+  const tealPct = totalUnread > 0 ? Math.round((unreadAlertCount / totalUnread) * 100) : 50
+  const badgeGradient = `linear-gradient(135deg, ${MW_AQUA} 0%, ${tealPct}%, ${PURPLE} 100%)`
   const appsMenuOpen = Boolean(appsAnchorEl)
 
   // App launcher items - organized by category
@@ -350,31 +514,53 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
             </IconButton>
 
             {/* Bell Icon */}
-            <IconButton
-              sx={{
-                color: 'text.secondary',
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: '50%',
-                width: 36,
-                height: 36,
-              }}
-            >
-              <Badge
-                badgeContent={3}
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+              <IconButton
+                onClick={e => setNotifAnchorEl(e.currentTarget)}
                 sx={{
-                  '& .MuiBadge-badge': {
-                    backgroundColor: 'secondary.main',
-                    color: 'white',
-                    fontSize: 10,
-                    minWidth: 18,
-                    height: 18,
-                  },
+                  color: Boolean(notifAnchorEl) ? TEAL : 'text.secondary',
+                  border: '1px solid',
+                  borderColor: Boolean(notifAnchorEl) ? TEAL : 'divider',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
                 }}
               >
                 <NotificationsOutlinedIcon fontSize="small" />
-              </Badge>
-            </IconButton>
+              </IconButton>
+              {totalUnread > 0 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -7,
+                    right: -7,
+                    minWidth: 20,
+                    height: 20,
+                    borderRadius: '10px',
+                    background: badgeGradient,
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    px: '4px',
+                    pt: '1px',
+                    boxShadow: '0 0 0 2.5px #fff',
+                    pointerEvents: 'none',
+                    zIndex: 1,
+                  }}
+                >
+                  {totalUnread}
+                </Box>
+              )}
+            </Box>
+            <NotificationDropdown
+              anchorEl={notifAnchorEl}
+              onClose={() => setNotifAnchorEl(null)}
+              onViewAll={(tab) => { navigate('/mw-alerts') }}
+            />
 
             {/* Help Button */}
             {!isXs && (
