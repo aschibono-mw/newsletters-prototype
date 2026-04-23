@@ -254,7 +254,7 @@ import CheckboxGuidedPage from '../pages/uxr/checkbox/CheckboxGuidedPage'
 
 // Core routes
 export const coreRoutes = [
-  { path: '/', element: () => <Navigate to="/mw-newsletters" replace /> },
+  { path: '/', element: () => <Navigate to="/mw-home" replace /> },
   { path: '/insights', element: InsightsPage, props: ['chatOpen'] },
   { path: '/discover', element: DiscoverPage, props: ['chatOpen'] },
   { path: '/workspace', element: WorkspacePage, props: ['chatOpen'] },
