@@ -442,7 +442,24 @@ function LatestEditionCard({ series, onEdit }) {
             <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>Latest · In progress</Typography>
           </Box>
         </Box>
-        <StatusBadge status={series.status} />
+        {/* Action buttons in header */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {isCurating && (
+            <Button size="small" variant="outlined" onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${series.id}`, '_blank') }}
+              sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'rgba(0,130,127,0.35)', color: TEAL, py: 0.5, bgcolor: 'rgba(255,255,255,0.6)', '&:hover': { bgcolor: 'rgba(255,255,255,0.9)', borderColor: TEAL } }}>
+              Preview draft
+            </Button>
+          )}
+          <Button
+            size="small"
+            variant="contained"
+            endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
+            onClick={() => onEdit(series.id)}
+            sx={{ textTransform: 'none', fontSize: '12px', py: 0.5, fontWeight: 600, color: '#fff', bgcolor: isReady ? AMBER : TEAL, '&:hover': { bgcolor: isReady ? '#9a4e08' : '#006e6b' } }}
+          >
+            {isReady ? 'Review & Edit' : 'Open in editor'}
+          </Button>
+        </Box>
       </Box>
 
       {/* Body */}
@@ -477,6 +494,7 @@ function LatestEditionCard({ series, onEdit }) {
               <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
                 <strong>{series.articlesCount} articles</strong> curated and ready for your review
               </Typography>
+              <Box sx={{ ml: 'auto' }}><StatusBadge status={series.status} /></Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 1.25, bgcolor: AMBER_LIGHT, borderRadius: '6px', border: '1px solid rgba(245,158,11,0.2)' }}>
               <WarningAmberIcon sx={{ fontSize: 14, color: AMBER }} />
@@ -488,10 +506,8 @@ function LatestEditionCard({ series, onEdit }) {
           </>
         )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: isCurating && !series.estReady ? 2 : 0 }}>
-          <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap', '&:hover .edit-sources-link': { opacity: 1 } }}
-          >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: isCurating && !series.estReady ? 2 : 0, '&:hover .edit-sources-link': { opacity: 1 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
             <SearchPills searches={series.searches} max={3} />
             <Typography
               className="edit-sources-link"
@@ -501,22 +517,7 @@ function LatestEditionCard({ series, onEdit }) {
               Edit sources
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, ml: 1 }}>
-            {isCurating && (
-              <Button size="small" variant="outlined" onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${series.id}`, '_blank') }} sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5 }}>
-                Preview draft
-              </Button>
-            )}
-            <Button
-              size="small"
-              variant="contained"
-              endIcon={<ArrowForwardIcon sx={{ fontSize: 14 }} />}
-              onClick={() => onEdit(series.id)}
-              sx={{ textTransform: 'none', fontSize: '12px', py: 0.5, fontWeight: 600, color: '#fff', bgcolor: isReady ? AMBER : TEAL, '&:hover': { bgcolor: isReady ? '#9a4e08' : '#006e6b' } }}
-            >
-              {isReady ? 'Review & Edit' : 'Open in editor'}
-            </Button>
-          </Box>
+          {isCurating && <StatusBadge status={series.status} />}
         </Box>
       </Box>
     </Box>
