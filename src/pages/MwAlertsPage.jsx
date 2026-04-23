@@ -403,12 +403,18 @@ function ManageAlertsTab() {
   const [alertActive, setAlertActive] = useState(() =>
     Object.fromEntries(MANAGE_ALERT_GROUPS.flatMap(g => g.alerts.map(a => [a.id, a.active])))
   )
+  const [groupExpanded, setGroupExpanded] = useState(() =>
+    Object.fromEntries(MANAGE_ALERT_GROUPS.map(g => [g.id, true]))
+  )
 
   const toggleGroup = (groupId) =>
     setGroupActive(prev => ({ ...prev, [groupId]: !prev[groupId] }))
 
   const toggleAlert = (alertId) =>
     setAlertActive(prev => ({ ...prev, [alertId]: !prev[alertId] }))
+
+  const toggleExpanded = (groupId) =>
+    setGroupExpanded(prev => ({ ...prev, [groupId]: !prev[groupId] }))
 
   const switchSx = {
     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#00B4AF', opacity: 1 },
@@ -429,26 +435,43 @@ function ManageAlertsTab() {
       {/* Groups */}
       {MANAGE_ALERT_GROUPS.map((group, gi) => {
         const isGroupOn = groupActive[group.id] ?? true
+        const isExpanded = groupExpanded[group.id] ?? true
         return (
         <Box key={group.id} sx={{ borderBottom: gi < MANAGE_ALERT_GROUPS.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
 
           {/* Group header — same grid as alert rows so switch lines up under Status */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 150px 90px 130px 40px', alignItems: 'center', px: 3, py: 1.75, bgcolor: 'rgba(0,0,0,0.02)', borderBottom: '1px solid', borderColor: 'divider' }}>
-            {/* Col 1: icon + name + chips */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.375 }}>
-                <Box sx={{ mr: 0.75, display: 'flex', alignItems: 'center' }}>
-                  <TrackerIcon size={18} color={isGroupOn ? TEAL : 'rgba(0,0,0,0.26)'} />
-                </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 150px 90px 130px 40px', alignItems: 'center', px: 3, py: 1.75, bgcolor: 'rgba(0,0,0,0.02)', borderBottom: isExpanded ? '1px solid' : 'none', borderColor: 'divider' }}>
+            {/* Col 1: chevron + icon + name + count + chips */}
+            <Box
+              onClick={() => toggleExpanded(group.id)}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap', cursor: 'pointer', userSelect: 'none' }}
+            >
+              <KeyboardArrowDownIcon sx={{
+                fontSize: 18, color: 'text.secondary', flexShrink: 0,
+                transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                transition: 'transform 0.2s ease',
+              }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.875 }}>
+                <TrackerIcon size={16} color={isGroupOn ? TEAL : 'rgba(0,0,0,0.26)'} />
                 <Typography sx={{ fontSize: '14px', fontWeight: 700, color: isGroupOn ? 'text.primary' : 'text.disabled' }}>
                   {group.name}
                 </Typography>
+                {/* Alert count badge */}
+                <Box sx={{
+                  px: 0.875, py: 0.125, borderRadius: '10px',
+                  bgcolor: 'rgba(0,0,0,0.07)',
+                  display: 'flex', alignItems: 'center',
+                }}>
+                  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: 'text.secondary', lineHeight: 1.6 }}>
+                    {group.alerts.length} alert{group.alerts.length !== 1 ? 's' : ''}
+                  </Typography>
+                </Box>
               </Box>
               <Box sx={{ display: 'flex', gap: 0.625, flexWrap: 'wrap', opacity: isGroupOn ? 1 : 0.4 }}>
                 {group.sources.map(src => {
                   const s = SOURCE_TYPE_STYLES[src.type]
                   return (
-                    <Box key={src.label} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: s.bgcolor, borderRadius: '20px', px: 1, py: 0.375 }}>
+                    <Box key={src.label} onClick={e => e.stopPropagation()} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, bgcolor: s.bgcolor, borderRadius: '20px', px: 1, py: 0.375 }}>
                       <s.Icon sx={{ fontSize: 12, color: s.color }} />
                       <Typography sx={{ fontSize: '12px', color: s.color, fontWeight: 500, lineHeight: 1 }}>{src.label}</Typography>
                     </Box>
@@ -486,13 +509,20 @@ function ManageAlertsTab() {
             </Box>
             {/* Col 5: tracker menu */}
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setTrackerMenuAnchor(e.currentTarget)}>
+              <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => { e.stopPropagation(); setTrackerMenuAnchor(e.currentTarget) }}>
                 <MoreVertIcon sx={{ fontSize: 16 }} />
               </IconButton>
             </Box>
           </Box>
 
-          {/* Alert rows */}
+          {/* Alert rows — collapsible */}
+          <Box sx={{
+            maxHeight: isExpanded ? '2000px' : 0,
+            overflow: 'hidden',
+            transition: isExpanded
+              ? 'max-height 0.3s ease'
+              : 'max-height 0.25s ease',
+          }}>
           {group.alerts.map((alert, ai) => {
             const isAlertOn = alertActive[alert.id] ?? alert.active
             return (
@@ -533,6 +563,7 @@ function ManageAlertsTab() {
               </IconButton>
             </Box>
           )})}
+          </Box>{/* end collapse wrapper */}
         </Box>
       )})}
 
