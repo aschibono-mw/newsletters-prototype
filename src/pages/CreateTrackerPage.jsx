@@ -23,6 +23,8 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const TEAL = '#00827F'
@@ -162,8 +164,10 @@ export default function CreateTrackerPage() {
   const [brandFilter, setBrandFilter]           = useState('')
   const [selectedSearchIds, setSelectedSearchIds] = useState([])
   const [selectedBrand, setSelectedBrand]       = useState(null)
+  const [outputType, setOutputType]             = useState(null)      // 'alerts' | 'digest' | 'both'
   const [selectedAlertTypeIds, setSelectedAlertTypeIds] = useState([])
   const [alertDelivery, setAlertDelivery]       = useState({})       // { [alertTypeId]: { email, inapp, slack } }
+  const [digestSchedule, setDigestSchedule]     = useState(null)     // 'daily' | 'weekly' | 'monthly'
   const [recipients, setRecipients]             = useState([
     { id: 1, initials: 'AT', name: 'Antonio T.', email: 'tony.schibono@meltwater.com' },
   ])
@@ -173,8 +177,18 @@ export default function CreateTrackerPage() {
     sourceType === 'search' ? selectedSearchIds.length > 0 :
     sourceType === 'brand'  ? selectedBrand !== null :
     false
+  const wantsAlerts  = outputType === 'alerts' || outputType === 'both'
+  const wantsDigest  = outputType === 'digest' || outputType === 'both'
   const alertTypeSelected = selectedAlertTypeIds.length > 0
-  const canCreate = trackerName.trim().length > 0 && sourceSelected && alertTypeSelected
+  const digestValid  = !wantsDigest || digestSchedule !== null
+  const alertsValid  = !wantsAlerts || alertTypeSelected
+  const canCreate = trackerName.trim().length > 0 && sourceSelected && outputType !== null && alertsValid && digestValid
+
+  const DIGEST_SCHEDULES = [
+    { value: 'daily',   label: 'Daily',   desc: 'Delivered every morning at 8am' },
+    { value: 'weekly',  label: 'Weekly',  desc: 'Delivered every Monday at 8am' },
+    { value: 'monthly', label: 'Monthly', desc: 'Delivered on the 1st of each month' },
+  ]
 
   // Handlers
   const handleSourceTypeChange = (type) => {
@@ -182,8 +196,10 @@ export default function CreateTrackerPage() {
     setSourceType(type)
     setSelectedSearchIds([])
     setSelectedBrand(null)
+    setOutputType(null)
     setSelectedAlertTypeIds([])
     setAlertDelivery({})
+    setDigestSchedule(null)
     setSearchFilter('')
     setBrandFilter('')
   }
@@ -491,8 +507,46 @@ export default function CreateTrackerPage() {
             </Box>
           </RevealSection>
 
-          {/* ─── 4. Alert types (progressive) ───────────────────────── */}
+          {/* ─── 4. Output type (progressive) ───────────────────────── */}
           <RevealSection visible={sourceSelected}>
+            <Box sx={{ mb: 3.5 }}>
+              <SectionHeader title="What do you want from this tracker?" description="You can change this later from tracker settings." />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {[
+                  { value: 'alerts', label: 'Alerts only',     desc: 'Get notified in real-time when specific events happen',          IconA: NotificationsNoneOutlinedIcon, IconB: null },
+                  { value: 'digest', label: 'Digest only',     desc: 'Receive a scheduled email summary of your sources',              IconA: ArticleOutlinedIcon,           IconB: null },
+                  { value: 'both',   label: 'Alerts & Digest', desc: 'Combine real-time alerts with a scheduled digest for full coverage', IconA: NotificationsNoneOutlinedIcon, IconB: ArticleOutlinedIcon },
+                ].map(opt => {
+                  const sel = outputType === opt.value
+                  return (
+                    <Box key={opt.value} onClick={() => setOutputType(opt.value)}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 2, border: '1.5px solid', borderRadius: '10px', p: 2, cursor: 'pointer', borderColor: sel ? TEAL : 'divider', bgcolor: sel ? 'rgba(0,130,127,0.04)' : 'background.paper', '&:hover': { borderColor: sel ? TEAL : 'rgba(0,0,0,0.25)' }, transition: 'all 0.15s' }}>
+                      <Box sx={{ width: 38, height: 38, borderRadius: '8px', bgcolor: sel ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {opt.IconB ? (
+                          <Box sx={{ display: 'flex', gap: 0.25 }}>
+                            <opt.IconA sx={{ fontSize: 15, color: sel ? TEAL : 'text.secondary' }} />
+                            <opt.IconB sx={{ fontSize: 15, color: sel ? TEAL : 'text.secondary' }} />
+                          </Box>
+                        ) : (
+                          <opt.IconA sx={{ fontSize: 18, color: sel ? TEAL : 'text.secondary' }} />
+                        )}
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ fontSize: '14px', fontWeight: 600, color: sel ? TEAL : 'text.primary', mb: 0.25 }}>{opt.label}</Typography>
+                        <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{opt.desc}</Typography>
+                      </Box>
+                      <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid', borderColor: sel ? TEAL : 'rgba(0,0,0,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {sel && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: TEAL }} />}
+                      </Box>
+                    </Box>
+                  )
+                })}
+              </Box>
+            </Box>
+          </RevealSection>
+
+          {/* ─── 5. Alert types (progressive) ───────────────────────── */}
+          <RevealSection visible={sourceSelected && wantsAlerts}>
             <Box sx={{ mb: 3.5 }}>
               <SectionHeader
                 title="Alert types"
@@ -617,8 +671,35 @@ export default function CreateTrackerPage() {
             </Box>
           </RevealSection>
 
-          {/* ─── 5. Recipients (progressive) ────────────────────────── */}
-          <RevealSection visible={alertTypeSelected}>
+          {/* ─── 6. Digest schedule (progressive) ───────────────────── */}
+          <RevealSection visible={sourceSelected && wantsDigest}>
+            <Box sx={{ mb: 3.5 }}>
+              <SectionHeader title="Digest schedule" description="How often should this digest be delivered?" />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {DIGEST_SCHEDULES.map(s => {
+                  const sel = digestSchedule === s.value
+                  return (
+                    <Box key={s.value} onClick={() => setDigestSchedule(s.value)}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 2, border: '1.5px solid', borderRadius: '10px', p: 2, cursor: 'pointer', borderColor: sel ? TEAL : 'divider', bgcolor: sel ? 'rgba(0,130,127,0.04)' : 'background.paper', '&:hover': { borderColor: sel ? TEAL : 'rgba(0,0,0,0.25)' }, transition: 'all 0.15s' }}>
+                      <Box sx={{ width: 38, height: 38, borderRadius: '8px', bgcolor: sel ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CalendarMonthOutlinedIcon sx={{ fontSize: 18, color: sel ? TEAL : 'text.secondary' }} />
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ fontSize: '14px', fontWeight: 600, color: sel ? TEAL : 'text.primary', mb: 0.25 }}>{s.label}</Typography>
+                        <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{s.desc}</Typography>
+                      </Box>
+                      <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid', borderColor: sel ? TEAL : 'rgba(0,0,0,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {sel && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: TEAL }} />}
+                      </Box>
+                    </Box>
+                  )
+                })}
+              </Box>
+            </Box>
+          </RevealSection>
+
+          {/* ─── 7. Recipients (progressive) ────────────────────────── */}
+          <RevealSection visible={(wantsAlerts && alertTypeSelected) || (wantsDigest && digestSchedule !== null)}>
             <Box sx={{ mb: 4 }}>
               <SectionHeader
                 title="Recipients"
