@@ -1264,7 +1264,7 @@ export default function MwAlertsPage() {
       {/* Page header */}
       <Box sx={{ px: 3, pt: 3, pb: 2.5, bgcolor: 'background.default', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Trackers</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Your trackers</Typography>
           <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
             Stay on top of your searches with real-time alerts and scheduled digests
           </Typography>

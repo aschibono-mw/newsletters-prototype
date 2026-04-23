@@ -71,7 +71,7 @@ export default function MwAlertsStandalonePage() {
       {/* Page header */}
       <Box sx={{ px: 3, pt: 3, pb: 2.5, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Alerts</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Active monitoring</Typography>
           <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
             Real-time notifications triggered by events across your searches and brands
           </Typography>

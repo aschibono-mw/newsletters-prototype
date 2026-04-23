@@ -117,7 +117,7 @@ export default function MwDigestsPage() {
       {/* Page header */}
       <Box sx={{ px: 3, pt: 3, pb: 2.5, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Digests</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '20px', mb: 0.5 }}>Scheduled summaries</Typography>
           <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
             Scheduled email summaries delivered on your schedule
           </Typography>
