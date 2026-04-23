@@ -101,6 +101,16 @@ const TRACKERS = [
     ],
   },
   {
+    id: 5,
+    name: 'Weekly Industry Roundup',
+    sources: [
+      { label: 'Industry News',   type: 'search' },
+      { label: 'Market Analysis', type: 'search' },
+    ],
+    digest: { cadence: 'Weekly', schedule: 'Every Friday at 7am', recipients: 8 },
+    alerts: [],
+  },
+  {
     id: 4,
     name: 'Executive Monitoring',
     sources: [
@@ -289,6 +299,29 @@ export default function MwAlertsV2Page() {
                   transition: isExpanded ? 'max-height 0.3s ease' : 'max-height 0.25s ease',
                 }}>
 
+                  {/* ── Digest-only trackers: show digest first ── */}
+                  {tracker.alerts.length === 0 && tracker.digest && (<>
+                  <DeliveryLabel
+                    icon={<ArticleOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />}
+                    label="Digest"
+                  />
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px', alignItems: 'center', px: 3, py: 1.125, opacity: isOn ? 1 : 0.45, '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'rgba(63,81,181,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <CalendarMonthOutlinedIcon sx={{ fontSize: 13, color: '#3F51B5' }} />
+                      </Box>
+                      <Box>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 500 }}>{tracker.digest.cadence} digest</Typography>
+                        <Typography sx={{ fontSize: '11px', color: 'text.secondary', mt: 0.125 }}>{tracker.digest.schedule}</Typography>
+                      </Box>
+                    </Box>
+                    <DeliveryChannels channels={['Email']} />
+                    <Switch checked={digestActive[tracker.id] ?? true} onChange={() => setDigestActive(p => ({ ...p, [tracker.id]: !p[tracker.id] }))} size="small" disabled={!isOn} sx={switchSx} />
+                    <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>{tracker.digest.recipients} recipient{tracker.digest.recipients !== 1 ? 's' : ''}</Typography>
+                    <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setTrackerMenu(e.currentTarget)}><MoreVertIcon sx={{ fontSize: 15 }} /></IconButton>
+                  </Box>
+                  </>)}
+
                   {/* ── REAL-TIME ALERTS section ── */}
                   <DeliveryLabel
                     icon={<NotificationsNoneOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />}
@@ -296,12 +329,23 @@ export default function MwAlertsV2Page() {
                     count={tracker.alerts.length}
                   />
 
-                  {/* Alert column headers */}
-                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px', px: 3, py: 0.75, borderBottom: '1px solid', borderColor: 'rgba(0,0,0,0.04)' }}>
-                    {['Alert type', 'Delivery', 'Status', 'Last triggered', ''].map((h, i) => (
-                      <Typography key={i} sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.04em' }}>{h}</Typography>
-                    ))}
-                  </Box>
+                  {/* Alert column headers — only show if there are alerts */}
+                  {tracker.alerts.length > 0 && (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px', px: 3, py: 0.75, borderBottom: '1px solid', borderColor: 'rgba(0,0,0,0.04)' }}>
+                      {['Alert type', 'Delivery', 'Status', 'Last triggered', ''].map((h, i) => (
+                        <Typography key={i} sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.04em' }}>{h}</Typography>
+                      ))}
+                    </Box>
+                  )}
+
+                  {tracker.alerts.length === 0 && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 3, py: 1.375, opacity: isOn ? 1 : 0.45 }}>
+                      <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>No real-time alerts configured</Typography>
+                      <Typography sx={{ fontSize: '13px', color: TEAL, fontWeight: 500, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                        + Add alert
+                      </Typography>
+                    </Box>
+                  )}
 
                   {tracker.alerts.map((alert, ai) => {
                     const isAlertOn = alertActive[alert.id] ?? alert.active
@@ -334,46 +378,38 @@ export default function MwAlertsV2Page() {
                     )
                   })}
 
-                  {/* ── DIGEST section ── */}
-                  <DeliveryLabel
-                    icon={<ArticleOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />}
-                    label="Digest"
-                  />
-
-                  {tracker.digest ? (
-                    <Box sx={{
-                      display: 'flex', alignItems: 'center', px: 3, py: 1.375, gap: 2,
-                      opacity: isOn ? 1 : 0.45,
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' },
-                    }}>
-                      <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'rgba(63,81,181,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <CalendarMonthOutlinedIcon sx={{ fontSize: 13, color: '#3F51B5' }} />
+                  {/* ── DIGEST section (only rendered here when tracker has alerts; digest-only shows it above) ── */}
+                  {tracker.alerts.length > 0 && (<>
+                    <DeliveryLabel
+                      icon={<ArticleOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />}
+                      label="Digest"
+                    />
+                    {tracker.digest ? (
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px', alignItems: 'center', px: 3, py: 1.125, opacity: isOn ? 1 : 0.45, '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 26, height: 26, borderRadius: '6px', bgcolor: 'rgba(63,81,181,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <CalendarMonthOutlinedIcon sx={{ fontSize: 13, color: '#3F51B5' }} />
+                          </Box>
+                          <Box>
+                            <Typography sx={{ fontSize: '13px', fontWeight: 500 }}>{tracker.digest.cadence} digest</Typography>
+                            <Typography sx={{ fontSize: '11px', color: 'text.secondary', mt: 0.125 }}>{tracker.digest.schedule}</Typography>
+                          </Box>
+                        </Box>
+                        <DeliveryChannels channels={['Email']} />
+                        <Switch checked={digestActive[tracker.id] ?? true} onChange={() => setDigestActive(p => ({ ...p, [tracker.id]: !p[tracker.id] }))} size="small" disabled={!isOn} sx={switchSx} />
+                        <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>{tracker.digest.recipients} recipient{tracker.digest.recipients !== 1 ? 's' : ''}</Typography>
+                        <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setTrackerMenu(e.currentTarget)}><MoreVertIcon sx={{ fontSize: 15 }} /></IconButton>
                       </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
-                          {tracker.digest.cadence} digest
-                        </Typography>
-                        <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.125 }}>
-                          {tracker.digest.schedule} · {tracker.digest.recipients} recipient{tracker.digest.recipients !== 1 ? 's' : ''}
-                        </Typography>
+                    ) : (
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px', alignItems: 'center', px: 3, py: 1.375, opacity: isOn ? 1 : 0.45 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>No digest configured</Typography>
+                          <Typography sx={{ fontSize: '13px', color: TEAL, fontWeight: 500, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>+ Set up</Typography>
+                        </Box>
+                        <Box /><Box /><Box /><Box />
                       </Box>
-                      <Switch
-                        checked={digestActive[tracker.id] ?? true}
-                        onChange={() => setDigestActive(p => ({ ...p, [tracker.id]: !p[tracker.id] }))}
-                        size="small" disabled={!isOn} sx={switchSx}
-                      />
-                      <IconButton size="small" sx={{ p: 0, width: 28, height: 28, borderRadius: '50%' }} onClick={e => setTrackerMenu(e.currentTarget)}>
-                        <EditOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                      </IconButton>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 3, py: 1.375, opacity: isOn ? 1 : 0.45 }}>
-                      <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>No digest configured</Typography>
-                      <Typography sx={{ fontSize: '13px', color: TEAL, fontWeight: 500, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-                        + Set up digest
-                      </Typography>
-                    </Box>
-                  )}
+                    )}
+                  </>)}
 
                 </Box>
               </Box>
