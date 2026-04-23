@@ -42,6 +42,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 import { NAV_ITEMS } from '../../config/navigationConfig';
 
@@ -85,6 +86,7 @@ const ICON_MAP = {
   PersonOutlined:           PersonOutlinedIcon,
   SettingsOutlined:         SettingsOutlinedIcon,
   FolderOutlined:           FolderOutlinedIcon,
+  ArticleOutlined:          ArticleOutlinedIcon,
 };
 
 // Custom Tracker icon — crosshair/target

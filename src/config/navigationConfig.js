@@ -27,7 +27,9 @@ export const NAV_ITEMS = [
       { path: '/newmw/outreach',       label: 'Insight reports' },
     ],
   },
-  { iconName: 'Tracker',                   path: '/mw-alerts',         label: 'Trackers',                     spacerAfter: true },
+  { iconName: 'Tracker',                   path: '/mw-alerts',         label: 'Trackers' },
+  { iconName: 'NotificationsNoneOutlined', path: '/alerts',            label: 'Alerts' },
+  { iconName: 'ArticleOutlined',           path: '/digests',           label: 'Digests',                      spacerAfter: true },
   {
     iconName: 'TuneOutlined',
     path: '/content-mgmt',

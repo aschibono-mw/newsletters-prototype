@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, InputBase, Card, CardContent,
   Stack, Chip, Divider, IconButton, Link, Button
@@ -12,6 +13,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 
 const recentItems = [
   { Icon: ShowChartOutlinedIcon, color: 'info.main', bg: 'info.light', title: 'Monitor', subtitle: 'Monitor • 2m ago' },
@@ -25,25 +27,32 @@ const productCards = [
     Icon: ExploreOutlinedIcon,
     title: 'Explore insights and trends',
     desc: 'Create and manage searches to monitor brand, competitor, and industry media coverage',
-    links: ['Go to Explore', 'Start training'],
+    links: [{ label: 'Go to Explore', path: null }],
   },
   {
     Icon: ShowChartOutlinedIcon,
     title: 'Monitor media coverage',
     desc: 'Personalize your monitoring experience to easily view, organize, and share relevant media coverage',
-    links: ['Go to Monitor', 'Start training'],
+    links: [{ label: 'Go to Monitor', path: null }],
   },
   {
     Icon: AssessmentOutlinedIcon,
     title: 'Report on media coverage',
     desc: 'Access and manage all of your reports',
-    links: ['Go to Report', 'Start training'],
+    links: [{ label: 'Go to Report', path: null }],
   },
   {
     Icon: TuneOutlinedIcon,
     title: 'Manage your content',
     desc: 'Manage all of your content configurations like searches, tags, labels, RSS feeds, and any manually added URLs',
-    links: ['Go to Content'],
+    links: [{ label: 'Go to Content', path: null }],
+  },
+  {
+    Icon: NotificationsNoneOutlinedIcon,
+    title: 'Stay on top with Trackers',
+    desc: 'Set up real-time alerts and scheduled digests across your searches and brands',
+    links: [{ label: 'Go to Trackers', path: '/mw-alerts' }],
+    highlight: true,
   },
 ];
 
@@ -54,6 +63,7 @@ const alertItems = [
 ];
 
 export default function MwHomePage() {
+  const navigate = useNavigate();
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'grey.50' }}>
 
@@ -160,26 +170,37 @@ export default function MwHomePage() {
                 gap: 2,
               }}
             >
-              {productCards.map(({ Icon, title, desc, links }, i) => (
-                <Card key={i} variant="outlined" sx={{ height: '100%' }}>
+              {productCards.map(({ Icon, title, desc, links, highlight }, i) => (
+                <Card key={i} variant="outlined" sx={{
+                  height: '100%',
+                  ...(highlight && { borderColor: '#00827F', bgcolor: 'rgba(0,130,127,0.02)' }),
+                }}>
                   <CardContent>
                     <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
                       <Box
                         sx={{
                           width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                          bgcolor: 'primary.light', opacity: 0.85,
+                          bgcolor: highlight ? 'rgba(0,130,127,0.12)' : 'primary.light',
+                          opacity: 0.85,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}
                       >
-                        <Icon sx={{ fontSize: 16, color: 'primary.main' }} />
+                        <Icon sx={{ fontSize: 16, color: highlight ? '#00827F' : 'primary.main' }} />
                       </Box>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>{title}</Typography>
                     </Stack>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{desc}</Typography>
                     <Divider sx={{ mb: 1.5 }} />
                     <Stack direction="row" spacing={2.5}>
-                      {links.map((label, j) => (
-                        <Link key={j} href="#" underline="hover" variant="body2" sx={{ color: 'primary.main', fontWeight: 500 }}>
+                      {links.map(({ label, path }, j) => (
+                        <Link
+                          key={j}
+                          href={path ? undefined : '#'}
+                          onClick={path ? () => navigate(path) : undefined}
+                          underline="hover"
+                          variant="body2"
+                          sx={{ color: highlight ? '#00827F' : 'primary.main', fontWeight: 500, cursor: 'pointer' }}
+                        >
                           {label}
                         </Link>
                       ))}
@@ -247,7 +268,7 @@ export default function MwHomePage() {
                 </Typography>
                 <Stack direction="row" spacing={0.5}>
                   <IconButton size="small"><IosShareOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
-                  <IconButton size="small"><SettingsOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
+                  <IconButton size="small" onClick={() => navigate('/mw-alerts')}><SettingsOutlinedIcon sx={{ fontSize: 16 }} /></IconButton>
                 </Stack>
               </Stack>
 
