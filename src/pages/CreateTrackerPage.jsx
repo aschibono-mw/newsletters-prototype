@@ -852,16 +852,32 @@ export default function CreateTrackerPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5,
             pt: 2.5, mt: 1, borderTop: '1px solid', borderColor: 'divider',
           }}>
-            {/* Completion hints when button is disabled */}
-            {!canCreate && (
-              <Box sx={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {!trackerName.trim() && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Tracker name</Typography>}
-                {!sourceSelected && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select a source</Typography>}
-                {sourceSelected && !outputType && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Choose output type</Typography>}
-                {wantsAlerts && !alertTypeSelected && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select alert types</Typography>}
-                {wantsDigest && !digestSchedule && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select a schedule</Typography>}
-              </Box>
-            )}
+            {/* Completion checklist — always visible */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {[
+                { label: 'Tracker name',  done: !!trackerName.trim() },
+                { label: 'Source',        done: sourceSelected },
+                { label: 'Output type',   done: outputType !== null },
+                ...(wantsAlerts ? [{ label: 'Alert types', done: alertTypeSelected }] : []),
+                ...(wantsDigest ? [{ label: 'Digest schedule', done: !!digestSchedule }] : []),
+              ].map(step => (
+                <Box key={step.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Box sx={{
+                    width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+                    bgcolor: step.done ? TEAL : 'rgba(0,0,0,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {step.done
+                      ? <CheckIcon sx={{ fontSize: 10, color: '#fff' }} />
+                      : <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'rgba(0,0,0,0.25)' }} />
+                    }
+                  </Box>
+                  <Typography sx={{ fontSize: '12px', color: step.done ? 'text.secondary' : 'text.primary', fontWeight: step.done ? 400 : 600 }}>
+                    {step.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
             <Button
               variant="text"
               onClick={() => navigate('/mw-alerts')}
