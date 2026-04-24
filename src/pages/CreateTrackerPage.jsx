@@ -23,8 +23,14 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
+import GroupsIcon from '@mui/icons-material/Groups'
+import ApiIcon from '@mui/icons-material/Api'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import LanguageIcon from '@mui/icons-material/Language'
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined'
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const TEAL = '#00827F'
@@ -55,32 +61,41 @@ const BRAND_LIST = [
 const SEARCH_ALERT_TYPE_GROUPS = [
   {
     section: 'SEARCH ALERTS',
+    singleSelect: false,
     types: [
-      { id: 'every_mention',   name: 'Every Mention',   desc: 'Sends an alert every time a new mention appears in a search.',           Icon: ChatBubbleOutlineIcon },
-      { id: 'follow_post',     name: 'Follow Post',     desc: "Notifies you when there's activity on a post you're following.",         Icon: ReplyIcon },
-      { id: 'sentiment_shift', name: 'Sentiment Shift', desc: 'Triggers when overall sentiment for a search meaningfully changes.',     Icon: TrendingUpIcon },
-      { id: 'spike_detection', name: 'Spike Detection', desc: 'Alerts when mention volume suddenly jumps above normal.',                Icon: BoltIcon },
-      { id: 'top_reach',       name: 'Top Reach',       desc: 'Flags when a high-reach source mentions your search.',                  Icon: CampaignOutlinedIcon },
-      { id: 'x_influencer',    name: 'X Influencer',    desc: 'Notifies when a high-influence X account posts about your search.',     Icon: XIcon },
+      { id: 'every_mention',   name: 'Every Mention',   desc: 'Each new mention in my search, up to 200 per hour.',                  Icon: ChatBubbleOutlineIcon },
+      { id: 'follow_post',     name: 'Follow Post',     desc: "Notifies when there's activity on a post you're following.",          Icon: ReplyIcon },
+      { id: 'sentiment_shift', name: 'Sentiment Shift', desc: 'Changes in sentiment for my search.',                                 Icon: TrendingUpIcon },
+      { id: 'spike_detection', name: 'Spike Detection', desc: 'Sudden increases in mentions related to my search.',                  Icon: BoltIcon },
+      { id: 'top_reach',       name: 'Top Reach',       desc: 'High-reach editorial sources mention my search keywords.',            Icon: CampaignOutlinedIcon },
+      { id: 'x_influencer',    name: 'X Influencers',   desc: 'Top influencers mention my search keywords.',                         Icon: XIcon },
     ],
   },
   {
     section: 'EVENT ALERTS',
+    singleSelect: true,
+    notice: 'Event alerts can only be created one at a time',
     types: [
-      { id: 'company_events',  name: 'Company Events',  desc: 'Alerts when a significant business event is detected for a company.',   Icon: ApartmentIcon },
-      { id: 'industry_events', name: 'Industry Events', desc: 'Alerts on major developments affecting an entire industry.',            Icon: EqualizerIcon },
+      { id: 'company_events',  name: 'Company Events',  desc: 'Alerts on significant business events for companies you monitor.',    Icon: ApartmentIcon },
+      { id: 'industry_events', name: 'Industry Events', desc: 'Major industry events (partnerships, product launches, layoffs, etc.)', Icon: EqualizerIcon },
     ],
   },
   {
     section: 'SOCIAL ALERTS',
+    singleSelect: true,
+    notice: 'Social alerts can only be created one at a time',
     types: [
-      { id: 'likely_boosted',  name: 'Likely Boosted',  desc: 'Identifies Facebook posts that are likely being paid-boosted.',         Icon: AttachMoneyIcon },
+      { id: 'breakout_post',   name: 'Breakout Post',   desc: 'Emerging or trending posts on my Facebook page.',                     Icon: LocalFireDepartmentIcon },
+      { id: 'likely_boosted',  name: 'Likely Boosted',  desc: 'Posts that are likely boosted on monitored Facebook pages.',          Icon: AttachMoneyIcon },
+      { id: 'page_engagement', name: 'Page Engagement', desc: 'Notable increases of engagement on my Facebook page.',                Icon: CampaignOutlinedIcon },
     ],
   },
   {
     section: 'RSS ALERTS',
+    singleSelect: true,
+    notice: 'RSS alerts can only be created one at a time',
     types: [
-      { id: 'rss_feed',        name: 'RSS Feed',        desc: 'Sends an alert when a new article appears in a connected RSS feed.',    Icon: RssFeedIcon },
+      { id: 'rss_feed',        name: 'RSS Feed',        desc: 'New documents in my RSS Feed.',                                       Icon: RssFeedIcon },
     ],
   },
 ]
@@ -88,6 +103,7 @@ const SEARCH_ALERT_TYPE_GROUPS = [
 const BRAND_ALERT_TYPE_GROUPS = [
   {
     section: 'BRAND ALERTS',
+    singleSelect: false,
     types: [
       { id: 'brand_company_events', name: 'Company Events', desc: 'Alerts when a significant business event is detected for this brand.', Icon: ApartmentIcon },
       { id: 'genai_lens',           name: 'GenAI Lens',     desc: 'AI-powered brand intelligence, narrative analysis, and sentiment trends.', Icon: AutoAwesomeIcon, isNew: true },
@@ -96,9 +112,17 @@ const BRAND_ALERT_TYPE_GROUPS = [
 ]
 
 const DELIVERY_CHANNELS = [
-  { key: 'email', label: 'Email',  Icon: MailOutlineIcon },
-  { key: 'inapp', label: 'In-app', Icon: NotificationsNoneOutlinedIcon },
-  { key: 'slack', label: 'Slack',  Icon: ForumOutlinedIcon },
+  { key: 'email',   label: 'Email',          Icon: MailOutlineIcon,                  defaultOn: true  },
+  { key: 'mwweb',   label: 'Meltwater web',  Icon: NotificationsNoneOutlinedIcon,    defaultOn: true  },
+  { key: 'slack',   label: 'Slack',          Icon: ForumOutlinedIcon,                defaultOn: false },
+  { key: 'teams',   label: 'Teams',          Icon: GroupsIcon,                       defaultOn: false },
+  { key: 'webhook', label: 'Webhook',        Icon: ApiIcon,                          defaultOn: false },
+]
+
+const LANGUAGES = ['English', 'French', 'German', 'Spanish', 'Portuguese', 'Italian', 'Dutch', 'Japanese']
+const TIMEZONES = [
+  'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+  'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Singapore', 'Australia/Sydney',
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -112,6 +136,14 @@ function CustomCheckbox({ checked }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}>
       {checked && <CheckIcon sx={{ fontSize: 11, color: '#fff' }} />}
+    </Box>
+  )
+}
+
+function CustomRadio({ checked }) {
+  return (
+    <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid', borderColor: checked ? TEAL : 'rgba(0,0,0,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      {checked && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: TEAL }} />}
     </Box>
   )
 }
@@ -168,6 +200,8 @@ export default function CreateTrackerPage() {
   const [selectedAlertTypeIds, setSelectedAlertTypeIds] = useState([])
   const [alertDelivery, setAlertDelivery]       = useState({})       // { [alertTypeId]: { email, inapp, slack } }
   const [digestSchedule, setDigestSchedule]     = useState(null)     // 'daily' | 'weekly' | 'monthly'
+  const [language, setLanguage]                 = useState('English')
+  const [timezone, setTimezone]                 = useState('UTC')
   const [recipients, setRecipients]             = useState([
     { id: 1, initials: 'AT', name: 'Antonio T.', email: 'tony.schibono@meltwater.com' },
   ])
@@ -208,11 +242,19 @@ export default function CreateTrackerPage() {
     setSelectedSearchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
 
   const toggleAlertType = (id) => {
+    // Find if the group for this type is single-select
+    const allGroups = [...SEARCH_ALERT_TYPE_GROUPS, ...BRAND_ALERT_TYPE_GROUPS]
+    const group = allGroups.find(g => g.types.some(t => t.id === id))
+    const isSingleSelect = group?.singleSelect ?? false
+    const groupTypeIds = group?.types.map(t => t.id) ?? []
+
     setSelectedAlertTypeIds(prev => {
       if (prev.includes(id)) return prev.filter(x => x !== id)
-      // Initialize delivery defaults for newly selected type
-      setAlertDelivery(d => ({ ...d, [id]: { email: true, inapp: true, slack: false } }))
-      return [...prev, id]
+      // For single-select, deselect others in the same group
+      const filtered = isSingleSelect ? prev.filter(x => !groupTypeIds.includes(x)) : prev
+      const defaults = Object.fromEntries(DELIVERY_CHANNELS.map(ch => [ch.key, ch.defaultOn]))
+      setAlertDelivery(d => ({ ...d, [id]: defaults }))
+      return [...filtered, id]
     })
   }
 
@@ -556,16 +598,19 @@ export default function CreateTrackerPage() {
                 {currentAlertTypeGroups.map((group, gi) => (
                   <Box key={group.section}>
                     {/* Section label */}
-                    <Box sx={{
-                      px: 2.5, py: 0.875,
-                      bgcolor: 'rgba(0,0,0,0.025)',
-                      borderBottom: '1px solid', borderColor: 'divider',
-                      borderTop: gi > 0 ? '1px solid' : 'none', borderTopColor: 'divider',
-                    }}>
+                    <Box sx={{ px: 2.5, py: 0.875, bgcolor: 'rgba(0,0,0,0.025)', borderBottom: '1px solid', borderColor: 'divider', borderTop: gi > 0 ? '1px solid' : 'none', borderTopColor: 'divider' }}>
                       <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em' }}>
                         {group.section}
                       </Typography>
                     </Box>
+
+                    {/* Single-select notice */}
+                    {group.notice && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.875, px: 2.5, py: 0.875, bgcolor: 'rgba(0,0,0,0.015)', borderBottom: '1px solid', borderColor: 'rgba(0,0,0,0.06)' }}>
+                        <InfoOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                        <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{group.notice}</Typography>
+                      </Box>
+                    )}
 
                     {group.types.map((type, ti) => {
                       const { Icon } = type
@@ -580,22 +625,19 @@ export default function CreateTrackerPage() {
                           <Box
                             onClick={() => toggleAlertType(type.id)}
                             sx={{
-                              display: 'flex', alignItems: 'flex-start', gap: 1.5, px: 2.5, py: 1.75,
+                              display: 'flex', alignItems: 'flex-start', gap: 1.5, px: 2.5, py: 1.625,
                               cursor: 'pointer',
                               bgcolor: sel ? 'rgba(0,130,127,0.03)' : '#fff',
                               '&:hover': { bgcolor: sel ? 'rgba(0,130,127,0.055)' : 'rgba(0,0,0,0.02)' },
+                              '&:hover .view-example': { opacity: 1 },
                               borderBottom: (!isLastInGroup || !isLastGroup) && !sel ? '1px solid' : 'none',
                               borderColor: 'rgba(0,0,0,0.06)',
                             }}
                           >
-                            <Box sx={{ mt: '2px', flexShrink: 0 }}>
-                              <CustomCheckbox checked={sel} />
+                            <Box sx={{ mt: '3px', flexShrink: 0 }}>
+                              {group.singleSelect ? <CustomRadio checked={sel} /> : <CustomCheckbox checked={sel} />}
                             </Box>
-                            <Box sx={{
-                              width: 32, height: 32, borderRadius: '6px', flexShrink: 0,
-                              bgcolor: sel ? 'rgba(0,130,127,0.1)' : 'rgba(0,0,0,0.05)',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
+                            <Box sx={{ width: 32, height: 32, borderRadius: '6px', flexShrink: 0, bgcolor: sel ? 'rgba(0,130,127,0.1)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Icon sx={{ fontSize: 16, color: sel ? TEAL : 'text.secondary' }} />
                             </Box>
                             <Box sx={{ flex: 1 }}>
@@ -604,19 +646,18 @@ export default function CreateTrackerPage() {
                                   {type.name}
                                 </Typography>
                                 {type.isNew && (
-                                  <Box sx={{
-                                    bgcolor: TEAL, color: '#fff',
-                                    fontSize: '10px', fontWeight: 700,
-                                    px: 0.75, py: 0.2, borderRadius: '4px', lineHeight: 1.6,
-                                  }}>
-                                    New
-                                  </Box>
+                                  <Box sx={{ bgcolor: TEAL, color: '#fff', fontSize: '10px', fontWeight: 700, px: 0.75, py: 0.2, borderRadius: '4px', lineHeight: 1.6 }}>New</Box>
                                 )}
                               </Box>
-                              <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25, lineHeight: 1.45 }}>
-                                {type.desc}
-                              </Typography>
+                              <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25, lineHeight: 1.45 }}>{type.desc}</Typography>
                             </Box>
+                            <Typography
+                              className="view-example"
+                              onClick={e => e.stopPropagation()}
+                              sx={{ fontSize: '12px', color: TEAL, fontWeight: 500, whiteSpace: 'nowrap', opacity: 0, transition: 'opacity 0.15s', cursor: 'pointer', flexShrink: 0, mt: 0.25, '&:hover': { textDecoration: 'underline' } }}
+                            >
+                              View example
+                            </Typography>
                           </Box>
 
                           {/* Delivery channels — inline reveal when selected */}
@@ -738,6 +779,37 @@ export default function CreateTrackerPage() {
                   </Box>
                 ))}
               </FormCard>
+            </Box>
+          </RevealSection>
+
+          {/* ─── 8. Language & timezone (progressive) ───────────────── */}
+          <RevealSection visible={(wantsAlerts && alertTypeSelected) || (wantsDigest && digestSchedule !== null)}>
+            <Box sx={{ mb: 4 }}>
+              <SectionHeader title="Language & time zone" description="Alerts will be sent in the selected language and time zone for all recipients" />
+              <Box sx={{ display: 'flex', gap: 1.5 }}>
+                {/* Language */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                    <LanguageIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Language</Typography>
+                  </Box>
+                  <Box component="select" value={language} onChange={e => setLanguage(e.target.value)}
+                    sx={{ width: '100%', px: 1.5, py: 1.125, borderRadius: '8px', border: '1px solid', borderColor: 'divider', fontSize: '13px', bgcolor: 'background.paper', color: 'text.primary', cursor: 'pointer', outline: 'none', '&:focus': { borderColor: TEAL } }}>
+                    {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
+                  </Box>
+                </Box>
+                {/* Timezone */}
+                <Box sx={{ flex: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                    <AccessTimeOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>Time zone</Typography>
+                  </Box>
+                  <Box component="select" value={timezone} onChange={e => setTimezone(e.target.value)}
+                    sx={{ width: '100%', px: 1.5, py: 1.125, borderRadius: '8px', border: '1px solid', borderColor: 'divider', fontSize: '13px', bgcolor: 'background.paper', color: 'text.primary', cursor: 'pointer', outline: 'none', '&:focus': { borderColor: TEAL } }}>
+                    {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+                  </Box>
+                </Box>
+              </Box>
             </Box>
           </RevealSection>
 
