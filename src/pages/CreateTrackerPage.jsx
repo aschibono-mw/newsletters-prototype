@@ -205,6 +205,29 @@ export default function CreateTrackerPage() {
   const [recipients, setRecipients]             = useState([
     { id: 1, initials: 'AT', name: 'Antonio T.', email: 'tony.schibono@meltwater.com' },
   ])
+  const [recipientQuery, setRecipientQuery]     = useState('')
+  const [recipientFocused, setRecipientFocused] = useState(false)
+
+  const ALL_USERS = [
+    { id: 1, initials: 'AT', name: 'Antonio T.',  email: 'tony.schibono@meltwater.com' },
+    { id: 2, initials: 'SJ', name: 'Sarah J.',    email: 'sarah.johnson@meltwater.com' },
+    { id: 3, initials: 'MG', name: 'Maria G.',    email: 'maria.garcia@meltwater.com' },
+    { id: 4, initials: 'JL', name: 'James L.',    email: 'james.lee@meltwater.com' },
+    { id: 5, initials: 'PD', name: 'Paul D.',     email: 'paul.davis@meltwater.com' },
+    { id: 6, initials: 'CM', name: 'Clara M.',    email: 'clara.mills@meltwater.com' },
+    { id: 7, initials: 'SK', name: 'Soo K.',      email: 'soo.kim@meltwater.com' },
+    { id: 8, initials: 'RB', name: 'Rachel B.',   email: 'rachel.brown@meltwater.com' },
+  ]
+  const recipientIds = recipients.map(r => r.id)
+  const recipientSuggestions = recipientQuery.trim().length > 0
+    ? ALL_USERS.filter(u =>
+        !recipientIds.includes(u.id) &&
+        (u.name.toLowerCase().includes(recipientQuery.toLowerCase()) ||
+         u.email.toLowerCase().includes(recipientQuery.toLowerCase()))
+      )
+    : []
+  const addRecipient    = (user) => { setRecipients(prev => [...prev, user]); setRecipientQuery('') }
+  const removeRecipient = (id)   => setRecipients(prev => prev.filter(r => r.id !== id))
 
   // Progressive visibility
   const sourceSelected =
@@ -746,39 +769,50 @@ export default function CreateTrackerPage() {
                 title="Recipients"
                 description="Who should receive these alerts?"
               />
-              <FormCard>
+              <Box sx={{ border: '1px solid', borderColor: recipientFocused ? TEAL : 'divider', borderRadius: '8px', overflow: 'visible', transition: 'border-color 0.15s', position: 'relative' }}>
                 {/* Search input */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
-                  <SearchIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
-                  <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>
-                    Search by name or email address
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, borderBottom: recipients.length > 0 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)', bgcolor: '#fff', borderRadius: recipients.length > 0 ? '8px 8px 0 0' : '8px' }}>
+                  <SearchIcon sx={{ fontSize: 15, color: recipientFocused ? TEAL : 'text.disabled', flexShrink: 0, transition: 'color 0.15s' }} />
+                  <Box component="input" placeholder="Search by name or email address" value={recipientQuery}
+                    onChange={e => setRecipientQuery(e.target.value)}
+                    onFocus={() => setRecipientFocused(true)}
+                    onBlur={() => setTimeout(() => setRecipientFocused(false), 150)}
+                    sx={{ border: 'none', outline: 'none', fontSize: '13px', flex: 1, bgcolor: 'transparent', color: 'text.primary', '&::placeholder': { color: 'rgba(0,0,0,0.35)' } }}
+                  />
                 </Box>
-                {/* Recipient rows */}
+                {/* Suggestions dropdown */}
+                {recipientSuggestions.length > 0 && (
+                  <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, border: '1px solid', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden', mt: '-1px' }}>
+                    {recipientSuggestions.map((u, i) => (
+                      <Box key={u.id} onMouseDown={() => addRecipient(u)}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.125, cursor: 'pointer', borderBottom: i < recipientSuggestions.length - 1 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,130,127,0.04)' } }}>
+                        <Avatar sx={{ width: 28, height: 28, bgcolor: 'rgba(0,130,127,0.12)', color: TEAL, fontSize: '10px', fontWeight: 700 }}>{u.initials}</Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography sx={{ fontSize: '13px', fontWeight: 500 }}>{u.name}</Typography>
+                          <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>{u.email}</Typography>
+                        </Box>
+                        <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 500 }}>Add</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+                {/* Added recipients */}
                 {recipients.map((r, i) => (
-                  <Box
-                    key={r.id}
-                    sx={{
-                      display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.25,
-                      borderBottom: i < recipients.length - 1 ? '1px solid' : 'none',
-                      borderColor: 'rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <Avatar sx={{ width: 30, height: 30, bgcolor: 'rgba(0,130,127,0.15)', color: TEAL, fontSize: '11px', fontWeight: 700 }}>
-                      {r.initials}
-                    </Avatar>
+                  <Box key={r.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.125, borderBottom: i < recipients.length - 1 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)', bgcolor: '#fff' }}>
+                    <Avatar sx={{ width: 30, height: 30, bgcolor: 'rgba(0,130,127,0.15)', color: TEAL, fontSize: '11px', fontWeight: 700 }}>{r.initials}</Avatar>
                     <Box sx={{ flex: 1 }}>
                       <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>{r.name}</Typography>
                       <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{r.email}</Typography>
                     </Box>
-                    {recipients.length > 1 && (
-                      <IconButton size="small" sx={{ p: 0.375 }} onClick={() => setRecipients(p => p.filter(x => x.id !== r.id))}>
-                        <CloseIcon sx={{ fontSize: 14 }} />
-                      </IconButton>
-                    )}
+                    <IconButton size="small" sx={{ p: 0.375, opacity: 0.4, '&:hover': { opacity: 1 } }} onClick={() => removeRecipient(r.id)}>
+                      <CloseIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
                   </Box>
                 ))}
-              </FormCard>
+              </Box>
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 1 }}>
+                {recipients.length}/10 recipients
+              </Typography>
             </Box>
           </RevealSection>
 
