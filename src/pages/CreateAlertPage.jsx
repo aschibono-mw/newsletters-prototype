@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box, Typography, Button, TextField, IconButton, Avatar, Chip,
 } from '@mui/material'
@@ -26,6 +26,11 @@ import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 
 const TEAL = '#00827F'
 const PURPLE = '#B627A1'
+
+const SOURCE_TYPE_STYLES = {
+  search: { bgcolor: 'rgba(0,130,127,0.08)',  color: TEAL,    Icon: SearchIcon },
+  brand:  { bgcolor: 'rgba(182,39,161,0.08)', color: PURPLE,  Icon: DiamondOutlinedIcon },
+}
 
 const SAVED_SEARCHES_LIST = [
   { id: 1,  name: 'Brand Coverage',     type: 'Standard'  },
@@ -131,16 +136,26 @@ function SectionHeader({ title, description }) {
 }
 
 export default function CreateAlertPage() {
-  const navigate = useNavigate()
+  const navigate   = useNavigate()
+  const location   = useLocation()
+  const preset     = location.state?.source ?? null  // { label, type } passed from Alerts page
 
-  const [sourceType, setSourceType]         = useState(null)
-  const [searchFilter, setSearchFilter]     = useState('')
-  const [selectedSearchIds, setSelectedSearchIds] = useState([])
-  const [brandFilter, setBrandFilter]       = useState('')
-  const [selectedBrand, setSelectedBrand]   = useState(null)
-  const [selectedTypeIds, setSelectedTypeIds] = useState([])
-  const [alertDelivery, setAlertDelivery]   = useState({})
-  const [recipients]         = useState([
+  // Pre-populate from preset source context
+  const presetSearchId = preset?.type === 'search'
+    ? (SAVED_SEARCHES_LIST.find(s => s.name === preset.label)?.id ?? null)
+    : null
+  const presetBrand = preset?.type === 'brand'
+    ? (BRAND_LIST.find(b => b.name === preset.label) ?? null)
+    : null
+
+  const [sourceType, setSourceType]               = useState(() => preset?.type ?? null)
+  const [searchFilter, setSearchFilter]           = useState('')
+  const [selectedSearchIds, setSelectedSearchIds] = useState(() => presetSearchId ? [presetSearchId] : [])
+  const [brandFilter, setBrandFilter]             = useState('')
+  const [selectedBrand, setSelectedBrand]         = useState(() => presetBrand)
+  const [selectedTypeIds, setSelectedTypeIds]     = useState([])
+  const [alertDelivery, setAlertDelivery]         = useState({})
+  const [recipients]                              = useState([
     { id: 1, initials: 'AT', name: 'Antonio T.', email: 'tony.schibono@meltwater.com' },
   ])
 
@@ -201,10 +216,37 @@ export default function CreateAlertPage() {
       {/* Form */}
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
         <Box sx={{ maxWidth: 640, mx: 'auto', px: 3, py: 4 }}>
-          <Typography sx={{ fontSize: '22px', fontWeight: 700, mb: 4 }}>Create Alert</Typography>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, mb: preset ? 2.5 : 4 }}>Create Alert</Typography>
 
-          {/* Source type */}
-          <Box sx={{ mb: 3.5 }}>
+          {/* Context banner — shown when arriving from a specific source */}
+          {preset && (() => {
+            const s = SOURCE_TYPE_STYLES[preset.type]
+            return (
+              <Box sx={{
+                display: 'flex', alignItems: 'center', gap: 1.25,
+                border: '1px solid', borderColor: s.color + '40',
+                bgcolor: s.bgcolor, borderRadius: '8px',
+                px: 2, py: 1.25, mb: 3.5,
+              }}>
+                <Box sx={{ width: 30, height: 30, borderRadius: '6px', bgcolor: s.color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <s.Icon sx={{ fontSize: 15, color: s.color }} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 0.2 }}>Adding alert to</Typography>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 700, color: s.color }}>{preset.label}</Typography>
+                </Box>
+                <Typography
+                  sx={{ fontSize: '12px', color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'text.primary' } }}
+                  onClick={() => navigate('/alerts/create', { replace: true, state: null })}
+                >
+                  Change
+                </Typography>
+              </Box>
+            )
+          })()}
+
+          {/* Source type — hidden when preset source is locked in */}
+          {!preset && <Box sx={{ mb: 3.5 }}>
             <SectionHeader title="Source type" description="What do you want to monitor?" />
             <Box sx={{ display: 'flex', gap: 1.5, mt: 1.5 }}>
               {[
@@ -227,10 +269,10 @@ export default function CreateAlertPage() {
                 )
               })}
             </Box>
-          </Box>
+          </Box>}
 
-          {/* Saved search list */}
-          <RevealSection visible={sourceType === 'search'}>
+          {/* Saved search list — hidden when source is locked in from context */}
+          <RevealSection visible={sourceType === 'search' && !preset}>
             <Box sx={{ mb: 3.5 }}>
               <SectionHeader title="Saved searches" description="Select one or more searches to monitor" />
               {selectedSearchIds.length > 0 && (
@@ -264,8 +306,8 @@ export default function CreateAlertPage() {
             </Box>
           </RevealSection>
 
-          {/* Brand selection */}
-          <RevealSection visible={sourceType === 'brand'}>
+          {/* Brand selection — hidden when source is locked in from context */}
+          <RevealSection visible={sourceType === 'brand' && !preset}>
             <Box sx={{ mb: 3.5 }}>
               <SectionHeader title="Brand" description="Select a brand to monitor. Brands are sourced from your GenAI Lens configuration." />
               {selectedBrand && (
