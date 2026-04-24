@@ -852,6 +852,16 @@ export default function CreateTrackerPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5,
             pt: 2.5, mt: 1, borderTop: '1px solid', borderColor: 'divider',
           }}>
+            {/* Completion hints when button is disabled */}
+            {!canCreate && (
+              <Box sx={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {!trackerName.trim() && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Tracker name</Typography>}
+                {!sourceSelected && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select a source</Typography>}
+                {sourceSelected && !outputType && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Choose output type</Typography>}
+                {wantsAlerts && !alertTypeSelected && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select alert types</Typography>}
+                {wantsDigest && !digestSchedule && <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>• Select a schedule</Typography>}
+              </Box>
+            )}
             <Button
               variant="text"
               onClick={() => navigate('/mw-alerts')}
