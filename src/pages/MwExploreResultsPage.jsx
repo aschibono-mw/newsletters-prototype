@@ -575,16 +575,33 @@ function CreateTrackerDialog({ open, onClose }) {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
           {digests.map((digest) => {
             const sched = DIGEST_SCHEDULES.find((s) => s.value === digest.schedule)
-            const count = digest.articleCount ?? 25
-            const tooFew  = count < 10
-            const tooMany = count > 50
-            const feedbackColor = tooFew ? '#E65100' : tooMany ? '#E65100' : TEAL
-            const feedbackBg    = tooFew ? 'rgba(230,81,0,0.07)' : tooMany ? 'rgba(230,81,0,0.07)' : 'rgba(0,130,127,0.07)'
+            // Contextual volume based on schedule
+            const WEEKLY_TOTAL = 3370
+            const available = digest.schedule === 'daily'   ? Math.round(WEEKLY_TOTAL / 7)
+                            : digest.schedule === 'weekly'  ? WEEKLY_TOTAL
+                            : digest.schedule === 'monthly' ? Math.round(WEEKLY_TOTAL * 4.3)
+                            : WEEKLY_TOTAL
+            const sliderMax  = Math.max(50, Math.min(200, available))
+            const aiSugg     = Math.min(75, Math.max(5, Math.round((available * 0.20) / 5) * 5))
+            const recMin     = Math.max(5, Math.round(available * 0.10 / 5) * 5)
+            const recMax     = Math.min(sliderMax, Math.round(available * 0.35 / 5) * 5)
+            const count      = digest.articleCount ?? aiSugg
+            const tooFew     = count < recMin
+            const tooMany    = count > recMax
+            const feedbackColor = tooFew || tooMany ? '#E65100' : TEAL
+            const feedbackBg    = tooFew || tooMany ? 'rgba(230,81,0,0.07)' : 'rgba(0,130,127,0.07)'
             const feedbackText  = tooFew
               ? `${count} articles — you may miss important coverage at this volume`
               : tooMany
               ? `${count} articles — large digest, may feel overwhelming for recipients`
               : `${count} articles per digest`
+            const sliderMarks = [
+              { value: Math.round(sliderMax * 0.05 / 5) * 5 || 5, label: `${Math.round(sliderMax * 0.05 / 5) * 5 || 5}` },
+              { value: Math.round(sliderMax * 0.25 / 5) * 5,       label: `${Math.round(sliderMax * 0.25 / 5) * 5}` },
+              { value: Math.round(sliderMax * 0.50 / 5) * 5,       label: `${Math.round(sliderMax * 0.50 / 5) * 5}` },
+              { value: Math.round(sliderMax * 0.75 / 5) * 5,       label: `${Math.round(sliderMax * 0.75 / 5) * 5}` },
+              { value: sliderMax,                                   label: `${sliderMax}` },
+            ]
 
             return (
               <Box key={digest.id} sx={{ border: '1px solid rgba(0,130,127,0.2)', borderRadius: '8px', px: 2, py: 1.5, bgcolor: 'rgba(0,130,127,0.02)' }}>
@@ -614,37 +631,33 @@ function CreateTrackerDialog({ open, onClose }) {
 
                 {/* Article volume slider */}
                 <Box sx={{ mt: 2, pl: 3, pr: 0.5 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
                     <AutoAwesomeIcon sx={{ fontSize: 12, color: PURPLE, flexShrink: 0 }} />
                     <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>
-                      Articles per digest — based on ~481 mentions/day from this search
+                      {available.toLocaleString()} articles available per {digest.schedule} from this search
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Slider
-                        value={count}
-                        min={5}
-                        max={100}
-                        step={5}
-                        onChange={(_, v) => setDigestArticleCount(digest.id, v)}
-                        sx={{
-                          color: tooFew || tooMany ? '#E65100' : TEAL,
-                          height: 4,
-                          '& .MuiSlider-thumb': { width: 14, height: 14 },
-                          '& .MuiSlider-rail': { opacity: 0.25 },
-                        }}
-                      />
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: -0.5 }}>
-                        <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>5</Typography>
-                        <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>100</Typography>
-                      </Box>
-                    </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Slider
+                      value={count}
+                      min={5}
+                      max={sliderMax}
+                      step={5}
+                      marks={sliderMarks}
+                      onChange={(_, v) => setDigestArticleCount(digest.id, v)}
+                      sx={{
+                        color: tooFew || tooMany ? '#E65100' : TEAL,
+                        height: 4,
+                        '& .MuiSlider-thumb': { width: 14, height: 14 },
+                        '& .MuiSlider-rail': { opacity: 0.25 },
+                        '& .MuiSlider-markLabel': { fontSize: '10px', color: 'text.disabled' },
+                      }}
+                    />
                   </Box>
 
                   {/* Feedback pill */}
-                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 0.75, px: 1.25, py: 0.4, borderRadius: '20px', bgcolor: feedbackBg }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, mt: 0.25, px: 1.25, py: 0.4, borderRadius: '20px', bgcolor: feedbackBg }}>
                     {(tooFew || tooMany) && (
                       <Box component="span" sx={{ fontSize: '13px', lineHeight: 1 }}>⚠</Box>
                     )}
@@ -652,6 +665,9 @@ function CreateTrackerDialog({ open, onClose }) {
                       {feedbackText}
                     </Typography>
                   </Box>
+                  <Typography sx={{ fontSize: '10px', color: 'text.disabled', mt: 0.5 }}>
+                    Recommended: {recMin}–{recMax} articles ({Math.round(recMin / available * 100)}–{Math.round(recMax / available * 100)}% of available)
+                  </Typography>
                 </Box>
 
               </Box>

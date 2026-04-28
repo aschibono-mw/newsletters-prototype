@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Button, TextField, IconButton, Avatar, Chip, Slider,
@@ -41,16 +41,16 @@ const PURPLE = '#B627A1'
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const SAVED_SEARCHES_LIST = [
-  { id: 1,  name: 'Brand Coverage',     type: 'Standard'  },
-  { id: 2,  name: 'Crisis Keywords',    type: 'Standard'  },
-  { id: 3,  name: 'Competitor A',       type: 'Optimized' },
-  { id: 4,  name: 'Product Launches',   type: 'Standard'  },
-  { id: 5,  name: 'CEO Name',           type: 'Optimized' },
-  { id: 6,  name: 'Industry News',      type: 'Standard'  },
-  { id: 7,  name: 'Executive Mentions', type: 'Standard'  },
-  { id: 8,  name: 'Social Trends',      type: 'Optimized' },
-  { id: 9,  name: 'Competitor B',       type: 'Standard'  },
-  { id: 10, name: 'Market Analysis',    type: 'Standard'  },
+  { id: 1,  name: 'Brand Coverage',     type: 'Standard',  weeklyVolume: 420 },
+  { id: 2,  name: 'Crisis Keywords',    type: 'Standard',  weeklyVolume: 85  },
+  { id: 3,  name: 'Competitor A',       type: 'Optimized', weeklyVolume: 310 },
+  { id: 4,  name: 'Product Launches',   type: 'Standard',  weeklyVolume: 140 },
+  { id: 5,  name: 'CEO Name',           type: 'Optimized', weeklyVolume: 55  },
+  { id: 6,  name: 'Industry News',      type: 'Standard',  weeklyVolume: 680 },
+  { id: 7,  name: 'Executive Mentions', type: 'Standard',  weeklyVolume: 95  },
+  { id: 8,  name: 'Social Trends',      type: 'Optimized', weeklyVolume: 520 },
+  { id: 9,  name: 'Competitor B',       type: 'Standard',  weeklyVolume: 230 },
+  { id: 10, name: 'Market Analysis',    type: 'Standard',  weeklyVolume: 175 },
 ]
 
 // Brands currently configured in GenAI Lens
@@ -202,7 +202,7 @@ export default function CreateTrackerPage() {
   const [selectedAlertTypeIds, setSelectedAlertTypeIds] = useState([])
   const [alertDelivery, setAlertDelivery]       = useState({})       // { [alertTypeId]: { email, inapp, slack } }
   const [digestSchedule, setDigestSchedule]     = useState(null)     // 'daily' | 'weekly' | 'monthly'
-  const [articleCount, setArticleCount]         = useState(25)       // AI-preset articles per digest
+  const [articleCount, setArticleCount]         = useState(null)     // null = use AI suggested
   const [brandCompQuery, setBrandCompQuery]     = useState('')
   const [selectedBrandComps, setSelectedBrandComps] = useState([])
   const [digestType, setDigestType]             = useState('standard')
@@ -240,6 +240,49 @@ export default function CreateTrackerPage() {
     : []
   const addRecipient    = (user) => { setRecipients(prev => [...prev, user]); setRecipientQuery('') }
   const removeRecipient = (id)   => setRecipients(prev => prev.filter(r => r.id !== id))
+
+  // ── Volume / slider computation ───────────────────────────────────────────
+  const totalWeeklyVolume = React.useMemo(() => {
+    const selected = SAVED_SEARCHES_LIST.filter(s => selectedSearchIds.includes(s.id))
+    return selected.length > 0
+      ? selected.reduce((sum, s) => sum + s.weeklyVolume, 0)
+      : 300 // fallback when brand source or nothing selected
+  }, [selectedSearchIds])
+
+  const articlesAvailable = React.useMemo(() => {
+    if (!digestSchedule) return totalWeeklyVolume
+    if (digestSchedule === 'daily')   return Math.round(totalWeeklyVolume / 7)
+    if (digestSchedule === 'weekly')  return totalWeeklyVolume
+    if (digestSchedule === 'monthly') return Math.round(totalWeeklyVolume * 4.3)
+    return totalWeeklyVolume
+  }, [digestSchedule, totalWeeklyVolume])
+
+  const aiSuggested = React.useMemo(() => {
+    // ~20% of available, capped between 5 and 75, rounded to nearest 5
+    const raw = Math.round((articlesAvailable * 0.20) / 5) * 5
+    return Math.min(75, Math.max(5, raw))
+  }, [articlesAvailable])
+
+  const sliderMax = React.useMemo(() => {
+    // Cap at 200 or total available, whichever is smaller, min 50
+    return Math.max(50, Math.min(200, articlesAvailable))
+  }, [articlesAvailable])
+
+  const sliderMarks = React.useMemo(() => {
+    const m = sliderMax
+    return [
+      { value: Math.round(m * 0.05 / 5) * 5 || 5, label: `${Math.round(m * 0.05 / 5) * 5 || 5}` },
+      { value: Math.round(m * 0.25 / 5) * 5,       label: `${Math.round(m * 0.25 / 5) * 5}` },
+      { value: Math.round(m * 0.50 / 5) * 5,       label: `${Math.round(m * 0.50 / 5) * 5}` },
+      { value: Math.round(m * 0.75 / 5) * 5,       label: `${Math.round(m * 0.75 / 5) * 5}` },
+      { value: m,                                   label: `${m}` },
+    ]
+  }, [sliderMax])
+
+  const effectiveArticleCount = articleCount !== null ? articleCount : aiSuggested
+  const recMin = Math.max(5, Math.round(articlesAvailable * 0.10 / 5) * 5)
+  const recMax = Math.min(sliderMax, Math.round(articlesAvailable * 0.35 / 5) * 5)
+  const outOfRange = effectiveArticleCount < recMin || effectiveArticleCount > recMax
 
   // Progressive visibility
   const sourceSelected =
@@ -864,27 +907,21 @@ export default function CreateTrackerPage() {
                     </Box>
                   </Box>
                   <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 2.5 }}>
-                    How many articles should be included in each digest? Based on the volume coming out of your search.
+                    {articlesAvailable.toLocaleString()} articles available per {digestSchedule || 'period'} from your selected {selectedSearchIds.length > 1 ? 'searches' : 'search'}. Choose how many to include in each digest.
                   </Typography>
 
                   {/* Slider */}
                   <Box sx={{ px: 0.5 }}>
                     <Slider
-                      value={articleCount}
+                      value={effectiveArticleCount}
                       min={5}
-                      max={100}
+                      max={sliderMax}
                       step={5}
-                      marks={[
-                        { value: 5,   label: '5'   },
-                        { value: 25,  label: '25'  },
-                        { value: 50,  label: '50'  },
-                        { value: 75,  label: '75'  },
-                        { value: 100, label: '100' },
-                      ]}
+                      marks={sliderMarks}
                       valueLabelDisplay="auto"
                       onChange={(_, v) => setArticleCount(v)}
                       sx={{
-                        color: articleCount < 10 || articleCount > 50 ? '#E65100' : TEAL,
+                        color: outOfRange ? '#E65100' : TEAL,
                         height: 5,
                         '& .MuiSlider-thumb': { width: 16, height: 16 },
                         '& .MuiSlider-rail': { opacity: 0.25 },
@@ -895,40 +932,44 @@ export default function CreateTrackerPage() {
                   </Box>
 
                   {/* Live feedback */}
-                  <Box
-                    sx={{
-                      mt: 1.5,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 0.75,
-                      px: 1.5,
-                      py: 0.6,
-                      borderRadius: '20px',
-                      bgcolor: articleCount < 10 || articleCount > 50
-                        ? 'rgba(230,81,0,0.08)'
-                        : 'rgba(0,130,127,0.08)',
-                    }}
-                  >
-                    {(articleCount < 10 || articleCount > 50) && (
-                      <Typography component="span" sx={{ fontSize: '13px', lineHeight: 1 }}>⚠</Typography>
-                    )}
-                    <Typography
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
+                    <Box
                       sx={{
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        color: articleCount < 10 || articleCount > 50 ? '#E65100' : TEAL,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        px: 1.5,
+                        py: 0.6,
+                        borderRadius: '20px',
+                        bgcolor: outOfRange ? 'rgba(230,81,0,0.08)' : 'rgba(0,130,127,0.08)',
                       }}
                     >
-                      {articleCount < 10
-                        ? `${articleCount} articles — you may miss important coverage`
-                        : articleCount > 50
-                        ? `${articleCount} articles — large digest, may feel overwhelming`
-                        : `${articleCount} articles per digest`}
-                    </Typography>
+                      {outOfRange && (
+                        <Typography component="span" sx={{ fontSize: '13px', lineHeight: 1 }}>⚠</Typography>
+                      )}
+                      <Typography
+                        sx={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: outOfRange ? '#E65100' : TEAL,
+                        }}
+                      >
+                        {effectiveArticleCount < recMin
+                          ? `${effectiveArticleCount} articles — you may miss important coverage`
+                          : effectiveArticleCount > recMax
+                          ? `${effectiveArticleCount} articles — large digest, may feel overwhelming`
+                          : `${effectiveArticleCount} articles per digest`}
+                      </Typography>
+                    </Box>
+                    {articleCount === null && (
+                      <Typography sx={{ fontSize: '11px', color: PURPLE, fontWeight: 500 }}>
+                        ✦ AI preset
+                      </Typography>
+                    )}
                   </Box>
 
                   <Typography sx={{ fontSize: '12px', color: 'text.disabled', mt: 1 }}>
-                    Recommended range: 10–50 articles
+                    Recommended range: {recMin}–{recMax} articles ({Math.round(recMin / articlesAvailable * 100)}–{Math.round(recMax / articlesAvailable * 100)}% of available)
                   </Typography>
                 </Box>
               </RevealSection>
