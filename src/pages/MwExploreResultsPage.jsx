@@ -18,6 +18,7 @@ import {
   TextField,
   Tooltip,
   Slider,
+  Switch,
 } from '@mui/material'
 import {
   AreaChart,
@@ -439,6 +440,8 @@ function CreateTrackerDialog({ open, onClose }) {
   const [digests, setDigests]               = useState(DEFAULT_DIGESTS)
   const [showAlertPicker, setShowAlertPicker] = useState(false)
   const [showDigestPicker, setShowDigestPicker] = useState(false)
+  const [alertsEnabled, setAlertsEnabled]   = useState(true)
+  const [digestEnabled, setDigestEnabled]   = useState(true)
 
   const removeAlert  = (id)  => setAlerts((prev) => prev.filter((a) => a.id !== id))
   const addAlert     = (id)  => {
@@ -488,9 +491,15 @@ function CreateTrackerDialog({ open, onClose }) {
         {/* AI Banner */}
         <Box sx={{ bgcolor: 'rgba(182,39,161,0.06)', border: '1px solid rgba(182,39,161,0.2)', borderRadius: '8px', px: 2, py: 1.25, mb: 2.5, display: 'flex', gap: 1 }}>
           <AutoAwesomeIcon sx={{ color: PURPLE, fontSize: 15, mt: 0.3, flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.6 }}>
-            Pre-configured based on your search. Remove, add, or adjust anything before saving.
-          </Typography>
+          <Box>
+            <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.6 }}>
+              Pre-configured based on your search. Remove, add, or adjust anything before saving.
+            </Typography>
+            <Typography sx={{ fontSize: '12px', color: 'text.disabled', lineHeight: 1.6, mt: 0.25 }}>
+              <Box component="span" sx={{ fontWeight: 600, color: 'text.secondary' }}>Why this setup:</Box>{' '}
+              Yelp Brand Search generates ~481 articles/day with mixed sentiment. Sentiment Shift and Top Reach alerts catch reputation signals early, while a Daily Digest keeps you across the broader coverage without inbox overload.
+            </Typography>
+          </Box>
         </Box>
 
         {/* Tracker Name */}
@@ -501,13 +510,22 @@ function CreateTrackerDialog({ open, onClose }) {
 
         {/* ── Alerts ── */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-          <NotificationsActiveOutlinedIcon sx={{ fontSize: 15, color: TEAL, mr: 0.75 }} />
-          <Typography sx={{ fontSize: '13px', fontWeight: 700, flex: 1 }}>Alerts</Typography>
+          <NotificationsActiveOutlinedIcon sx={{ fontSize: 15, color: alertsEnabled ? TEAL : 'text.disabled', mr: 0.75 }} />
+          <Typography sx={{ fontSize: '13px', fontWeight: 700, flex: 1, color: alertsEnabled ? 'text.primary' : 'text.disabled' }}>Alerts</Typography>
           <Chip icon={<AutoAwesomeIcon sx={{ fontSize: '11px !important', color: `${PURPLE} !important` }} />} label="Pre-configured" size="small"
-            sx={{ height: 20, fontSize: '11px', bgcolor: 'rgba(182,39,161,0.08)', color: PURPLE, border: 'none' }} />
+            sx={{ height: 20, fontSize: '11px', bgcolor: 'rgba(182,39,161,0.08)', color: PURPLE, border: 'none', mr: 1 }} />
+          <Switch
+            checked={alertsEnabled}
+            onChange={() => setAlertsEnabled(v => !v)}
+            size="small"
+            sx={{
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL, opacity: 1 },
+              '& .MuiSwitch-switchBase.Mui-checked': { color: '#fff' },
+            }}
+          />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1, opacity: alertsEnabled ? 1 : 0.45, pointerEvents: alertsEnabled ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
           {alerts.map((alert) => {
             const type = ALL_ALERT_TYPES.find((t) => t.id === alert.id)
             return (
@@ -566,13 +584,22 @@ function CreateTrackerDialog({ open, onClose }) {
 
         {/* ── Digest ── */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-          <MailOutlineIcon sx={{ fontSize: 15, color: TEAL, mr: 0.75 }} />
-          <Typography sx={{ fontSize: '13px', fontWeight: 700, flex: 1 }}>Digest</Typography>
+          <MailOutlineIcon sx={{ fontSize: 15, color: digestEnabled ? TEAL : 'text.disabled', mr: 0.75 }} />
+          <Typography sx={{ fontSize: '13px', fontWeight: 700, flex: 1, color: digestEnabled ? 'text.primary' : 'text.disabled' }}>Digest</Typography>
           <Chip icon={<AutoAwesomeIcon sx={{ fontSize: '11px !important', color: `${PURPLE} !important` }} />} label="Pre-configured" size="small"
-            sx={{ height: 20, fontSize: '11px', bgcolor: 'rgba(182,39,161,0.08)', color: PURPLE, border: 'none' }} />
+            sx={{ height: 20, fontSize: '11px', bgcolor: 'rgba(182,39,161,0.08)', color: PURPLE, border: 'none', mr: 1 }} />
+          <Switch
+            checked={digestEnabled}
+            onChange={() => setDigestEnabled(v => !v)}
+            size="small"
+            sx={{
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL, opacity: 1 },
+              '& .MuiSwitch-switchBase.Mui-checked': { color: '#fff' },
+            }}
+          />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1, opacity: digestEnabled ? 1 : 0.45, pointerEvents: digestEnabled ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
           {digests.map((digest) => {
             const sched = DIGEST_SCHEDULES.find((s) => s.value === digest.schedule)
             // Contextual volume based on schedule
@@ -616,9 +643,6 @@ function CreateTrackerDialog({ open, onClose }) {
                     <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 0.2 }}>{sched?.label} Digest</Typography>
                     <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{sched?.desc}</Typography>
                   </Box>
-                  <IconButton size="small" sx={{ ml: 0.5, opacity: 0.45, '&:hover': { opacity: 1 } }} onClick={() => removeDigest(digest.id)}>
-                    <CloseIcon sx={{ fontSize: 14 }} />
-                  </IconButton>
                 </Box>
 
                 {/* Delivery channels */}
@@ -700,13 +724,6 @@ function CreateTrackerDialog({ open, onClose }) {
             ))}
           </Box>
         )}
-
-        <Button size="small" startIcon={<MailOutlineIcon sx={{ fontSize: 15 }} />}
-          onClick={() => setShowDigestPicker((v) => !v)}
-          sx={{ textTransform: 'none', fontSize: '13px', color: TEAL, fontWeight: 500, pl: 0,
-            '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}>
-          {showDigestPicker ? 'Cancel' : '+ Add digest'}
-        </Button>
 
       </DialogContent>
 
