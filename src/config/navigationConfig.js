@@ -29,6 +29,7 @@ export const NAV_ITEMS = [
     ],
   },
   { iconName: 'Tracker',                   path: '/mw-alerts-v2',      label: 'Trackers' },
+  { iconName: 'NotificationsNoneOutlined', path: '/mw-alerts-a',       label: 'Alerts (A)' },
   { iconName: 'NotificationsNoneOutlined', path: '/alerts',            label: 'Alerts (B)' },
   { iconName: 'ArticleOutlined',           path: '/digests',           label: 'Digests (B)',                  spacerAfter: true },
   {

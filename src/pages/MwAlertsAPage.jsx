@@ -490,7 +490,7 @@ export default function MwAlertsAPage() {
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2,
         }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>Active monitoring</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Alerts</Typography>
             <Typography variant="body2" color="text.secondary">
               Real-time notifications triggered by events across your searches and brands
             </Typography>

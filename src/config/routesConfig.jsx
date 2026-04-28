@@ -39,6 +39,7 @@ import MwNewslettersCurrentCreatePage from '../pages/MwNewslettersCurrentCreateP
 import MwNewslettersCurrentEditorPage from '../pages/MwNewslettersCurrentEditorPage'
 import MwAlertsPage from '../pages/MwAlertsPage'
 import MwAlertsV2Page from '../pages/MwAlertsV2Page'
+import MwAlertsAPage from '../pages/MwAlertsAPage'
 import CreateTrackerPage from '../pages/CreateTrackerPage'
 import MwAlertsStandalonePage from '../pages/MwAlertsStandalonePage'
 import CreateAlertPage from '../pages/CreateAlertPage'
@@ -303,6 +304,7 @@ export const coreRoutes = [
   { path: '/mw-newsletters-current/editor/:id', element: MwNewslettersCurrentEditorPage },
   { path: '/mw-alerts', element: MwAlertsPage },
   { path: '/mw-alerts-v2', element: MwAlertsV2Page },
+  { path: '/mw-alerts-a', element: MwAlertsAPage },
   { path: '/mw-alerts/create', element: CreateTrackerPage },
   { path: '/alerts', element: MwAlertsStandalonePage },
   { path: '/alerts/create', element: CreateAlertPage },
