@@ -77,12 +77,14 @@ function AppContent() {
     if (location.pathname.startsWith('/account')) return 'Account'
     if (location.pathname.includes('api-tokens')) return 'Account'
     if (location.pathname.startsWith('/studio')) return 'Studio'
+    if (location.pathname.startsWith('/mw-newsletters-current')) return ''
     if (location.pathname.startsWith('/mw-newsletters')) return ''
     if (location.pathname.startsWith('/mw-alerts-v2')) return ''
     if (location.pathname.startsWith('/mw-alerts')) return ''
     if (location.pathname.startsWith('/alerts')) return ''
     if (location.pathname.startsWith('/digests')) return ''
     if (location.pathname.startsWith('/mw-monitor')) return ''
+    if (location.pathname.startsWith('/mw-explore')) return ''
 
     return 'App'
   }
@@ -111,9 +113,10 @@ function AppContent() {
     if (location.pathname.includes('seats')) return 'Seats & Permissions'
     if (location.pathname.startsWith('/guidelines')) return 'Guidelines'
     if (location.pathname === '/mw-home') return ''
+    if (location.pathname.startsWith('/mw-newsletters-current') && !location.pathname.includes('/create') && !location.pathname.includes('/editor')) return 'Newsletters'
     if (location.pathname.startsWith('/mw-newsletters')) return 'Newsletters'
     if (location.pathname.includes('/mw-newsletters/editor')) return ''
-    if (location.pathname.startsWith('/mw-alerts-v2')) return 'Trackers V2'
+    if (location.pathname.startsWith('/mw-alerts-v2')) return 'Trackers'
     if (location.pathname.startsWith('/mw-alerts')) return 'Trackers'
     if (location.pathname === '/alerts') return 'Alerts'
     if (location.pathname === '/alerts/create') return 'Create Alert'
@@ -122,6 +125,8 @@ function AppContent() {
     if (location.pathname === '/mw-monitor') return 'Monitor'
     if (location.pathname.startsWith('/mw-monitor/views')) return 'Monitor'
     if (location.pathname === '/mw-monitor/trends') return 'Trends Center'
+    if (location.pathname === '/mw-explore') return 'Explore'
+    if (location.pathname.startsWith('/mw-explore/results')) return 'Explore'
     return 'Page'
   }
 
@@ -130,7 +135,12 @@ function AppContent() {
   }
 
   // Full-screen routes bypass the main AppHeader + Sidebar
-  if (location.pathname.startsWith('/genai-lens-v2') || location.pathname.startsWith('/mw-newsletters/preview')) {
+  if (
+    location.pathname.startsWith('/genai-lens-v2') ||
+    location.pathname.startsWith('/mw-newsletters/preview') ||
+    location.pathname.startsWith('/mw-newsletters-current/create') ||
+    location.pathname.startsWith('/mw-newsletters-current/editor')
+  ) {
     return (
       <Box sx={{ height: '100vh', overflow: 'hidden' }}>
         <ScrollToTop />

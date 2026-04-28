@@ -212,6 +212,146 @@ import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomi
 import BrushOutlinedIcon from '@mui/icons-material/BrushOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
+// User menu icons
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
+import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined'
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined'
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined'
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
+import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined'
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
+import TrackChangesIcon from '@mui/icons-material/TrackChanges'
+import MailOutlineIcon2 from '@mui/icons-material/MailOutline'
+
+// ── User Menu Dropdown ──────────────────────────────────────────────────────────
+function UserMenuDropdown({ anchorEl, onClose }) {
+  const sections = [
+    {
+      label: 'Personal',
+      items: [
+        { icon: <AccountCircleOutlinedIcon fontSize="small" />, label: 'Profile' },
+        { icon: <BookmarkBorderOutlinedIcon fontSize="small" />, label: 'Saved Documents' },
+        { icon: <PeopleOutlinedIcon fontSize="small" />, label: 'Social Accounts' },
+      ],
+    },
+    {
+      label: 'Workspace',
+      items: [
+        { icon: <FolderOutlinedIcon fontSize="small" />, label: 'Asset Manager' },
+        { icon: <ContentCopyOutlinedIcon fontSize="small" />, label: 'Content Manager' },
+        { icon: <TrackChangesIcon fontSize="small" />, label: 'Tracker Manager' },
+        { icon: <MailOutlineIcon2 fontSize="small" />, label: 'Email Digests' },
+      ],
+    },
+    {
+      label: 'Administration',
+      items: [
+        { icon: <ManageAccountsOutlinedIcon fontSize="small" />, label: 'Account Settings' },
+        { icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, label: 'Admin' },
+      ],
+    },
+  ]
+
+  return (
+    <Popover
+      open={!!anchorEl}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      PaperProps={{
+        sx: {
+          width: 240,
+          borderRadius: '8px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+          mt: 0.75,
+          overflow: 'hidden',
+        },
+      }}
+    >
+      {/* User identity row */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.75 }}>
+        <Avatar sx={{ width: 36, height: 36, bgcolor: 'grey.200', color: 'text.secondary' }}>
+          <AccountCircleOutlinedIcon sx={{ fontSize: 22 }} />
+        </Avatar>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ fontSize: '14px', fontWeight: 600, lineHeight: 1.3 }}>
+            John Box
+          </Typography>
+          <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            John.Box@meltwater.com
+          </Typography>
+        </Box>
+      </Box>
+
+      <Divider />
+
+      {/* Sections */}
+      {sections.map((section, si) => (
+        <Box key={section.label}>
+          <Typography
+            sx={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'text.disabled',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              px: 2,
+              pt: 1.25,
+              pb: 0.5,
+            }}
+          >
+            {section.label}
+          </Typography>
+          {section.items.map((item) => (
+            <Box
+              key={item.label}
+              onClick={onClose}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                px: 2,
+                py: 0.875,
+                cursor: 'pointer',
+                color: 'text.primary',
+                '&:hover': { bgcolor: 'action.hover' },
+              }}
+            >
+              <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
+                {item.icon}
+              </Box>
+              <Typography sx={{ fontSize: '14px' }}>{item.label}</Typography>
+            </Box>
+          ))}
+          {si < sections.length - 1 && <Divider sx={{ mt: 0.75 }} />}
+        </Box>
+      ))}
+
+      <Divider sx={{ mt: 0.75 }} />
+
+      {/* Logout */}
+      <Box
+        onClick={onClose}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          px: 2,
+          py: 1,
+          mb: 0.5,
+          cursor: 'pointer',
+          color: 'error.main',
+          '&:hover': { bgcolor: 'error.50' },
+        }}
+      >
+        <LogoutOutlinedIcon fontSize="small" />
+        <Typography sx={{ fontSize: '14px', fontWeight: 500 }}>Logout</Typography>
+      </Box>
+    </Popover>
+  )
+}
 
 function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, onChatToggle = () => {} }) {
   const theme = useTheme()
@@ -221,6 +361,7 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
   const [searchExpanded, setSearchExpanded] = useState(false)
   const [appsAnchorEl, setAppsAnchorEl] = useState(null)
   const [notifAnchorEl, setNotifAnchorEl] = useState(null)
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null)
 
   const unreadAlertCount = ALERTS_DATA.filter(a => a.unread).length
   const unreadNotifCount = NOTIFS_DATA.filter(n => n.unread).length
@@ -604,6 +745,7 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
             {/* Company / User */}
             {!isXs && (
               <Box
+                onClick={(e) => setUserMenuAnchorEl(e.currentTarget)}
                 sx={{
                   display: { xs: 'none', sm: 'flex' },
                   alignItems: 'center',
@@ -611,10 +753,11 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
                   pl: 2,
                   pr: 0.5,
                   border: '1px solid',
-                  borderColor: 'divider',
+                  borderColor: userMenuAnchorEl ? 'primary.main' : 'divider',
                   borderRadius: '18px',
                   cursor: 'pointer',
                   height: 36,
+                  backgroundColor: userMenuAnchorEl ? 'action.selected' : 'transparent',
                   '&:hover': {
                     backgroundColor: 'action.hover',
                   },
@@ -635,7 +778,7 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
 
             {/* User Avatar Only (xs) */}
             {isXs && (
-              <IconButton sx={{ p: 0 }}>
+              <IconButton sx={{ p: 0 }} onClick={(e) => setUserMenuAnchorEl(e.currentTarget)}>
                 <Avatar
                   sx={{
                     width: 32,
@@ -645,6 +788,11 @@ function AppHeader({ pageName = 'Page', parentName = 'App', chatOpen = false, on
                 />
               </IconButton>
             )}
+
+            <UserMenuDropdown
+              anchorEl={userMenuAnchorEl}
+              onClose={() => setUserMenuAnchorEl(null)}
+            />
           </Box>
         </Toolbar>
       </AppBar>

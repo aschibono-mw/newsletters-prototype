@@ -34,6 +34,9 @@ import MwNewslettersCreatePage from '../pages/MwNewslettersCreatePage'
 import MwNewslettersEditorPage from '../pages/MwNewslettersEditorPage'
 import MwNewslettersPreviewPage from '../pages/MwNewslettersPreviewPage'
 import { MwNewslettersRecipientsPage, MwNewslettersRecipientDetailPage } from '../pages/MwNewslettersRecipientsPage'
+import MwNewslettersCurrentPage from '../pages/MwNewslettersCurrentPage'
+import MwNewslettersCurrentCreatePage from '../pages/MwNewslettersCurrentCreatePage'
+import MwNewslettersCurrentEditorPage from '../pages/MwNewslettersCurrentEditorPage'
 import MwAlertsPage from '../pages/MwAlertsPage'
 import MwAlertsV2Page from '../pages/MwAlertsV2Page'
 import CreateTrackerPage from '../pages/CreateTrackerPage'
@@ -45,6 +48,8 @@ import MwNotificationsPage from '../pages/MwNotificationsPage'
 import MwMonitorPage from '../pages/MwMonitorPage'
 import MwMonitorViewsPage from '../pages/MwMonitorViewsPage'
 import MwTrendsCenterPage from '../pages/MwTrendsCenterPage'
+import MwExploreLandingPage from '../pages/MwExploreLandingPage'
+import MwExploreResultsPage from '../pages/MwExploreResultsPage'
 
 // ============================================
 // SEATS PAGES (active prototyping)
@@ -293,6 +298,9 @@ export const coreRoutes = [
   { path: '/mw-newsletters/preview/:seriesId', element: MwNewslettersPreviewPage },
   { path: '/mw-newsletters/recipients', element: MwNewslettersRecipientsPage },
   { path: '/mw-newsletters/recipients/:listId', element: MwNewslettersRecipientDetailPage },
+  { path: '/mw-newsletters-current', element: MwNewslettersCurrentPage },
+  { path: '/mw-newsletters-current/create', element: MwNewslettersCurrentCreatePage },
+  { path: '/mw-newsletters-current/editor/:id', element: MwNewslettersCurrentEditorPage },
   { path: '/mw-alerts', element: MwAlertsPage },
   { path: '/mw-alerts-v2', element: MwAlertsV2Page },
   { path: '/mw-alerts/create', element: CreateTrackerPage },
@@ -304,6 +312,8 @@ export const coreRoutes = [
   { path: '/mw-monitor', element: MwMonitorPage },
   { path: '/mw-monitor/views/:viewId', element: MwMonitorViewsPage },
   { path: '/mw-monitor/trends', element: MwTrendsCenterPage },
+  { path: '/mw-explore', element: MwExploreLandingPage },
+  { path: '/mw-explore/results', element: MwExploreResultsPage },
 ]
 
 // Seats routes (V5-V9 archived - see src/pages/_archived/)

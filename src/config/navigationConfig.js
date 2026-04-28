@@ -3,7 +3,7 @@
 
 export const NAV_ITEMS = [
   { iconName: 'HomeOutlined',              path: '/mw-home',           label: 'Home' },
-  { iconName: 'ExploreOutlined',           path: '/explore',           label: 'Explore',      disabled: true },
+  { iconName: 'ExploreOutlined',           path: '/mw-explore',        label: 'Explore' },
   {
     iconName: 'ShowChartOutlined',
     path: '/mw-monitor',
@@ -17,6 +17,7 @@ export const NAV_ITEMS = [
   },
   { iconName: 'BarChartOutlined',          path: '/newmw/analyze',     label: 'Analyze',      disabled: true },
   { iconName: 'NewspaperOutlined',         path: '/mw-newsletters',    label: 'Newsletters' },
+  { iconName: 'NewspaperOutlined',         path: '/mw-newsletters-current', label: 'Newsletters Current' },
   {
     iconName: 'DescriptionOutlined',
     path: '/report-group',

@@ -356,7 +356,7 @@ export default function MwAlertsV2Page() {
                         sx={{
                           display: 'grid', gridTemplateColumns: '1fr 100px 90px 100px 40px',
                           alignItems: 'center', px: 3, py: 1.125,
-                          borderBottom: ai < tracker.alerts.length - 1 ? '1px solid' : 'none',
+                          borderBottom: '1px solid',
                           borderColor: 'rgba(0,0,0,0.05)',
                           opacity: isOn ? 1 : 0.45,
                           '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' },
@@ -377,6 +377,24 @@ export default function MwAlertsV2Page() {
                       </Box>
                     )
                   })}
+
+                  {/* Add alert CTA — shown when alerts exist */}
+                  {tracker.alerts.length > 0 && (
+                    <Box
+                      onClick={() => navigate('/alerts/create', { state: { source: tracker.sources[0] } })}
+                      sx={{
+                        display: 'flex', alignItems: 'center', gap: 0.75,
+                        px: 3, py: 1,
+                        cursor: 'pointer',
+                        opacity: isOn ? 1 : 0.45,
+                        color: TEAL,
+                        '&:hover': { bgcolor: 'rgba(0,130,127,0.04)' },
+                      }}
+                    >
+                      <AddCircleOutlineIcon sx={{ fontSize: 14, color: TEAL }} />
+                      <Typography sx={{ fontSize: '12px', fontWeight: 500, color: TEAL }}>Add alert</Typography>
+                    </Box>
+                  )}
 
                   {/* ── DIGEST section (only rendered here when tracker has alerts; digest-only shows it above) ── */}
                   {tracker.alerts.length > 0 && (<>

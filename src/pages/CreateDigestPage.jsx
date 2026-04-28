@@ -12,6 +12,10 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import RssFeedIcon from '@mui/icons-material/RssFeed'
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import TrendingUpIcon from '@mui/icons-material/TrendingUp'
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 
 const TEAL = '#00827F'
 const PURPLE = '#B627A1'
@@ -80,6 +84,15 @@ export default function CreateDigestPage() {
   const [brandFilter, setBrandFilter]         = useState('')
   const [selectedBrand, setSelectedBrand]     = useState(null)
   const [schedule, setSchedule]               = useState(null)
+  const [brandCompetitorQuery, setBrandCompetitorQuery] = useState('')
+  const [selectedBrandCompetitors, setSelectedBrandCompetitors] = useState([])
+  const [digestType, setDigestType]           = useState('standard')
+  const [contentOptions, setContentOptions]   = useState({
+    topStories: true,
+    volumeSummary: true,
+    alertHighlights: true,
+    aiOverview: false,
+  })
   const [recipients, setRecipients] = useState([
     { id: 1, initials: 'AT', name: 'Antonio T.', email: 'tony.schibono@meltwater.com' },
   ])
@@ -269,6 +282,80 @@ export default function CreateDigestPage() {
             </Box>
           </RevealSection>
 
+          {/* ── Brands & Competitors (new) ──────────────────────────── */}
+          <RevealSection visible={sourceSelected}>
+            <Box sx={{ mb: 3.5 }}>
+              <SectionHeader
+                title="Brands & Competitors"
+                description="Add companies to include brand intelligence in the digest."
+              />
+              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'visible', position: 'relative' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#fff', borderRadius: selectedBrandCompetitors.length > 0 ? '8px 8px 0 0' : '8px', borderBottom: selectedBrandCompetitors.length > 0 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)' }}>
+                  <SearchIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+                  <Box
+                    component="input"
+                    placeholder="Search for a company or brand…"
+                    value={brandCompetitorQuery}
+                    onChange={e => setBrandCompetitorQuery(e.target.value)}
+                    sx={{ border: 'none', outline: 'none', fontSize: '13px', flex: 1, bgcolor: 'transparent', color: 'text.primary', '&::placeholder': { color: 'rgba(0,0,0,0.35)' } }}
+                  />
+                  {brandCompetitorQuery && (
+                    <IconButton size="small" sx={{ p: 0.25 }} onClick={() => setBrandCompetitorQuery('')}>
+                      <CloseIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  )}
+                </Box>
+                {/* Inline suggestion — brand list filtered by query */}
+                {brandCompetitorQuery.trim().length > 0 && (
+                  <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, border: '1px solid', borderColor: 'divider', borderRadius: '0 0 8px 8px', bgcolor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden', mt: '-1px' }}>
+                    {BRAND_LIST.filter(b =>
+                      b.name.toLowerCase().includes(brandCompetitorQuery.toLowerCase()) &&
+                      !selectedBrandCompetitors.some(s => s.id === b.id)
+                    ).map((b, i, arr) => (
+                      <Box key={b.id} onMouseDown={() => { setSelectedBrandCompetitors(p => [...p, b]); setBrandCompetitorQuery('') }}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.125, cursor: 'pointer', borderBottom: i < arr.length - 1 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,130,127,0.04)' } }}>
+                        <Box sx={{ width: 28, height: 28, borderRadius: '6px', bgcolor: 'rgba(182,39,161,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <DiamondOutlinedIcon sx={{ fontSize: 14, color: PURPLE }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography sx={{ fontSize: '13px', fontWeight: 500 }}>{b.name}</Typography>
+                          <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>{b.sector}</Typography>
+                        </Box>
+                        <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 500 }}>Add</Typography>
+                      </Box>
+                    ))}
+                    {BRAND_LIST.filter(b =>
+                      b.name.toLowerCase().includes(brandCompetitorQuery.toLowerCase()) &&
+                      !selectedBrandCompetitors.some(s => s.id === b.id)
+                    ).length === 0 && (
+                      <Box sx={{ px: 2.5, py: 1.5 }}>
+                        <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>No brands found</Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                {/* Added brands */}
+                {selectedBrandCompetitors.map((b, i) => (
+                  <Box key={b.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2.5, py: 1.125, borderBottom: i < selectedBrandCompetitors.length - 1 ? '1px solid' : 'none', borderColor: 'rgba(0,0,0,0.06)', bgcolor: '#fff' }}>
+                    <Box sx={{ width: 28, height: 28, borderRadius: '6px', bgcolor: 'rgba(182,39,161,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <DiamondOutlinedIcon sx={{ fontSize: 14, color: PURPLE }} />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontSize: '13px', fontWeight: 600 }}>{b.name}</Typography>
+                      <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{b.sector}</Typography>
+                    </Box>
+                    <IconButton size="small" sx={{ p: 0.375, opacity: 0.4, '&:hover': { opacity: 1 } }} onClick={() => setSelectedBrandCompetitors(p => p.filter(x => x.id !== b.id))}>
+                      <CloseIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 1 }}>
+                Optional — adds brand intelligence sections to the digest
+              </Typography>
+            </Box>
+          </RevealSection>
+
           {/* Schedule */}
           <RevealSection visible={sourceSelected}>
             <Box sx={{ mb: 3.5 }}>
@@ -292,6 +379,125 @@ export default function CreateDigestPage() {
                     </Box>
                   )
                 })}
+              </Box>
+            </Box>
+          </RevealSection>
+
+          {/* ── Digest Type (new) ───────────────────────────────────── */}
+          <RevealSection visible={scheduleSelected}>
+            <Box sx={{ mb: 3.5 }}>
+              <SectionHeader title="Digest type" description="Each type sends a separate scheduled email." />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+
+                {/* Standard Digest */}
+                <Box
+                  onClick={() => setDigestType('standard')}
+                  sx={{
+                    border: '1.5px solid',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    borderColor: digestType === 'standard' ? TEAL : 'divider',
+                    bgcolor: digestType === 'standard' ? 'rgba(0,130,127,0.04)' : 'background.paper',
+                    overflow: 'hidden',
+                    transition: 'all 0.15s',
+                    '&:hover': { borderColor: digestType === 'standard' ? TEAL : 'rgba(0,0,0,0.25)' },
+                  }}
+                >
+                  {/* Row */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
+                    <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: digestType === 'standard' ? 'rgba(0,130,127,0.12)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <ArticleOutlinedIcon sx={{ fontSize: 18, color: digestType === 'standard' ? TEAL : 'text.secondary' }} />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography sx={{ fontSize: '14px', fontWeight: 700, color: digestType === 'standard' ? TEAL : 'text.primary' }}>Standard Digest</Typography>
+                      <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25 }}>Top stories, volume summary, and alert highlights</Typography>
+                    </Box>
+                    <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid', borderColor: digestType === 'standard' ? TEAL : 'rgba(0,0,0,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {digestType === 'standard' && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: TEAL }} />}
+                    </Box>
+                  </Box>
+
+                  {/* Content options — visible when selected */}
+                  {digestType === 'standard' && (
+                    <Box
+                      onClick={e => e.stopPropagation()}
+                      sx={{ px: 2.5, pb: 2, pt: 0.5, borderTop: '1px solid', borderColor: 'rgba(0,130,127,0.15)', bgcolor: 'rgba(0,130,127,0.02)', display: 'flex', flexDirection: 'column', gap: 1.25 }}
+                    >
+                      <Typography sx={{ fontSize: '12px', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em', mt: 1.25, mb: 0.25 }}>
+                        Content sections
+                      </Typography>
+                      {[
+                        { key: 'topStories',      label: 'Top Stories',      desc: 'Most-read and highest-reach articles from this period' },
+                        { key: 'volumeSummary',   label: 'Volume Summary',   desc: 'Mention count and trend chart' },
+                        { key: 'alertHighlights', label: 'Alert Highlights', desc: 'Mentions that triggered your tracker alerts' },
+                      ].map(opt => (
+                        <Box key={opt.key}
+                          onClick={() => setContentOptions(p => ({ ...p, [opt.key]: !p[opt.key] }))}
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', '&:hover': { opacity: 0.85 } }}
+                        >
+                          <CustomCheckbox checked={contentOptions[opt.key]} />
+                          <Box>
+                            <Typography sx={{ fontSize: '13px', fontWeight: contentOptions[opt.key] ? 600 : 400, color: contentOptions[opt.key] ? 'text.primary' : 'text.secondary' }}>{opt.label}</Typography>
+                            <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{opt.desc}</Typography>
+                          </Box>
+                        </Box>
+                      ))}
+
+                      {/* AI Overview — styled distinctly */}
+                      <Box sx={{ mt: 0.5, pt: 1.25, borderTop: '1px dashed rgba(182,39,161,0.2)' }}>
+                        <Box
+                          onClick={() => setContentOptions(p => ({ ...p, aiOverview: !p.aiOverview }))}
+                          sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, cursor: 'pointer', '&:hover': { opacity: 0.85 } }}
+                        >
+                          <CustomCheckbox checked={contentOptions.aiOverview} />
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography sx={{ fontSize: '13px', fontWeight: contentOptions.aiOverview ? 600 : 400, color: contentOptions.aiOverview ? PURPLE : 'text.secondary' }}>
+                                AI Overview
+                              </Typography>
+                              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: 'rgba(182,39,161,0.1)', px: 0.75, py: 0.2, borderRadius: '4px' }}>
+                                <AutoAwesomeIcon sx={{ fontSize: 11, color: PURPLE }} />
+                                <Typography sx={{ fontSize: '10px', fontWeight: 700, color: PURPLE, lineHeight: 1.6 }}>Beta</Typography>
+                              </Box>
+                            </Box>
+                            <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>AI-generated summary placed at the top of the digest</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Trends Center Digest — coming soon */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, border: '1.5px solid', borderRadius: '10px', p: 2, borderColor: 'divider', bgcolor: 'background.paper', opacity: 0.6 }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <TrendingUpIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ fontSize: '14px', fontWeight: 700, color: 'text.secondary' }}>Trends Center Digest</Typography>
+                      <Chip label="Coming soon" size="small" sx={{ height: 18, fontSize: '10px', bgcolor: 'rgba(0,0,0,0.07)', color: 'text.secondary' }} />
+                    </Box>
+                    <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25 }}>Trending hashtags and topics — separate email</Typography>
+                  </Box>
+                  <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.2)', flexShrink: 0 }} />
+                </Box>
+
+                {/* Risk Categories Digest — coming soon */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, border: '1.5px solid', borderRadius: '10px', p: 2, borderColor: 'divider', bgcolor: 'background.paper', opacity: 0.6 }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ShieldOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography sx={{ fontSize: '14px', fontWeight: 700, color: 'text.secondary' }}>Risk Categories Digest</Typography>
+                      <Chip label="Coming soon" size="small" sx={{ height: 18, fontSize: '10px', bgcolor: 'rgba(0,0,0,0.07)', color: 'text.secondary' }} />
+                    </Box>
+                    <Typography sx={{ fontSize: '12px', color: 'text.secondary', mt: 0.25 }}>AI reputation risk assessment — separate email</Typography>
+                  </Box>
+                  <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.2)', flexShrink: 0 }} />
+                </Box>
+
               </Box>
             </Box>
           </RevealSection>
