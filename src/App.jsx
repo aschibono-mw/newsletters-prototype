@@ -117,6 +117,7 @@ function AppContent() {
     if (location.pathname.startsWith('/mw-newsletters')) return 'Newsletters'
     if (location.pathname.includes('/mw-newsletters/editor')) return ''
     if (location.pathname.startsWith('/mw-alerts-v2')) return 'Trackers'
+    if (location.pathname === '/mw-alerts-a') return 'Alerts'
     if (location.pathname.startsWith('/mw-alerts')) return 'Trackers'
     if (location.pathname === '/alerts') return 'Alerts'
     if (location.pathname === '/alerts/create') return 'Create Alert'
