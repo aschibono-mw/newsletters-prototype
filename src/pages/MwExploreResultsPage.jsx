@@ -577,30 +577,33 @@ function CreateTrackerDialog({ open, onClose }) {
             const sched = DIGEST_SCHEDULES.find((s) => s.value === digest.schedule)
             // Contextual volume based on schedule
             const WEEKLY_TOTAL = 3370
-            const available = digest.schedule === 'daily'   ? Math.round(WEEKLY_TOTAL / 7)
-                            : digest.schedule === 'weekly'  ? WEEKLY_TOTAL
-                            : digest.schedule === 'monthly' ? Math.round(WEEKLY_TOTAL * 4.3)
-                            : WEEKLY_TOTAL
-            const sliderMax  = Math.max(50, Math.min(200, available))
-            const aiSugg     = Math.min(75, Math.max(5, Math.round((available * 0.20) / 5) * 5))
-            const recMin     = Math.max(5, Math.round(available * 0.10 / 5) * 5)
-            const recMax     = Math.min(sliderMax, Math.round(available * 0.35 / 5) * 5)
-            const count      = digest.articleCount ?? aiSugg
+            const available  = digest.schedule === 'daily'   ? Math.round(WEEKLY_TOTAL / 7)
+                             : digest.schedule === 'weekly'  ? WEEKLY_TOTAL
+                             : digest.schedule === 'monthly' ? Math.round(WEEKLY_TOTAL * 4.3)
+                             : WEEKLY_TOTAL
+            const sliderStep = available > 500 ? 10 : 5
+            const sliderMax  = available
+            const snap       = (v) => Math.max(5, Math.round(v / sliderStep) * sliderStep)
+            const aiSugg     = snap(available * 0.20)
+            const recMin     = snap(available * 0.10)
+            const recMax     = snap(available * 0.35)
+            const count      = Math.min(digest.articleCount ?? aiSugg, sliderMax)
             const tooFew     = count < recMin
             const tooMany    = count > recMax
+            const pct        = available > 0 ? Math.round((count / available) * 100) : 0
             const feedbackColor = tooFew || tooMany ? '#E65100' : TEAL
             const feedbackBg    = tooFew || tooMany ? 'rgba(230,81,0,0.07)' : 'rgba(0,130,127,0.07)'
             const feedbackText  = tooFew
-              ? `${count} articles — you may miss important coverage at this volume`
+              ? `${count} of ${available.toLocaleString()} articles (${pct}%) — may miss coverage`
               : tooMany
-              ? `${count} articles — large digest, may feel overwhelming for recipients`
-              : `${count} articles per digest`
+              ? `${count} of ${available.toLocaleString()} articles (${pct}%) — large digest`
+              : `${count} of ${available.toLocaleString()} articles (${pct}%)`
             const sliderMarks = [
-              { value: Math.round(sliderMax * 0.05 / 5) * 5 || 5, label: `${Math.round(sliderMax * 0.05 / 5) * 5 || 5}` },
-              { value: Math.round(sliderMax * 0.25 / 5) * 5,       label: `${Math.round(sliderMax * 0.25 / 5) * 5}` },
-              { value: Math.round(sliderMax * 0.50 / 5) * 5,       label: `${Math.round(sliderMax * 0.50 / 5) * 5}` },
-              { value: Math.round(sliderMax * 0.75 / 5) * 5,       label: `${Math.round(sliderMax * 0.75 / 5) * 5}` },
-              { value: sliderMax,                                   label: `${sliderMax}` },
+              { value: snap(sliderMax * 0.10), label: snap(sliderMax * 0.10).toString() },
+              { value: snap(sliderMax * 0.25), label: snap(sliderMax * 0.25).toString() },
+              { value: snap(sliderMax * 0.50), label: snap(sliderMax * 0.50).toString() },
+              { value: snap(sliderMax * 0.75), label: snap(sliderMax * 0.75).toString() },
+              { value: sliderMax,              label: sliderMax.toString() },
             ]
 
             return (
@@ -634,7 +637,11 @@ function CreateTrackerDialog({ open, onClose }) {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
                     <AutoAwesomeIcon sx={{ fontSize: 12, color: PURPLE, flexShrink: 0 }} />
                     <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>
-                      {available.toLocaleString()} articles available per {digest.schedule} from this search
+                      This search produces{' '}
+                      <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                        {available.toLocaleString()} articles
+                      </Box>{' '}
+                      per {digest.schedule} — choose how many to include
                     </Typography>
                   </Box>
 
@@ -666,7 +673,7 @@ function CreateTrackerDialog({ open, onClose }) {
                     </Typography>
                   </Box>
                   <Typography sx={{ fontSize: '10px', color: 'text.disabled', mt: 0.5 }}>
-                    Recommended: {recMin}–{recMax} articles ({Math.round(recMin / available * 100)}–{Math.round(recMax / available * 100)}% of available)
+                    Recommended: {recMin}–{recMax} articles · {Math.round(recMin / available * 100)}–{Math.round(recMax / available * 100)}% of your {digest.schedule} total
                   </Typography>
                 </Box>
 

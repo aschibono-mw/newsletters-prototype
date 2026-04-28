@@ -257,32 +257,33 @@ export default function CreateTrackerPage() {
     return totalWeeklyVolume
   }, [digestSchedule, totalWeeklyVolume])
 
-  const aiSuggested = React.useMemo(() => {
-    // ~20% of available, capped between 5 and 75, rounded to nearest 5
-    const raw = Math.round((articlesAvailable * 0.20) / 5) * 5
-    return Math.min(75, Math.max(5, raw))
-  }, [articlesAvailable])
+  // Slider goes to the full available total — no arbitrary cap
+  const sliderMax = articlesAvailable
 
-  const sliderMax = React.useMemo(() => {
-    // Cap at 200 or total available, whichever is smaller, min 50
-    return Math.max(50, Math.min(200, articlesAvailable))
-  }, [articlesAvailable])
+  const sliderStep = articlesAvailable > 500 ? 10 : 5
+
+  const aiSuggested = React.useMemo(() => {
+    // ~20% of available, rounded to nearest step, min 5
+    const raw = Math.round((articlesAvailable * 0.20) / sliderStep) * sliderStep
+    return Math.max(5, raw)
+  }, [articlesAvailable, sliderStep])
 
   const sliderMarks = React.useMemo(() => {
-    const m = sliderMax
+    const snap = (v) => Math.max(5, Math.round(v / sliderStep) * sliderStep)
     return [
-      { value: Math.round(m * 0.05 / 5) * 5 || 5, label: `${Math.round(m * 0.05 / 5) * 5 || 5}` },
-      { value: Math.round(m * 0.25 / 5) * 5,       label: `${Math.round(m * 0.25 / 5) * 5}` },
-      { value: Math.round(m * 0.50 / 5) * 5,       label: `${Math.round(m * 0.50 / 5) * 5}` },
-      { value: Math.round(m * 0.75 / 5) * 5,       label: `${Math.round(m * 0.75 / 5) * 5}` },
-      { value: m,                                   label: `${m}` },
+      { value: snap(sliderMax * 0.10), label: snap(sliderMax * 0.10).toString() },
+      { value: snap(sliderMax * 0.25), label: snap(sliderMax * 0.25).toString() },
+      { value: snap(sliderMax * 0.50), label: snap(sliderMax * 0.50).toString() },
+      { value: snap(sliderMax * 0.75), label: snap(sliderMax * 0.75).toString() },
+      { value: sliderMax,              label: sliderMax.toString() },
     ]
-  }, [sliderMax])
+  }, [sliderMax, sliderStep])
 
-  const effectiveArticleCount = articleCount !== null ? articleCount : aiSuggested
-  const recMin = Math.max(5, Math.round(articlesAvailable * 0.10 / 5) * 5)
-  const recMax = Math.min(sliderMax, Math.round(articlesAvailable * 0.35 / 5) * 5)
+  const effectiveArticleCount = Math.min(articleCount !== null ? articleCount : aiSuggested, sliderMax)
+  const recMin = Math.max(5, Math.round(sliderMax * 0.10 / sliderStep) * sliderStep)
+  const recMax = Math.round(sliderMax * 0.35 / sliderStep) * sliderStep
   const outOfRange = effectiveArticleCount < recMin || effectiveArticleCount > recMax
+  const pct = articlesAvailable > 0 ? Math.round((effectiveArticleCount / articlesAvailable) * 100) : 0
 
   // Progressive visibility
   const sourceSelected =
@@ -907,7 +908,11 @@ export default function CreateTrackerPage() {
                     </Box>
                   </Box>
                   <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 2.5 }}>
-                    {articlesAvailable.toLocaleString()} articles available per {digestSchedule || 'period'} from your selected {selectedSearchIds.length > 1 ? 'searches' : 'search'}. Choose how many to include in each digest.
+                    Your {selectedSearchIds.length > 1 ? 'searches produce' : 'search produces'}{' '}
+                    <Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      {articlesAvailable.toLocaleString()} articles
+                    </Box>{' '}
+                    per {digestSchedule || 'period'}. Drag to choose how many to include.
                   </Typography>
 
                   {/* Slider */}
@@ -955,10 +960,10 @@ export default function CreateTrackerPage() {
                         }}
                       >
                         {effectiveArticleCount < recMin
-                          ? `${effectiveArticleCount} articles — you may miss important coverage`
+                          ? `${effectiveArticleCount} of ${articlesAvailable} articles (${pct}%) — may miss coverage`
                           : effectiveArticleCount > recMax
-                          ? `${effectiveArticleCount} articles — large digest, may feel overwhelming`
-                          : `${effectiveArticleCount} articles per digest`}
+                          ? `${effectiveArticleCount} of ${articlesAvailable} articles (${pct}%) — large digest`
+                          : `${effectiveArticleCount} of ${articlesAvailable} articles (${pct}%)`}
                       </Typography>
                     </Box>
                     {articleCount === null && (
@@ -969,7 +974,7 @@ export default function CreateTrackerPage() {
                   </Box>
 
                   <Typography sx={{ fontSize: '12px', color: 'text.disabled', mt: 1 }}>
-                    Recommended range: {recMin}–{recMax} articles ({Math.round(recMin / articlesAvailable * 100)}–{Math.round(recMax / articlesAvailable * 100)}% of available)
+                    Recommended: {recMin}–{recMax} articles · {Math.round(recMin / articlesAvailable * 100)}–{Math.round(recMax / articlesAvailable * 100)}% of your {digestSchedule} total
                   </Typography>
                 </Box>
               </RevealSection>
