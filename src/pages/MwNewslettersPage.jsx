@@ -562,107 +562,203 @@ function CurationSkillMenu({ anchor, onClose, currentSkill, onSelect }) {
 }
 
 // ── Draft email preview ───────────────────────────────────────────────────────
-const PREVIEW_ARTICLES = {
-  'daily-brief': [
-    { tag: 'Brand Mention', title: 'Meltwater expands AI capabilities with new partnership announcement', source: 'TechCrunch', time: '2h ago', summary: 'The media intelligence platform announced a strategic integration with three leading AI providers, aiming to enhance real-time sentiment analysis and automated reporting workflows.' },
-    { tag: 'Industry', title: 'Social listening market projected to reach $9.4B by 2028 as enterprises scale up', source: 'Forbes', time: '4h ago', summary: 'New research shows enterprise adoption of media monitoring tools accelerating, with AI-driven curation cited as the primary driver of renewed investment in the category.' },
-    { tag: 'Leadership', title: 'CEO interview: "Data literacy is the new executive superpower"', source: 'Harvard Business Review', time: '6h ago', summary: 'An in-depth conversation on how communications leaders are rethinking their approach to earned media measurement and competitive intelligence in the AI era.' },
-    { tag: 'Competitor', title: 'Cision announces pricing changes ahead of Q2 earnings call', source: 'PR Newswire', time: '8h ago', summary: 'The announcement triggered mixed reactions from the analyst community, with some citing pressure from newer entrants in the media intelligence space.' },
-  ],
-  'monthly-roundup': [
-    { tag: 'Coverage Trend', title: 'Meltwater named a Leader in 2026 Gartner Magic Quadrant for Social Analytics', source: 'Gartner', time: 'Apr 14', summary: 'The annual report highlights Meltwater\'s strong execution and completeness of vision, particularly in AI-assisted curation and cross-channel monitoring.' },
-    { tag: 'Product', title: 'New Mira features drive 40% increase in newsletter engagement across enterprise accounts', source: 'Business Wire', time: 'Apr 9', summary: 'Internal data and customer case studies show significant uplift in open rates and click-throughs since the rollout of AI-curated newsletter editions.' },
-    { tag: 'Market', title: 'Brands are doubling down on owned media as trust in paid channels erodes', source: 'Marketing Week', time: 'Apr 3', summary: 'A new study from the Reuters Institute underscores a strategic shift toward curated newsletters and direct audience relationships as primary comms channels.' },
-  ],
-  'competitor-digest': [
-    { tag: 'Cision', title: 'Cision acquires PR analytics startup for $280M in bid to strengthen AI roadmap', source: 'Wall Street Journal', time: 'Apr 21', summary: 'The acquisition is expected to accelerate Cision\'s move into predictive media analytics, putting it in more direct competition with Meltwater\'s Mira platform.' },
-    { tag: 'Brandwatch', title: 'Brandwatch launches real-time trend detection for social listening enterprise tier', source: 'Adweek', time: 'Apr 18', summary: 'The new feature positions Brandwatch more directly against Meltwater\'s Explore product, targeting enterprise communications teams with high-volume monitoring needs.' },
-    { tag: 'Sprinklr', title: 'Sprinklr reports Q1 beat but lowers full-year guidance amid SMB churn', source: 'Reuters', time: 'Apr 15', summary: 'Analysts note the divergence between enterprise retention and SMB churn as a signal of broader market segmentation in the social analytics space.' },
-  ],
-  'media-coverage': [
-    { tag: 'Tier 1', title: 'Meltwater CEO joins panel on AI governance at Davos side event', source: 'Financial Times', time: 'Apr 20', summary: 'The panel discussion, attended by 200+ communications executives, focused on responsible AI deployment in media intelligence and the ethics of automated content curation.' },
-    { tag: 'Trade', title: 'PR Week names Meltwater\'s Mira among top 10 innovations reshaping communications in 2026', source: 'PR Week', time: 'Apr 17', summary: 'The annual innovation roundup highlights how AI-assisted newsletters are transforming how communications teams distribute earned media insights internally.' },
-    { tag: 'Regional', title: 'APAC expansion: Meltwater opens Singapore hub to serve growing Southeast Asia demand', source: 'Tech in Asia', time: 'Apr 12', summary: 'The new regional office will support over 400 enterprise clients across SEA, with a dedicated team focused on local-language media monitoring and AI curation.' },
-  ],
+const PREVIEW_DATA = {
+  'daily-brief': {
+    intro: 'Welcome to your Daily Brief. This edition covers your top brand mentions, key industry developments, and competitor activity — curated by Mira from your Explore searches and Monitor streams.',
+    aiOverview: 'Today\'s brief shows a <strong>spike in brand mentions</strong> driven by your Q1 earnings coverage. Sentiment is trending positive across Tier 1 outlets. Competitor activity is moderate — one acquisition story worth watching.',
+    widget: { label: 'Mention Volume', value: '3.2K', trend: '+11%', period: 'Last 24h', reason: 'Spike driven by Q1 earnings pick-up across financial media.' },
+    articles: [
+      { sourceCode: 'TC', sourceName: 'TechCrunch', sourceType: 'News', score: 97, time: 'Apr 20, 6:00 AM', tag: 'Brand Mention', title: 'Meltwater expands AI capabilities with new partnership announcement', body: 'The media intelligence platform announced a strategic integration with three leading AI providers, aiming to enhance real-time sentiment analysis and automated reporting.', aiSummary: 'Brand visibility up significantly in tech press following the partnership news. Tone is positive and forward-looking.', sentiment: 'Positive', reach: '4.1M', similar: 18, ave: '$34K' },
+      { sourceCode: 'FT', sourceName: 'Forbes', sourceType: 'News', score: 91, time: 'Apr 20, 8:30 AM', tag: 'Industry', title: 'Social listening market projected to reach $9.4B by 2028 as enterprises scale up', body: 'New research shows enterprise adoption of media monitoring tools accelerating, with AI-driven curation cited as the primary driver of renewed investment in the category.', aiSummary: 'Strong category tailwind — positions Meltwater favourably against the broader market narrative.', sentiment: 'Positive', reach: '2.9M', similar: 24, ave: '$28K' },
+      { sourceCode: 'HB', sourceName: 'Harvard Business Review', sourceType: 'News', score: 88, time: 'Apr 20, 10:00 AM', tag: 'Leadership', title: 'CEO interview: "Data literacy is the new executive superpower"', body: 'An in-depth conversation on how communications leaders are rethinking earned media measurement and competitive intelligence in the AI era.', aiSummary: 'Thought leadership angle — relevant for exec audience and reinforces Meltwater\'s positioning as a strategic partner.', sentiment: 'Neutral', reach: '1.8M', similar: 9, ave: '$21K' },
+    ],
+  },
+  'monthly-roundup': {
+    intro: 'Welcome to your Monthly Coverage Roundup. This edition highlights your biggest earned media wins, key industry narratives, and competitive landscape shifts from the past month.',
+    aiOverview: 'This month\'s digest shows a <strong>strong earned media performance</strong> — Q1 coverage is up 34% year-over-year across your key brand topics. The industry conversation is shifting toward AI-powered media intelligence, with your brand well-positioned in that narrative. Competitive monitoring shows a <strong>+12% share-of-voice gain</strong> versus primary competitors this month.',
+    widget: { label: 'Mention Volume', value: '12.4K', trend: '+18%', period: 'Last 30 days', reason: 'Mention volume spiked +18% this period, driven by Q1 earnings coverage and product launch activity.' },
+    articles: [
+      { sourceCode: 'GR', sourceName: 'Gartner', sourceType: 'Research', score: 97, time: 'Apr 14', tag: 'Coverage Trend', title: 'Meltwater named a Leader in 2026 Gartner Magic Quadrant for Social Analytics', body: 'The annual report highlights Meltwater\'s strong execution and completeness of vision, particularly in AI-assisted curation and cross-channel monitoring capabilities.', aiSummary: 'Highest-impact coverage of the month. Analyst recognition drives significant downstream media pickup and sales enablement value.', sentiment: 'Positive', reach: '3.8M', similar: 41, ave: '$52K' },
+      { sourceCode: 'BW', sourceName: 'Business Wire', sourceType: 'News', score: 94, time: 'Apr 9', tag: 'Product', title: 'New Mira features drive 40% increase in newsletter engagement across enterprise accounts', body: 'Internal data and customer case studies show significant uplift in open rates and click-throughs since the rollout of AI-curated newsletter editions.', aiSummary: 'Strong product narrative with quantified customer outcomes. Good asset for sales and customer success teams.', sentiment: 'Positive', reach: '2.1M', similar: 28, ave: '$31K' },
+      { sourceCode: 'MW', sourceName: 'Marketing Week', sourceType: 'Trade', score: 89, time: 'Apr 3', tag: 'Market', title: 'Brands are doubling down on owned media as trust in paid channels erodes', body: 'A new study underscores a strategic shift toward curated newsletters and direct audience relationships as primary comms channels for enterprise brands.', aiSummary: 'Category-level narrative that validates Meltwater\'s newsletter product direction and strengthens the owned media positioning.', sentiment: 'Positive', reach: '1.4M', similar: 16, ave: '$18K' },
+    ],
+  },
+  'competitor-digest': {
+    intro: 'Welcome to your Competitor Digest. This edition tracks the latest moves from key competitors across product launches, funding activity, and media coverage — curated automatically by Mira.',
+    aiOverview: 'Competitor activity was <strong>elevated this period</strong>. Cision made a significant acquisition move. Brandwatch is pushing into real-time social listening. Sprinklr showed mixed signals — enterprise retention strong but SMB churn worth monitoring.',
+    widget: { label: 'Competitor Mentions', value: '847', trend: '+22%', period: 'Last 7 days', reason: 'Cision acquisition story drove a significant spike in competitor media coverage across tech and business outlets.' },
+    articles: [
+      { sourceCode: 'WS', sourceName: 'Wall Street Journal', sourceType: 'News', score: 96, time: 'Apr 21', tag: 'Cision', title: 'Cision acquires PR analytics startup for $280M in bid to strengthen AI roadmap', body: 'The acquisition is expected to accelerate Cision\'s move into predictive media analytics, putting it in more direct competition with Meltwater\'s Mira platform.', aiSummary: 'High-impact competitive signal. Meltwater\'s Mira roadmap should be evaluated in context of this move — recommend flagging to product team.', sentiment: 'Neutral', reach: '5.2M', similar: 34, ave: '$61K' },
+      { sourceCode: 'AW', sourceName: 'Adweek', sourceType: 'Trade', score: 91, time: 'Apr 18', tag: 'Brandwatch', title: 'Brandwatch launches real-time trend detection for social listening enterprise tier', body: 'The new feature positions Brandwatch more directly against Meltwater\'s Explore product, targeting enterprise comms teams with high-volume monitoring needs.', aiSummary: 'Feature-level competitive pressure in core product area. Worth monitoring customer reactions and updating competitive battlecard.', sentiment: 'Neutral', reach: '1.6M', similar: 19, ave: '$22K' },
+      { sourceCode: 'RE', sourceName: 'Reuters', sourceType: 'News', score: 85, time: 'Apr 15', tag: 'Sprinklr', title: 'Sprinklr reports Q1 beat but lowers full-year guidance amid SMB churn', body: 'Analysts note the divergence between enterprise retention and SMB churn as a signal of broader market segmentation in the social analytics space.', aiSummary: 'Mixed signals — Sprinklr\'s SMB weakness may indicate opportunity in the mid-market segment for Meltwater.', sentiment: 'Neutral', reach: '3.1M', similar: 27, ave: '$38K' },
+    ],
+  },
+  'media-coverage': {
+    intro: 'Welcome to your April 2026 media coverage digest. This edition covers your top earned media wins, key industry trends, and a competitive landscape snapshot — all curated from your Explore searches and Monitor streams.',
+    aiOverview: 'This month\'s digest highlights a <strong>strong earned media performance</strong> — Q1 coverage is up 34% year-over-year across your key brand topics. The industry conversation is shifting decisively toward AI-powered media intelligence, with your brand well-positioned in that narrative. Competitive monitoring shows a <strong>+12% share-of-voice gain</strong> versus primary competitors this month, driven by product launch coverage and executive thought leadership placements.',
+    widget: { label: 'Mention Volume', value: '12.4K', trend: '+18%', period: 'Mar 22 – Apr 20, 2026', reason: 'Mention volume spiked +18% this period, driven by your Q1 earnings coverage. This gives readers immediate context on how much conversation your brand generated during the edition window.' },
+    articles: [
+      { sourceCode: 'CM', sourceName: 'Competitor Monitor', sourceType: 'Monitor', score: 97, time: 'Apr 20, 6:00 AM', tag: 'Competitive Intel', title: 'Competitor share-of-voice shift: your brand up 12% this month', body: 'Your Monitor streams detected a significant share-of-voice gain versus key competitors, driven by product launch coverage and exec thought leadership.', aiSummary: 'Brand share-of-voice increased 12% MoM, outperforming the category average of 4%. Competitor A saw a 7% decline coinciding with a product recall story.', sentiment: 'Positive', reach: '2.8M', similar: 34, ave: '$28K' },
+      { sourceCode: 'FT', sourceName: 'Financial Times', sourceType: 'News', score: 94, time: 'Apr 20, 8:30 AM', tag: 'Tier 1', title: 'AI-driven media monitoring transforms PR strategy for enterprise brands', body: 'Leading companies are shifting from reactive to proactive media management using AI-powered monitoring platforms, with significant gains in coverage quality and stakeholder engagement.', aiSummary: 'AI-powered media monitoring is enabling enterprise PR teams to shift from reactive to proactive strategies, with leading brands reporting significant gains in coverage quality and stakeholder engagement.', sentiment: 'Positive', reach: '4.2M', similar: 41, ave: '$48K' },
+      { sourceCode: 'BW', sourceName: 'Brand Watch Monitor', sourceType: 'Monitor', score: 91, time: 'Apr 20, 7:00 AM', tag: 'Brand', title: 'Q1 earnings coverage drives peak brand visibility across financial media', body: 'Your Q1 earnings announcement generated a record media footprint this quarter, with coverage spanning Tier 1 financial outlets and specialist trade press in 14 markets.', aiSummary: 'Earnings-driven coverage creates a sustained halo effect. Recommend capitalising on the momentum with targeted thought leadership placements in the next 2 weeks.', sentiment: 'Positive', reach: '3.5M', similar: 29, ave: '$41K' },
+    ],
+  },
 }
 
-function DraftEmailPreview({ series, curationSkill }) {
-  const articles = PREVIEW_ARTICLES[series.id] || PREVIEW_ARTICLES['daily-brief']
-  const skill = CURATION_SKILLS[curationSkill]
+const SENTIMENT_COLORS = {
+  Positive: { color: '#16a34a', bg: 'rgba(22,163,74,0.09)' },
+  Neutral:  { color: '#6b7280', bg: 'rgba(107,114,128,0.09)' },
+  Negative: { color: '#dc2626', bg: 'rgba(220,38,38,0.09)' },
+}
+
+function DraftEmailPreview({ series }) {
+  const data = PREVIEW_DATA[series.id] || PREVIEW_DATA['media-coverage']
   const accentColor = SERIES_COLORS[series.id] || TEAL
+  const accentLight = `${accentColor}12`
+  const accentBorder = `${accentColor}22`
 
   return (
-    <Box sx={{ bgcolor: '#f0f2f5', borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
-      {/* Email client chrome */}
-      <Box sx={{ maxWidth: 620, mx: 'auto' }}>
-        {/* Email meta bar */}
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '8px 8px 0 0', border: '1px solid', borderColor: 'divider', borderBottom: 'none', px: 2.5, py: 1.5, display: 'flex', flexDirection: 'column', gap: 0.4 }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>From:</Typography>
-            <Typography sx={{ fontSize: '11px', color: 'text.primary', fontWeight: 500 }}>{series.name} <Box component="span" sx={{ color: 'text.disabled', fontWeight: 400 }}>&lt;newsletters@meltwater.com&gt;</Box></Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>Subject:</Typography>
-            <Typography sx={{ fontSize: '11px', color: 'text.primary', fontWeight: 500 }}>{series.latestLabel} Edition — {series.articlesCount} stories curated</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>Status:</Typography>
-            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: TEAL }} />
-              <Typography sx={{ fontSize: '11px', color: TEAL, fontWeight: 600 }}>Draft · In curation ({series.progress}% complete)</Typography>
-            </Box>
-          </Box>
+    <Box sx={{ bgcolor: '#f4f5f7', borderTop: '1px solid', borderColor: 'divider', mx: -2.5, mb: -2, px: 2, pt: 2, pb: 2 }}>
+      <Box sx={{ maxWidth: 680, mx: 'auto', borderRadius: '8px', overflow: 'hidden', border: '1px solid', borderColor: 'divider', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+
+        {/* Colored edition header bar — mirrors editor */}
+        <Box sx={{ bgcolor: accentColor, px: 3, py: 1.25, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>
+            {series.latestLabel} Edition · {series.cadence}
+          </Typography>
+          <Typography sx={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textDecoration: 'underline', cursor: 'default' }}>View in browser</Typography>
         </Box>
 
-        {/* Email body */}
-        <Box sx={{ bgcolor: '#ffffff', border: '1px solid', borderColor: 'divider', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
+        <Box sx={{ bgcolor: '#ffffff', px: 3, pt: 3, pb: 2 }}>
 
-          {/* Newsletter header */}
-          <Box sx={{ bgcolor: accentColor, px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {series.logoUrl
-                ? <Box component="img" src={series.logoUrl} alt="Logo" sx={{ height: 28, maxWidth: 100, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
-                : <NlIcon size={22} color="rgba(255,255,255,0.9)" />
-              }
-              <Typography sx={{ fontSize: '15px', fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>{series.name}</Typography>
+          {/* Newsletter title + logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.75 }}>
+            {series.logoUrl
+              ? <Box component="img" src={series.logoUrl} alt="Logo" sx={{ height: 32, maxWidth: 80, objectFit: 'contain' }} />
+              : <Box sx={{ width: 32, height: 32, borderRadius: '6px', bgcolor: accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <NlIcon size={16} color="#fff" />
+                </Box>
+            }
+            <Box>
+              <Typography sx={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.02em', color: 'text.primary', lineHeight: 1.2 }}>{series.name}</Typography>
+              <Box sx={{ width: 36, height: 3, borderRadius: '2px', bgcolor: accentColor, mt: 0.5 }} />
             </Box>
-            <Typography sx={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)' }}>{series.latestLabel}</Typography>
+          </Box>
+          <Typography sx={{ fontSize: '12px', color: 'text.disabled', mb: 2 }}>{series.latestLabel} Edition</Typography>
+
+          {/* Intro paragraph */}
+          <Typography sx={{ fontSize: '13.5px', lineHeight: 1.7, color: 'text.secondary', mb: 2.5 }}>
+            {data.intro}
+          </Typography>
+
+          {/* AI Overview box */}
+          <Box sx={{ bgcolor: accentLight, border: `1px solid ${accentBorder}`, borderRadius: '6px', px: 2, py: 1.5, mb: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+              <AutoAwesomeIcon sx={{ fontSize: 13, color: accentColor }} />
+              <Typography sx={{ fontSize: '10px', fontWeight: 800, color: accentColor, textTransform: 'uppercase', letterSpacing: '0.08em' }}>AI Overview</Typography>
+            </Box>
+            <Typography sx={{ fontSize: '13px', lineHeight: 1.7, color: 'text.secondary', fontStyle: 'italic' }}
+              dangerouslySetInnerHTML={{ __html: data.aiOverview }}
+            />
           </Box>
 
-          {/* Mira intro strip */}
-          <Box sx={{ px: 3, py: 1.75, bgcolor: `${accentColor}0d`, borderBottom: '1px solid', borderColor: `${accentColor}20`, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <AutoAwesomeIcon sx={{ fontSize: 13, color: accentColor }} />
-            <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>
-              Curated by <strong style={{ color: accentColor }}>Mira</strong>
-              {skill && <> using <strong style={{ color: accentColor }}>{skill.label}</strong></>}
-              {' · '}{series.articlesCount} stories selected · Draft in progress
-            </Typography>
+          {/* Data widget */}
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '6px', p: 1.75, mb: 3, bgcolor: '#fafafa' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <BarChartOutlinedIcon sx={{ fontSize: 13, color: accentColor }} />
+                <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.primary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{data.widget.label}</Typography>
+                <Box sx={{ px: 0.75, py: 0.2, bgcolor: `${accentColor}15`, borderRadius: '3px' }}>
+                  <Typography sx={{ fontSize: '10px', fontWeight: 700, color: accentColor }}>+ Auto-added</Typography>
+                </Box>
+              </Box>
+            </Box>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled', mb: 1 }}>{data.widget.period} · Mentions</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1 }}>
+              <Typography sx={{ fontSize: '26px', fontWeight: 800, color: 'text.primary', letterSpacing: '-0.02em' }}>{data.widget.value}</Typography>
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>total mentions</Typography>
+              <Typography sx={{ fontSize: '12px', fontWeight: 700, color: '#16a34a', ml: 'auto' }}>{data.widget.trend}</Typography>
+            </Box>
+            {/* Sparkline placeholder */}
+            <Box sx={{ height: 36, bgcolor: `${accentColor}08`, borderRadius: '4px', mb: 1, position: 'relative', overflow: 'hidden' }}>
+              <svg width="100%" height="36" viewBox="0 0 300 36" preserveAspectRatio="none">
+                <polyline points="0,28 40,22 80,26 120,18 160,20 200,12 240,15 300,8" fill="none" stroke={accentColor} strokeWidth="1.5" strokeOpacity="0.6" />
+                <polygon points="0,28 40,22 80,26 120,18 160,20 200,12 240,15 300,8 300,36 0,36" fill={accentColor} fillOpacity="0.07" />
+              </svg>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <CalendarTodayOutlinedIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>Snapshot: {data.widget.period}</Typography>
+            </Box>
+            {/* Why AI picked this */}
+            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.4 }}>
+                <AutoAwesomeIcon sx={{ fontSize: 11, color: accentColor }} />
+                <Typography sx={{ fontSize: '10px', fontWeight: 700, color: accentColor }}>Why AI picked this</Typography>
+              </Box>
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.5 }}>{data.widget.reason}</Typography>
+            </Box>
           </Box>
 
           {/* Articles */}
-          <Box sx={{ px: 3, pt: 2.5, pb: 1 }}>
-            {articles.map((article, i) => (
-              <Box key={i} sx={{ mb: 2.5, pb: 2.5, borderBottom: i < articles.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none' }}>
+          {data.articles.map((article, i) => {
+            const sentCfg = SENTIMENT_COLORS[article.sentiment] || SENTIMENT_COLORS.Neutral
+            return (
+              <Box key={i} sx={{ mb: i < data.articles.length - 1 ? 0 : 0, pb: 2.5, borderBottom: i < data.articles.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none' }}>
+                {/* Source row */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-                  <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', bgcolor: `${accentColor}15`, border: `1px solid ${accentColor}25` }}>
-                    <Typography sx={{ fontSize: '10px', fontWeight: 700, color: accentColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.tag}</Typography>
+                  <Box sx={{ width: 22, height: 22, borderRadius: '4px', bgcolor: `${accentColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Typography sx={{ fontSize: '9px', fontWeight: 800, color: accentColor }}>{article.sourceCode}</Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.source} · {article.time}</Typography>
+                  <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.primary' }}>{article.sourceName}</Typography>
+                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.sourceType}</Typography>
+                  <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                    <Typography sx={{ fontSize: '11px', fontWeight: 700, color: accentColor }}>· {article.score}%</Typography>
+                    <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.time}</Typography>
+                  </Box>
                 </Box>
-                <Typography sx={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.4, mb: 0.6, color: 'text.primary' }}>{article.title}</Typography>
-                <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.6 }}>{article.summary}</Typography>
-              </Box>
-            ))}
-          </Box>
 
-          {/* Draft watermark footer */}
-          <Box sx={{ px: 3, py: 2, bgcolor: 'rgba(0,0,0,0.025)', borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
-              {series.articlesCount} of ~{Math.round(series.articlesCount / (series.progress / 100))} articles curated · More being added automatically
-            </Typography>
-            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.4, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px' }}>
-              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Draft preview</Typography>
-            </Box>
+                {/* Title + thumbnail placeholder */}
+                <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.4, color: 'text.primary', mb: 0.6 }}>{article.title}</Typography>
+                    <Typography sx={{ fontSize: '12.5px', color: 'text.secondary', lineHeight: 1.6 }}>{article.body}</Typography>
+                  </Box>
+                  <Box sx={{ width: 52, height: 48, borderRadius: '5px', bgcolor: `${accentColor}10`, border: `1px solid ${accentBorder}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ViewStreamOutlinedIcon sx={{ fontSize: 16, color: accentColor, opacity: 0.4 }} />
+                  </Box>
+                </Box>
+
+                {/* AI Summary */}
+                <Box sx={{ bgcolor: accentLight, border: `1px solid ${accentBorder}`, borderRadius: '5px', px: 1.5, py: 1, mb: 0.75 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.4 }}>
+                    <AutoAwesomeIcon sx={{ fontSize: 11, color: accentColor }} />
+                    <Typography sx={{ fontSize: '10px', fontWeight: 700, color: accentColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Summary</Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.55 }}>{article.aiSummary}</Typography>
+                </Box>
+
+                {/* Sentiment + stats */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Box sx={{ px: 1, py: 0.3, borderRadius: '4px', bgcolor: sentCfg.bg }}>
+                    <Typography sx={{ fontSize: '11px', fontWeight: 600, color: sentCfg.color }}>{article.sentiment}</Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.reach} Reach</Typography>
+                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.similar} Similar</Typography>
+                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.ave} AVE</Typography>
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+
+        {/* Footer */}
+        <Box sx={{ px: 3, py: 1.5, bgcolor: 'rgba(0,0,0,0.025)', borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+            {series.articlesCount} of ~{Math.round(series.articlesCount / (series.progress / 100))} articles curated · More being added automatically
+          </Typography>
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.35, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px' }}>
+            <Typography sx={{ fontSize: '10px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Draft preview</Typography>
           </Box>
         </Box>
       </Box>
@@ -804,7 +900,7 @@ function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChang
           </>
         )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: isCurating && !series.estReady ? 2 : 0, '&:hover .edit-sources-link': { opacity: 1 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: isCurating && !series.estReady ? 2 : 0, mb: previewOpen ? 2 : 0, '&:hover .edit-sources-link': { opacity: 1 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
             <SearchPills searches={series.searches} max={3} />
             <Typography
@@ -2782,7 +2878,14 @@ function NewSeriesModal({ open, onClose }) {
 
 // ── Newsletter Onboarding Flow ────────────────────────────────────────────────
 
-const MOCK_SEARCH = { name: 'Brand Monitoring', type: 'explore' }
+const AVAILABLE_SEARCHES = [
+  { name: 'Brand Monitoring',   type: 'explore' },
+  { name: 'Competitor Watch',   type: 'explore' },
+  { name: 'Industry News',      type: 'rss' },
+  { name: 'Executive Coverage', type: 'explore' },
+  { name: 'Product Mentions',   type: 'explore' },
+  { name: 'Market Trends',      type: 'rss' },
+]
 
 // Mock analysis results Mira would surface from a reference upload/paste
 const MOCK_ANALYSIS = {
@@ -2928,10 +3031,13 @@ function NewsletterOnboarding({ onComplete }) {
   const [skill, setSkill]     = useState(null)
   const [logoUrl, setLogoUrl]   = useState(null)
   const [logoName, setLogoName] = useState('')
+  const [brandAssets, setBrandAssets] = useState([])   // [{ name, size, type }]
+  const brandAssetsInputRef = useRef(null)
   const [refFileName, setRefFileName] = useState('')
   const [refPaste, setRefPaste]       = useState('')
   const [analysisState, setAnalysisState] = useState(null)  // null | 'loading' | 'shown' | 'confirmed'
   const [recipients, setRecipients] = useState('')
+  const [selectedSearches, setSelectedSearches] = useState(AVAILABLE_SEARCHES.slice(0, 3).map(s => s.name))
   const [cadence, setCadence]   = useState('Weekly')
   const [sendDay, setSendDay]   = useState('Friday')
   const [sendTime, setSendTime] = useState('8:00 AM')
@@ -2963,7 +3069,7 @@ function NewsletterOnboarding({ onComplete }) {
         setGenProgress(100)
         setGenMessage('Your first edition is ready!')
         setGenDone(true)
-        setTimeout(() => onComplete({ skill, logoUrl, recipients, cadence, sendDay, sendTime }), 1400)
+        setTimeout(() => onComplete({ skill, logoUrl, recipients, cadence, sendDay, sendTime, selectedSearches }), 1400)
       }
     }, 920)
     return () => clearInterval(tick)
@@ -3044,7 +3150,7 @@ function NewsletterOnboarding({ onComplete }) {
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
             <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
-              Skill: <strong>{activeSkill?.label}</strong> · Source: <strong>{MOCK_SEARCH.name}</strong>
+              Skill: <strong>{activeSkill?.label}</strong> · Sources: <strong>{selectedSearches.length} searches</strong>
               {hasRefContent && <> · <strong>Style reference loaded</strong></>}
             </Typography>
             <Typography sx={{ fontSize: '11px', fontWeight: 700, color: genDone ? '#22c55e' : (activeSkill ? activeSkill.color : TEAL) }}>
@@ -3058,7 +3164,6 @@ function NewsletterOnboarding({ onComplete }) {
 
   // ── Landing ────────────────────────────────────────────────────────────────
   if (phase === 'landing') {
-    const searchCfg = SEARCH_TYPE_CFG[MOCK_SEARCH.type] || SEARCH_TYPE_CFG.explore
     return (
       <Box sx={{
         height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -3088,23 +3193,60 @@ function NewsletterOnboarding({ onComplete }) {
               Connect your saved searches. Mira monitors the news, curates the most relevant stories, and assembles a polished edition — automatically, every time.
             </Typography>
 
-            {/* Search callout */}
-            <Box sx={{
-              display: 'inline-flex', alignItems: 'center', gap: 1.5,
-              bgcolor: 'background.paper', borderRadius: '10px',
-              border: `1.5px solid ${TEAL}20`, p: 1.5, mb: 3.5,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-            }}>
-              <CheckCircleIcon sx={{ fontSize: 18, color: TEAL, flexShrink: 0 }} />
-              <Box>
-                <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.4 }}>
-                  <strong style={{ color: 'rgba(0,0,0,0.85)' }}>1 search ready</strong> to power your first newsletter
-                </Typography>
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: searchCfg.bg, borderRadius: '4px', px: 0.75, py: 0.3, mt: 0.5 }}>
-                  <searchCfg.Icon sx={{ fontSize: 11, color: searchCfg.color }} />
-                  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: searchCfg.color }}>{MOCK_SEARCH.name}</Typography>
-                </Box>
+            {/* Search selector */}
+            <Box sx={{ bgcolor: 'background.paper', borderRadius: '10px', border: `1.5px solid ${TEAL}20`, p: 2, mb: 3.5, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', maxWidth: 420 }}>
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.secondary', mb: 1.25 }}>
+                Select searches to power your newsletter
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.25 }}>
+                {AVAILABLE_SEARCHES.map(s => {
+                  const cfg = SEARCH_TYPE_CFG[s.type] || SEARCH_TYPE_CFG.explore
+                  const isSelected = selectedSearches.includes(s.name)
+                  return (
+                    <Box
+                      key={s.name}
+                      onClick={() => setSelectedSearches(prev =>
+                        prev.includes(s.name) ? prev.filter(n => n !== s.name) : [...prev, s.name]
+                      )}
+                      sx={{
+                        display: 'flex', alignItems: 'center', gap: 1, px: 1.25, py: 0.9,
+                        borderRadius: '7px', cursor: 'pointer', border: '1.5px solid',
+                        borderColor: isSelected ? `${TEAL}35` : 'transparent',
+                        bgcolor: isSelected ? `${TEAL}08` : 'rgba(0,0,0,0.025)',
+                        transition: 'all 0.15s',
+                        '&:hover': { bgcolor: isSelected ? `${TEAL}10` : 'rgba(0,0,0,0.045)' },
+                      }}
+                    >
+                      <Box sx={{
+                        width: 16, height: 16, borderRadius: '4px', flexShrink: 0,
+                        border: `2px solid ${isSelected ? TEAL : 'rgba(0,0,0,0.2)'}`,
+                        bgcolor: isSelected ? TEAL : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all 0.15s',
+                      }}>
+                        {isSelected && <CheckIcon sx={{ fontSize: 10, color: '#fff' }} />}
+                      </Box>
+                      <cfg.Icon sx={{ fontSize: 13, color: cfg.color, flexShrink: 0 }} />
+                      <Typography sx={{ fontSize: '13px', fontWeight: 500, color: isSelected ? 'text.primary' : 'text.secondary', flex: 1 }}>
+                        {s.name}
+                      </Typography>
+                      <Box sx={{ px: 0.75, py: 0.2, bgcolor: cfg.bg, borderRadius: '3px' }}>
+                        <Typography sx={{ fontSize: '10px', fontWeight: 600, color: cfg.color, textTransform: 'capitalize' }}>{s.type}</Typography>
+                      </Box>
+                    </Box>
+                  )
+                })}
               </Box>
+              {selectedSearches.length > 0 ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <CheckCircleIcon sx={{ fontSize: 14, color: TEAL }} />
+                  <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 600 }}>
+                    {selectedSearches.length} search{selectedSearches.length !== 1 ? 'es' : ''} selected
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>Select at least one search to continue</Typography>
+              )}
             </Box>
 
             {/* CTA */}
@@ -3114,11 +3256,13 @@ function NewsletterOnboarding({ onComplete }) {
                 size="large"
                 endIcon={<ArrowForwardIcon />}
                 onClick={() => setPhase('wizard')}
+                disabled={selectedSearches.length === 0}
                 sx={{
                   bgcolor: TEAL, color: '#fff', fontWeight: 700, fontSize: '15px',
                   textTransform: 'none', borderRadius: '10px', px: 3.5, py: 1.5,
                   boxShadow: '0 4px 16px rgba(0,130,127,0.28)',
                   '&:hover': { bgcolor: '#006e6b', transform: 'translateY(-1px)', boxShadow: '0 7px 24px rgba(0,130,127,0.35)' },
+                  '&.Mui-disabled': { bgcolor: 'rgba(0,0,0,0.1)', color: 'rgba(0,0,0,0.3)', boxShadow: 'none' },
                   transition: 'all 0.2s',
                   display: 'block', mb: 1.5,
                 }}
@@ -3506,68 +3650,131 @@ function NewsletterOnboarding({ onComplete }) {
           )
         })()}
 
-        {/* ── Step 2: Upload logo ── */}
+        {/* ── Step 2: Upload logo + brand assets ── */}
         {step === 2 && (
-          <Box sx={{ maxWidth: 500, mx: 'auto' }}>
-            <Typography sx={{ fontSize: '15px', color: 'text.secondary', lineHeight: 1.65, mb: 3.5 }}>
-              Add your brand logo so every edition feels on-brand. You can update this anytime in settings.
-            </Typography>
+          <Box sx={{ maxWidth: 560, mx: 'auto' }}>
+            <input ref={logoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleLogoFile(e.target.files?.[0])} />
             <input
-              ref={logoInputRef}
+              ref={brandAssetsInputRef}
               type="file"
-              accept="image/*"
+              multiple
+              accept=".pdf,.pptx,.ppt,.docx,.doc,.png,.jpg,.jpeg,.svg,.zip,.ai,.eps,.sketch,.fig"
               style={{ display: 'none' }}
-              onChange={e => handleLogoFile(e.target.files?.[0])}
+              onChange={e => {
+                const files = Array.from(e.target.files || [])
+                setBrandAssets(prev => {
+                  const existing = new Set(prev.map(f => f.name))
+                  const newFiles = files.filter(f => !existing.has(f.name)).map(f => ({ name: f.name, size: f.size, type: f.name.split('.').pop().toLowerCase() }))
+                  return [...prev, ...newFiles]
+                })
+                e.target.value = ''
+              }}
             />
 
+            {/* Logo section */}
+            <Typography sx={{ fontSize: '13px', fontWeight: 700, color: 'text.primary', mb: 1 }}>Logo</Typography>
+            <Typography sx={{ fontSize: '13.5px', color: 'text.secondary', lineHeight: 1.6, mb: 2 }}>
+              Add your brand logo so every edition feels on-brand.
+            </Typography>
+
             {logoUrl ? (
-              <Box sx={{ p: 2.5, border: `2px solid ${TEAL}30`, borderRadius: '12px', bgcolor: TEAL_LIGHT, display: 'flex', alignItems: 'center', gap: 2.5, mb: 2 }}>
-                <Box sx={{
-                  width: 88, height: 60, borderRadius: '8px', bgcolor: '#fff',
-                  border: '1px solid rgba(0,0,0,0.09)', overflow: 'hidden',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-                }}>
-                  <Box component="img" src={logoUrl} alt="Logo preview" sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', p: 0.75 }} />
+              <Box sx={{ p: 2, border: `2px solid ${TEAL}30`, borderRadius: '10px', bgcolor: TEAL_LIGHT, display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Box sx={{ width: 80, height: 52, borderRadius: '7px', bgcolor: '#fff', border: '1px solid rgba(0,0,0,0.09)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.07)' }}>
+                  <Box component="img" src={logoUrl} alt="Logo" sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', p: 0.5 }} />
                 </Box>
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-                    <CheckCircleIcon sx={{ fontSize: 14, color: TEAL }} />
-                    <Typography sx={{ fontWeight: 600, fontSize: '14px' }}>Logo uploaded</Typography>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+                    <CheckCircleIcon sx={{ fontSize: 13, color: TEAL }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: '13px' }}>Logo uploaded</Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1 }}>{logoName}</Typography>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 0.75 }} noWrap>{logoName}</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5 }}>
-                    <Button size="small" onClick={() => logoInputRef.current?.click()}
-                      sx={{ textTransform: 'none', fontSize: '12px', color: TEAL, p: 0, minWidth: 0, '&:hover': { textDecoration: 'underline' } }}>
-                      Replace
-                    </Button>
-                    <Button size="small" onClick={() => { setLogoUrl(null); setLogoName('') }}
-                      sx={{ textTransform: 'none', fontSize: '12px', color: 'text.secondary', p: 0, minWidth: 0 }}>
-                      Remove
-                    </Button>
+                    <Button size="small" onClick={() => logoInputRef.current?.click()} sx={{ textTransform: 'none', fontSize: '12px', color: TEAL, p: 0, minWidth: 0 }}>Replace</Button>
+                    <Button size="small" onClick={() => { setLogoUrl(null); setLogoName('') }} sx={{ textTransform: 'none', fontSize: '12px', color: 'text.secondary', p: 0, minWidth: 0 }}>Remove</Button>
                   </Box>
                 </Box>
               </Box>
             ) : (
-              <Box
-                onClick={() => logoInputRef.current?.click()}
-                sx={{
-                  border: '2px dashed rgba(0,0,0,0.15)', borderRadius: '12px',
-                  p: 5, textAlign: 'center', cursor: 'pointer', mb: 2,
-                  transition: 'all 0.15s',
-                  '&:hover': { borderColor: TEAL, bgcolor: TEAL_LIGHT },
-                }}
-              >
-                <Box sx={{ width: 52, height: 52, borderRadius: '12px', bgcolor: 'rgba(0,0,0,0.05)', mx: 'auto', mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <AddIcon sx={{ fontSize: 26, color: 'text.disabled' }} />
+              <Box onClick={() => logoInputRef.current?.click()} sx={{ border: '2px dashed rgba(0,0,0,0.13)', borderRadius: '10px', p: 3.5, textAlign: 'center', cursor: 'pointer', mb: 3, transition: 'all 0.15s', '&:hover': { borderColor: TEAL, bgcolor: TEAL_LIGHT } }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: 'rgba(0,0,0,0.05)', mx: 'auto', mb: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AddIcon sx={{ fontSize: 22, color: 'text.disabled' }} />
                 </Box>
-                <Typography sx={{ fontWeight: 600, fontSize: '14px', mb: 0.5 }}>Click to upload your logo</Typography>
+                <Typography sx={{ fontWeight: 600, fontSize: '13.5px', mb: 0.4 }}>Click to upload your logo</Typography>
                 <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>PNG, SVG or JPG · Recommended 200 × 60 px</Typography>
               </Box>
             )}
 
-            <Typography sx={{ fontSize: '12px', color: 'text.disabled', textAlign: 'center', mt: 1 }}>
-              Optional — you can skip this and add it later in settings
+            <Divider sx={{ mb: 3 }} />
+
+            {/* Brand assets section */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 700, color: 'text.primary', mb: 0.5 }}>Brand assets</Typography>
+                <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.6, maxWidth: 400 }}>
+                  Upload a brand guide, deck, or any creative assets. Mira will use them to inform the look and feel of your newsletter.
+                </Typography>
+              </Box>
+              {brandAssets.length > 0 && (
+                <Button size="small" onClick={() => brandAssetsInputRef.current?.click()}
+                  sx={{ textTransform: 'none', fontSize: '12px', color: TEAL, fontWeight: 600, flexShrink: 0, ml: 2 }}>
+                  + Add more
+                </Button>
+              )}
+            </Box>
+
+            {brandAssets.length > 0 && (
+              <Box sx={{ mb: 1.5, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                {brandAssets.map((file, i) => {
+                  const iconMap = { pdf: '📄', pptx: '📊', ppt: '📊', docx: '📝', doc: '📝', png: '🖼', jpg: '🖼', jpeg: '🖼', svg: '🖼', zip: '📦', ai: '🎨', eps: '🎨', sketch: '🎨', fig: '🎨' }
+                  const icon = iconMap[file.type] || '📁'
+                  const sizeLabel = file.size > 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`
+                  return (
+                    <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, bgcolor: 'rgba(0,0,0,0.025)', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
+                      <Typography sx={{ fontSize: '18px', lineHeight: 1, flexShrink: 0 }}>{icon}</Typography>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontSize: '13px', fontWeight: 500, color: 'text.primary' }} noWrap>{file.name}</Typography>
+                        <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{file.type.toUpperCase()} · {sizeLabel}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                        <CheckCircleIcon sx={{ fontSize: 14, color: TEAL }} />
+                        <IconButton size="small" onClick={() => setBrandAssets(prev => prev.filter((_, idx) => idx !== i))} sx={{ p: 0.4, color: 'text.disabled', '&:hover': { color: 'text.primary' } }}>
+                          <CloseIcon sx={{ fontSize: 13 }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  )
+                })}
+              </Box>
+            )}
+
+            <Box
+              onClick={() => brandAssetsInputRef.current?.click()}
+              sx={{
+                border: '2px dashed rgba(0,0,0,0.13)', borderRadius: '10px',
+                p: brandAssets.length > 0 ? 2 : 3.5,
+                textAlign: 'center', cursor: 'pointer',
+                transition: 'all 0.15s',
+                '&:hover': { borderColor: PURPLE, bgcolor: 'rgba(182,39,161,0.04)' },
+              }}
+            >
+              {brandAssets.length === 0 ? (
+                <>
+                  <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: 'rgba(0,0,0,0.05)', mx: 'auto', mb: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AddIcon sx={{ fontSize: 22, color: 'text.disabled' }} />
+                  </Box>
+                  <Typography sx={{ fontWeight: 600, fontSize: '13.5px', mb: 0.4 }}>Upload brand assets</Typography>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 0.5 }}>Drag and drop or click to browse</Typography>
+                  <Typography sx={{ fontSize: '11.5px', color: 'text.disabled' }}>Brand guides · PowerPoints · PDFs · Images · Figma exports</Typography>
+                </>
+              ) : (
+                <Typography sx={{ fontSize: '12.5px', color: 'text.secondary' }}>
+                  + Drop more files here or click to browse
+                </Typography>
+              )}
+            </Box>
+
+            <Typography sx={{ fontSize: '12px', color: 'text.disabled', mt: 2 }}>
+              Optional — both logo and assets can be updated anytime in settings
             </Typography>
           </Box>
         )}
@@ -3809,7 +4016,7 @@ export default function MwNewslettersPage({ ftuxMode = false }) {
               articlesCount: 6,
               progress: 12,
               sources: ['Explore'],
-              searches: [{ name: MOCK_SEARCH.name, type: MOCK_SEARCH.type }],
+              searches: AVAILABLE_SEARCHES.filter(s => (data.selectedSearches || []).includes(s.name)),
               recipients: recipientCount,
               nextSend: computedNextSend,
               latestLabel: 'May 11, 2026',
