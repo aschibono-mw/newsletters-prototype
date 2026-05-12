@@ -16,6 +16,7 @@ export const NAV_ITEMS = [
     ],
   },
   { iconName: 'BarChartOutlined',          path: '/newmw/analyze',     label: 'Analyze',      disabled: true },
+  { iconName: 'NewspaperOutlined',         path: '/mw-newsletters-ftux', label: 'Newsletters FTUX' },
   { iconName: 'NewspaperOutlined',         path: '/mw-newsletters',    label: 'Newsletters' },
   { iconName: 'NewspaperOutlined',         path: '/mw-newsletters-current', label: 'Newsletters Current' },
   {

@@ -34,6 +34,7 @@ import MwNewslettersCreatePage from '../pages/MwNewslettersCreatePage'
 import MwNewslettersEditorPage from '../pages/MwNewslettersEditorPage'
 import MwNewslettersPreviewPage from '../pages/MwNewslettersPreviewPage'
 import { MwNewslettersRecipientsPage, MwNewslettersRecipientDetailPage } from '../pages/MwNewslettersRecipientsPage'
+import MwNewslettersFtuxPage from '../pages/MwNewslettersFtuxPage'
 import MwNewslettersCurrentPage from '../pages/MwNewslettersCurrentPage'
 import MwNewslettersCurrentCreatePage from '../pages/MwNewslettersCurrentCreatePage'
 import MwNewslettersCurrentEditorPage from '../pages/MwNewslettersCurrentEditorPage'
@@ -299,6 +300,7 @@ export const coreRoutes = [
   { path: '/mw-newsletters/preview/:seriesId', element: MwNewslettersPreviewPage },
   { path: '/mw-newsletters/recipients', element: MwNewslettersRecipientsPage },
   { path: '/mw-newsletters/recipients/:listId', element: MwNewslettersRecipientDetailPage },
+  { path: '/mw-newsletters-ftux', element: MwNewslettersFtuxPage },
   { path: '/mw-newsletters-current', element: MwNewslettersCurrentPage },
   { path: '/mw-newsletters-current/create', element: MwNewslettersCurrentCreatePage },
   { path: '/mw-newsletters-current/editor/:id', element: MwNewslettersCurrentEditorPage },

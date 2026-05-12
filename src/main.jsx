@@ -1,3 +1,4 @@
+import './tailwind.css'
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@mui/material/styles'

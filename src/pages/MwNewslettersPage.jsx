@@ -57,6 +57,34 @@ const SERIES_COLORS = {
   'competitor-digest': '#4F6AF5',  // blue
 }
 
+// ── Curation skill types ───────────────────────────────────────────────────────
+const CURATION_SKILLS = {
+  'coverage-roundup': {
+    id: 'coverage-roundup',
+    label: 'Coverage Roundup',
+    color: TEAL,
+    bg: TEAL_LIGHT,
+    Icon: ViewStreamOutlinedIcon,
+    description: 'Aggregates the top articles across all sources, organised by topic and coverage volume.',
+  },
+  'executive-briefing': {
+    id: 'executive-briefing',
+    label: 'Executive Briefing',
+    color: PURPLE,
+    bg: 'rgba(182,39,161,0.08)',
+    Icon: AutoAwesomeIcon,
+    description: 'Distils key insights and strategic signals into a concise, executive-ready summary.',
+  },
+  'analytics-snapshot': {
+    id: 'analytics-snapshot',
+    label: 'Analytics Snapshot',
+    color: '#e86c5a',
+    bg: 'rgba(232,108,90,0.10)',
+    Icon: BarChartOutlinedIcon,
+    description: 'Surfaces share of voice, sentiment trends, and top metrics for the period.',
+  },
+}
+
 // ── Search type config ─────────────────────────────────────────────────────────
 const SEARCH_TYPE_CFG = {
   explore: { Icon: SearchIcon,            color: '#4F6AF5', bg: 'rgba(79,106,245,0.10)' },
@@ -77,6 +105,8 @@ const SERIES = [
     id: 'daily-brief',
     name: 'The Daily Brief',
     cadence: 'Daily',
+    sendTime: '7:00 AM',
+    sendDay: null,
     status: 'curating',
     articlesCount: 23,
     progress: 35,
@@ -87,15 +117,18 @@ const SERIES = [
       { name: 'TechCrunch', type: 'rss' },
     ],
     recipients: 8,
-    nextSend: 'Tomorrow',
+    nextSend: 'Tomorrow, 7:00 AM',
     latestLabel: 'April 20, 2026',
     estReady: null,
+    curationSkill: 'executive-briefing',
     description: 'Daily snapshot of brand mentions and industry news from saved searches.',
   },
   {
     id: 'monthly-roundup',
     name: 'Monthly Round Up',
     cadence: 'Monthly',
+    sendTime: '9:00 AM',
+    sendDay: '1st',
     status: 'curating',
     articlesCount: 47,
     progress: 68,
@@ -107,15 +140,18 @@ const SERIES = [
       { name: 'TechCrunch', type: 'rss' },
     ],
     recipients: 24,
-    nextSend: 'May 1, 2026',
+    nextSend: 'May 1, 9:00 AM',
     latestLabel: 'April 2026',
     estReady: 'April 28, 2026',
+    curationSkill: 'coverage-roundup',
     description: 'Monthly digest pulling top stories across brand, industry, and social searches.',
   },
   {
     id: 'media-coverage',
     name: 'Media Coverage Monthly',
     cadence: 'Monthly',
+    sendTime: '8:30 AM',
+    sendDay: '3rd',
     status: 'ready',
     articlesCount: 12,
     progress: 100,
@@ -126,16 +162,19 @@ const SERIES = [
       { name: 'Burrelles', type: 'explore' },
     ],
     recipients: 16,
-    nextSend: 'April 22, 2026',
+    nextSend: 'April 22, 8:30 AM',
     latestLabel: 'April 2026',
     deadline: 'April 22, 2026',
     daysUntil: 2,
+    curationSkill: 'coverage-roundup',
     description: 'Monthly overview of earned media coverage from top monitoring searches.',
   },
   {
     id: 'competitor-digest',
     name: 'Competitor Digest',
     cadence: 'Weekly',
+    sendTime: '8:00 AM',
+    sendDay: 'Friday',
     status: 'curating',
     articlesCount: 12,
     progress: 20,
@@ -146,9 +185,10 @@ const SERIES = [
       { name: 'TVEyes', type: 'explore' },
     ],
     recipients: 12,
-    nextSend: 'April 25, 2026',
+    nextSend: 'Fri Apr 25, 8:00 AM',
     latestLabel: 'Week of Apr 14',
     estReady: 'April 23, 2026',
+    curationSkill: 'analytics-snapshot',
     description: 'Weekly competitive intelligence digest from saved competitor searches.',
   },
 ]
@@ -403,6 +443,18 @@ function SeriesListItem({ series, selected, onClick }) {
             {series.status === 'curating' && `${series.articlesCount} articles curated so far`}
             {series.status === 'ready' && `${series.articlesCount} articles · Send in ${series.daysUntil}d`}
           </Typography>
+          {series.sendTime && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+              <AccessTimeOutlinedIcon sx={{ fontSize: 10, color: 'text.disabled' }} />
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+                {series.cadence === 'Daily'
+                  ? `Daily · ${series.sendTime}`
+                  : series.sendDay
+                  ? `${series.sendDay} · ${series.sendTime}`
+                  : series.sendTime}
+              </Typography>
+            </Box>
+          )}
         </Box>
         <IconButton
           className="series-menu-btn"
@@ -424,12 +476,97 @@ function SeriesListItem({ series, selected, onClick }) {
   )
 }
 
+// ── Curation skill badge ──────────────────────────────────────────────────────
+function CurationSkillBadge({ skillId, onClick, showChange = false }) {
+  const skill = CURATION_SKILLS[skillId]
+  if (!skill) return null
+  const { Icon } = skill
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: 'inline-flex', alignItems: 'center', gap: 0.6,
+        borderRadius: '4px', px: 1, py: 0.4,
+        bgcolor: skill.bg,
+        cursor: onClick ? 'pointer' : 'default',
+        border: `1px solid ${skill.color}28`,
+        transition: 'all 0.15s',
+        ...(onClick && { '&:hover': { borderColor: `${skill.color}55`, bgcolor: `${skill.color}14` } }),
+      }}
+    >
+      <Icon sx={{ fontSize: 12, color: skill.color }} />
+      <Typography sx={{ fontSize: '11px', fontWeight: 600, color: skill.color, lineHeight: 1 }}>
+        {skill.label}
+      </Typography>
+      {showChange && <ArrowDropDownIcon sx={{ fontSize: 14, color: skill.color, ml: -0.25 }} />}
+    </Box>
+  )
+}
+
+// ── Curation skill menu ───────────────────────────────────────────────────────
+function CurationSkillMenu({ anchor, onClose, currentSkill, onSelect }) {
+  return (
+    <Menu
+      anchorEl={anchor}
+      open={Boolean(anchor)}
+      onClose={onClose}
+      onClick={e => e.stopPropagation()}
+      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      PaperProps={{ sx: { minWidth: 275, borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.13)', p: 0.75, mt: 0.5 } }}
+    >
+      <Typography sx={{ fontSize: '10px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', px: 1.25, pt: 0.5, pb: 0.75 }}>
+        Curation Skill
+      </Typography>
+      {Object.values(CURATION_SKILLS).map(skill => {
+        const { Icon } = skill
+        const active = currentSkill === skill.id
+        return (
+          <MenuItem
+            key={skill.id}
+            onClick={() => { onSelect(skill.id); onClose() }}
+            sx={{
+              borderRadius: '7px', px: 1.25, py: 1, mb: 0.25, alignItems: 'flex-start',
+              bgcolor: active ? skill.bg : 'transparent',
+              border: `1px solid ${active ? `${skill.color}28` : 'transparent'}`,
+              '&:hover': { bgcolor: skill.bg, border: `1px solid ${skill.color}20` },
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, width: '100%' }}>
+              <Box sx={{
+                width: 28, height: 28, borderRadius: '6px',
+                bgcolor: `${skill.color}18`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0, mt: 0.1,
+              }}>
+                <Icon sx={{ fontSize: 15, color: skill.color }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, color: skill.color }}>
+                    {skill.label}
+                  </Typography>
+                  {active && <CheckIcon sx={{ fontSize: 12, color: skill.color }} />}
+                </Box>
+                <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4, mt: 0.15 }}>
+                  {skill.description}
+                </Typography>
+              </Box>
+            </Box>
+          </MenuItem>
+        )
+      })}
+    </Menu>
+  )
+}
+
 // ── Latest edition card ───────────────────────────────────────────────────────
-function LatestEditionCard({ series, onEdit }) {
+function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChange }) {
   const isCurating = series.status === 'curating'
   const isReady    = series.status === 'ready'
   const borderColor = isReady ? AMBER : TEAL
   const headerBg    = isReady ? AMBER_LIGHT : TEAL_LIGHT
+  const [skillMenuAnchor, setSkillMenuAnchor] = useState(null)
 
   return (
     <Box sx={{ border: `1.5px solid ${borderColor}`, borderRadius: '10px', overflow: 'hidden', mb: 3, bgcolor: 'background.paper', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
@@ -466,12 +603,30 @@ function LatestEditionCard({ series, onEdit }) {
       <Box sx={{ px: 2.5, py: 2 }}>
         {isCurating && (
           <>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.25 }}>
-              <AutoAwesomeIcon sx={{ fontSize: 14, color: TEAL }} />
-              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
-                AI is curating content from <strong>{series.sources.length} sources</strong>
-              </Typography>
+            {/* Skill badge row */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.25 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AutoAwesomeIcon sx={{ fontSize: 14, color: TEAL }} />
+                <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
+                  AI is curating content from <strong>{series.sources.length} sources</strong>
+                </Typography>
+              </Box>
+              {curationSkill && (
+                <CurationSkillBadge
+                  skillId={curationSkill}
+                  showChange={!!onCurationSkillChange}
+                  onClick={onCurationSkillChange ? e => { e.stopPropagation(); setSkillMenuAnchor(e.currentTarget) } : undefined}
+                />
+              )}
             </Box>
+            {onCurationSkillChange && (
+              <CurationSkillMenu
+                anchor={skillMenuAnchor}
+                onClose={() => setSkillMenuAnchor(null)}
+                currentSkill={curationSkill}
+                onSelect={onCurationSkillChange}
+              />
+            )}
             <Box sx={{ mb: 0.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{series.articlesCount} articles curated</Typography>
@@ -479,7 +634,14 @@ function LatestEditionCard({ series, onEdit }) {
               </Box>
               <LinearProgress variant="determinate" value={series.progress} sx={{ height: 5, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.07)', '& .MuiLinearProgress-bar': { bgcolor: TEAL, borderRadius: 3 } }} />
             </Box>
-            {series.estReady && (
+            {series.nextSend ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75, mb: series.estReady ? 0.5 : 2 }}>
+                <ScheduleIcon sx={{ fontSize: 12, color: TEAL }} />
+                <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 500 }}>
+                  Scheduled: <strong>{series.nextSend}</strong>
+                </Typography>
+              </Box>
+            ) : series.estReady && (
               <Typography sx={{ fontSize: '12px', color: 'text.disabled', mt: 0.5, mb: 2 }}>
                 Estimated ready: {series.estReady}
               </Typography>
@@ -489,13 +651,30 @@ function LatestEditionCard({ series, onEdit }) {
 
         {isReady && (
           <>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
               <CheckCircleOutlineIcon sx={{ fontSize: 14, color: TEAL }} />
               <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
                 <strong>{series.articlesCount} articles</strong> curated and ready for your review
               </Typography>
-              <Box sx={{ ml: 'auto' }}><StatusBadge status={series.status} /></Box>
+              <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                {curationSkill && (
+                  <CurationSkillBadge
+                    skillId={curationSkill}
+                    showChange={!!onCurationSkillChange}
+                    onClick={onCurationSkillChange ? e => { e.stopPropagation(); setSkillMenuAnchor(e.currentTarget) } : undefined}
+                  />
+                )}
+                <StatusBadge status={series.status} />
+              </Box>
             </Box>
+            {onCurationSkillChange && (
+              <CurationSkillMenu
+                anchor={skillMenuAnchor}
+                onClose={() => setSkillMenuAnchor(null)}
+                currentSkill={curationSkill}
+                onSelect={onCurationSkillChange}
+              />
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 1.25, bgcolor: AMBER_LIGHT, borderRadius: '6px', border: '1px solid rgba(245,158,11,0.2)' }}>
               <WarningAmberIcon sx={{ fontSize: 14, color: AMBER }} />
               <Typography sx={{ fontSize: '12px', color: AMBER }}>
@@ -561,13 +740,13 @@ function EditionRow({ edition, seriesId }) {
 }
 
 // ── Curation Settings Modal ───────────────────────────────────────────────────
-const CURATION_STEPS = ['Sources', 'AI Prompt', 'Preferences']
+const CURATION_STEPS = ['Sources', 'Mira Skill', 'Preferences']
 
 const DEFAULT_PROMPTS = {
-  'daily-brief':      'Curate the top 5–8 earned media articles mentioning our brand today. Prioritise tier-1 outlets and positive sentiment. Skip press releases and syndicated wire copy.',
-  'monthly-roundup':  'Find the top stories across brand, industry, and social this month. Prioritise by reach and relevance. Include analyst commentary and emerging trends. Avoid duplicate coverage.',
-  'media-coverage':   'Curate earned media coverage from monitoring searches this month. Focus on tier-1 and tier-2 outlets. Highlight coverage with highest estimated reach first.',
-  'competitor-digest':'Surface the most significant competitor news this week. Focus on product launches, leadership changes, and funding announcements. Include share-of-voice shifts.',
+  'daily-brief':      'If our CEO or C-suite is mentioned directly, always include that story. Flag any coverage that could require a comms response. Skip earnings call recaps and syndicated republications.',
+  'monthly-roundup':  'Weight stories by narrative impact, not just reach. Include at least one piece of long-form analysis if available. If a story appears in three or more outlets, treat it as a signal worth highlighting.',
+  'media-coverage':   'Lead with the story that would matter most to our PR team. Group coverage by theme rather than outlet. Note if any coverage contradicts our official messaging.',
+  'competitor-digest':'Prioritise funding announcements, leadership changes, and product launches over general mentions. If a competitor gains significant share of voice this week, flag it explicitly.',
 }
 
 function CurationStepIndicator({ current }) {
@@ -604,296 +783,381 @@ function CurationStepIndicator({ current }) {
   )
 }
 
-function CurationSettingsModal({ open, onClose, series, initialStep = 0 }) {
-  const [step, setStep]           = useState(initialStep)
-  const [searches, setSearches]   = useState(series?.searches || [])
-  const [searchFind, setSearchFind] = useState('')
-  const [prompt, setPrompt]       = useState(DEFAULT_PROMPTS[series?.id] || '')
-
-  // Preferences state
+function CurationSettingsModal({ open, onClose, series }) {
+  const [activeSection, setActiveSection] = useState('skill')
+  const [searches, setSearches]     = useState(series?.searches || [])
+  const [searchFind, setSearchFind]  = useState('')
+  const [prompt, setPrompt]          = useState(DEFAULT_PROMPTS[series?.id] || '')
+  const [skillId, setSkillId]        = useState(series?.curationSkill || 'executive-briefing')
   const [articleCount, setArticleCount] = useState(8)
-  const [autoAddPct, setAutoAddPct]     = useState(80)
   const [sentiment, setSentiment]       = useState('all')
   const [outletTier, setOutletTier]     = useState('all')
+  const [schedCadence, setSchedCadence] = useState(series?.cadence || 'Weekly')
+  const [schedDay, setSchedDay]         = useState(series?.sendDay || 'Friday')
+  const [schedTime, setSchedTime]       = useState(series?.sendTime || '8:00 AM')
 
-  const prevSeriesId = useRef(null)
-  prevSeriesId.current = series?.id
-
-  const handleOpen = () => {
-    setStep(initialStep)
-    setSearches(series?.searches || [])
-    setPrompt(DEFAULT_PROMPTS[series?.id] || '')
-    setSearchFind('')
-  }
-
-  useEffect(() => { if (open) handleOpen() }, [open, series?.id, initialStep]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (open) {
+      setActiveSection('skill')
+      setSearches(series?.searches || [])
+      setPrompt(DEFAULT_PROMPTS[series?.id] || '')
+      setSkillId(series?.curationSkill || 'executive-briefing')
+      setSearchFind('')
+      setSchedCadence(series?.cadence || 'Weekly')
+      setSchedDay(series?.sendDay || 'Friday')
+      setSchedTime(series?.sendTime || '8:00 AM')
+    }
+  }, [open, series?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleSearch = (item) =>
     setSearches(prev => prev.find(s => s.name === item.name) ? prev.filter(s => s.name !== item.name) : [...prev, item])
   const isSearchActive = (name) => searches.some(s => s.name === name)
 
-  const canNext = () => {
-    if (step === 0) return searches.length > 0
-    if (step === 1) return prompt.trim().length > 0
-    return true
-  }
-
   const ARTICLE_COUNTS = [3, 5, 8, 10, 12, 15]
-  const AUTO_ADD_PCTS  = [65, 70, 75, 80, 85, 90]
+
+  const schedBadge = schedCadence === 'Daily'
+    ? `Daily · ${schedTime}`
+    : schedDay
+    ? `${schedDay} · ${schedTime}`
+    : schedTime
+
+  const NAV = [
+    { id: 'skill',    label: 'Mira Skill',    Icon: AutoAwesomeIcon,       badge: CURATION_SKILLS[skillId]?.label },
+    { id: 'sources',  label: 'Sources',        Icon: ManageSearchIcon,      badge: searches.length ? `${searches.length} selected` : null },
+    { id: 'prompt',   label: 'Instructions',   Icon: EditOutlinedIcon,      badge: prompt.trim() ? 'Set' : 'Optional' },
+    { id: 'prefs',    label: 'Preferences',    Icon: SettingsOutlinedIcon,  badge: null },
+    { id: 'schedule', label: 'Schedule',        Icon: ScheduleIcon,          badge: schedBadge },
+  ]
+
+  const PillGroup = ({ options, value, onChange }) => (
+    <Box sx={{ display: 'flex', gap: 0.75 }}>
+      {options.map(opt => (
+        <Box key={opt.val} onClick={() => onChange(opt.val)}
+          sx={{
+            flex: 1, py: 0.75, px: 0.5, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
+            border: `1.5px solid ${value === opt.val ? TEAL : 'rgba(0,0,0,0.12)'}`,
+            bgcolor: value === opt.val ? 'rgba(0,130,127,0.07)' : 'transparent',
+            transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+          }}
+        >
+          <Typography sx={{ fontSize: '12px', fontWeight: value === opt.val ? 700 : 400, color: value === opt.val ? TEAL : 'text.secondary' }}>
+            {opt.label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  )
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '14px', overflow: 'hidden' } }}>
-      {/* Header */}
-      <Box sx={{ px: 3, pt: 2.5, pb: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-            <AutoAwesomeIcon sx={{ fontSize: 15, color: TEAL }} />
-            <Typography sx={{ fontWeight: 700, fontSize: '16px' }}>Curation Settings</Typography>
-          </Box>
-          <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>{series?.name}</Typography>
+    <Dialog open={open} onClose={onClose}
+      PaperProps={{ sx: { borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '88vh', width: 680, maxWidth: '96vw' } }}>
+
+      {/* ── Header ── */}
+      <Box sx={{ px: 3, pt: 2.5, pb: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AutoAwesomeIcon sx={{ fontSize: 16, color: TEAL }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '15px' }}>Curation Settings</Typography>
+          <Typography sx={{ fontSize: '13px', color: 'text.disabled' }}>·</Typography>
+          <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>{series?.name}</Typography>
         </Box>
         <IconButton size="small" onClick={onClose}><CloseIcon sx={{ fontSize: 18 }} /></IconButton>
       </Box>
 
-      <DialogContent sx={{ px: 3, pt: 3, pb: 2 }}>
-        {/* Step indicator */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5 }}>
-          <CurationStepIndicator current={step} />
+      {/* ── Body: left nav + right content ── */}
+      <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+
+        {/* Left nav */}
+        <Box sx={{ width: 168, flexShrink: 0, borderRight: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.015)', pt: 1.5, pb: 2, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+          {NAV.map(item => {
+            const active = activeSection === item.id
+            const NavIcon = item.Icon
+            return (
+              <Box key={item.id} onClick={() => setActiveSection(item.id)}
+                sx={{
+                  mx: 1, px: 1.25, py: 1, borderRadius: '8px', cursor: 'pointer',
+                  bgcolor: active ? TEAL_LIGHT : 'transparent',
+                  border: `1px solid ${active ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
+                  '&:hover': { bgcolor: active ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
+                  transition: 'all 0.12s',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.2 }}>
+                  <NavIcon sx={{ fontSize: 14, color: active ? TEAL : 'text.disabled', flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: '13px', fontWeight: active ? 700 : 500, color: active ? TEAL : 'text.primary' }}>
+                    {item.label}
+                  </Typography>
+                </Box>
+                {item.badge && (
+                  <Typography sx={{ fontSize: '11px', color: active ? TEAL : 'text.disabled', pl: '22px', lineHeight: 1.2 }}>
+                    {item.badge}
+                  </Typography>
+                )}
+              </Box>
+            )
+          })}
         </Box>
 
-        {/* ── Step 0: Sources ── */}
-        {step === 0 && (
-          <Box>
-            <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>
-              Choose which saved searches AI pulls from when curating each edition.
-            </Typography>
+        {/* Right content — scrollable */}
+        <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
 
-            {searches.length > 0 && (
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
-                {searches.map(s => {
-                  const cfg = MODAL_SEARCH_ICON[s.type] || MODAL_SEARCH_ICON.explore
+          {/* ── Mira Skill ── */}
+          {activeSection === 'skill' && (
+            <Box>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>
+                Choose how Mira approaches curation for this series.
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                {Object.values(CURATION_SKILLS).map(skill => {
+                  const selected = skillId === skill.id
+                  const SkillIcon = skill.Icon
                   return (
-                    <Chip
-                      key={s.name} size="small"
-                      icon={cfg.Icon ? <cfg.Icon sx={{ fontSize: '12px !important', color: `${cfg.color} !important` }} /> : <Typography sx={{ fontSize: '11px', fontWeight: 800, color: cfg.color, ml: '6px !important' }}>#</Typography>}
-                      label={s.name}
-                      onDelete={() => toggleSearch(s)}
-                      sx={{ bgcolor: `${cfg.color}12`, border: `1px solid ${cfg.color}35`, '& .MuiChip-label': { fontSize: '0.72rem', color: cfg.color, fontWeight: 600 } }}
-                    />
+                    <Box key={skill.id} onClick={() => setSkillId(skill.id)}
+                      sx={{
+                        display: 'flex', alignItems: 'center', gap: 1.5,
+                        px: 1.5, py: 1.25, borderRadius: '10px', cursor: 'pointer',
+                        border: `1.5px solid ${selected ? skill.color : 'rgba(0,0,0,0.1)'}`,
+                        bgcolor: selected ? skill.bg : 'transparent',
+                        transition: 'all 0.15s',
+                        '&:hover': { borderColor: skill.color, bgcolor: skill.bg },
+                      }}
+                    >
+                      <Box sx={{ width: 34, height: 34, borderRadius: '8px', flexShrink: 0, bgcolor: selected ? `${skill.color}22` : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <SkillIcon sx={{ fontSize: 17, color: selected ? skill.color : 'text.disabled' }} />
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '13px', color: selected ? skill.color : 'text.primary' }}>{skill.label}</Typography>
+                        <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.4 }}>{skill.description}</Typography>
+                      </Box>
+                      {selected && <CheckCircleIcon sx={{ fontSize: 16, color: skill.color, flexShrink: 0 }} />}
+                    </Box>
                   )
                 })}
               </Box>
-            )}
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, bgcolor: 'rgba(0,0,0,0.04)', borderRadius: '8px', px: 1.25, py: 0.75, mb: 1 }}>
-              <SearchIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-              <input
-                value={searchFind} onChange={e => setSearchFind(e.target.value)}
-                placeholder="Find..."
-                style={{ border: 'none', background: 'none', outline: 'none', fontSize: '13px', flex: 1, color: 'inherit', fontFamily: 'inherit' }}
-              />
             </Box>
+          )}
 
-            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'hidden' }}>
-              {Object.entries(MODAL_SEARCHES).map(([cat, items], ci) => {
-                const filtered = items.filter(i => i.name.toLowerCase().includes(searchFind.toLowerCase()))
-                if (filtered.length === 0) return null
-                const cfg = MODAL_SEARCH_ICON[filtered[0].type] || MODAL_SEARCH_ICON.explore
-                return (
-                  <Box key={cat} sx={{ borderTop: ci > 0 ? '1px solid' : 'none', borderColor: 'divider' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1.5, pt: 0.875, pb: 0.25 }}>
-                      <Typography sx={{ fontSize: '10px', fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{cat}</Typography>
-                      {searches.some(s => items.find(i => i.name === s.name)) && (
-                        <Typography onClick={() => setSearches(prev => prev.filter(s => !items.find(i => i.name === s.name)))}
-                          sx={{ fontSize: '10px', color: TEAL, cursor: 'pointer', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}>Clear</Typography>
-                      )}
-                    </Box>
-                    {filtered.map(item => (
-                      <Box key={item.name} onClick={() => toggleSearch(item)}
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.6, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,0,0,0.025)' } }}>
-                        <Box sx={{
-                          width: 15, height: 15, border: `1.5px solid ${isSearchActive(item.name) ? TEAL : 'rgba(0,0,0,0.25)'}`,
-                          bgcolor: isSearchActive(item.name) ? TEAL : 'transparent',
-                          borderRadius: '3px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          {isSearchActive(item.name) && <CheckIcon sx={{ fontSize: 10, color: '#fff' }} />}
-                        </Box>
-                        <Typography sx={{ fontSize: '12px', flex: 1 }}>{item.name}</Typography>
-                        {cfg.Icon ? <cfg.Icon sx={{ fontSize: 13, color: 'rgba(0,0,0,0.2)' }} /> : <Typography sx={{ fontSize: '12px', color: 'rgba(0,0,0,0.25)', fontWeight: 700 }}>#</Typography>}
-                      </Box>
-                    ))}
-                  </Box>
-                )
-              })}
-            </Box>
-          </Box>
-        )}
-
-        {/* ── Step 1: AI Prompt ── */}
-        {step === 1 && (
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, p: 1.5, bgcolor: 'rgba(0,130,127,0.05)', borderRadius: '8px', border: '1px solid rgba(0,130,127,0.15)', mb: 2.5 }}>
-              <AutoAwesomeIcon sx={{ fontSize: 14, color: TEAL, mt: '2px', flexShrink: 0 }} />
-              <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.5 }}>
-                Tell AI what to curate for each edition. Be specific about topics, tone, outlet preferences, and what to exclude. This prompt runs every time a new edition is generated.
+          {/* ── Sources ── */}
+          {activeSection === 'sources' && (
+            <Box>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>
+                Choose which saved searches Mira pulls from when curating each edition.
               </Typography>
-            </Box>
 
-            <TextField
-              fullWidth multiline rows={4} size="small"
-              placeholder="e.g. Curate the top 5–8 earned media articles about our brand this week. Prioritise tier-1 outlets and positive sentiment. Skip press releases and wire copy…"
-              value={prompt} onChange={e => setPrompt(e.target.value)}
-              sx={{ mb: 2.5, '& .MuiInputBase-root': { fontSize: '13px', borderRadius: '8px' } }}
-            />
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
-              <LightbulbOutlinedIcon sx={{ fontSize: 13, color: AMBER }} />
-              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Example prompts — click to use
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {PROMPT_EXAMPLES.map(ex => (
-                <Box key={ex.label} onClick={() => setPrompt(ex.prompt)}
-                  sx={{
-                    p: 1.25, borderRadius: '8px', cursor: 'pointer',
-                    border: `1px solid ${prompt === ex.prompt ? TEAL : 'rgba(0,0,0,0.1)'}`,
-                    bgcolor: prompt === ex.prompt ? 'rgba(0,130,127,0.05)' : 'transparent',
-                    '&:hover': { borderColor: TEAL, bgcolor: 'rgba(0,130,127,0.03)' },
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.4 }}>
-                    {prompt === ex.prompt && <CheckIcon sx={{ fontSize: 11, color: TEAL }} />}
-                    <Typography sx={{ fontSize: '12px', fontWeight: 700, color: prompt === ex.prompt ? TEAL : 'text.primary' }}>{ex.label}</Typography>
-                  </Box>
-                  <Typography sx={{ fontSize: '11px', color: 'text.secondary', lineHeight: 1.45 }}>
-                    {ex.prompt.length > 110 ? ex.prompt.slice(0, 110) + '…' : ex.prompt}
-                  </Typography>
+              {searches.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
+                  {searches.map(s => {
+                    const cfg = MODAL_SEARCH_ICON[s.type] || MODAL_SEARCH_ICON.explore
+                    return (
+                      <Chip key={s.name} size="small"
+                        icon={cfg.Icon ? <cfg.Icon sx={{ fontSize: '12px !important', color: `${cfg.color} !important` }} /> : <Typography sx={{ fontSize: '11px', fontWeight: 800, color: cfg.color, ml: '6px !important' }}>#</Typography>}
+                        label={s.name} onDelete={() => toggleSearch(s)}
+                        sx={{ bgcolor: `${cfg.color}12`, border: `1px solid ${cfg.color}35`, '& .MuiChip-label': { fontSize: '0.72rem', color: cfg.color, fontWeight: 600 } }}
+                      />
+                    )
+                  })}
                 </Box>
-              ))}
-            </Box>
-          </Box>
-        )}
+              )}
 
-        {/* ── Step 2: Preferences ── */}
-        {step === 2 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, bgcolor: 'rgba(0,0,0,0.04)', borderRadius: '8px', px: 1.25, py: 0.75, mb: 1 }}>
+                <SearchIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                <input value={searchFind} onChange={e => setSearchFind(e.target.value)} placeholder="Find a search…"
+                  style={{ border: 'none', background: 'none', outline: 'none', fontSize: '13px', flex: 1, color: 'inherit', fontFamily: 'inherit' }} />
+              </Box>
 
-            {/* Articles per edition */}
-            <Box>
-              <Typography sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>Articles per edition</Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled', mb: 1.25 }}>Maximum number of articles AI includes in each edition.</Typography>
-              <Box sx={{ display: 'flex', gap: 0.75 }}>
-                {ARTICLE_COUNTS.map(n => (
-                  <Box key={n} onClick={() => setArticleCount(n)}
-                    sx={{
-                      flex: 1, py: 0.9, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${articleCount === n ? TEAL : 'rgba(0,0,0,0.15)'}`,
-                      bgcolor: articleCount === n ? 'rgba(0,130,127,0.07)' : 'transparent',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '13px', fontWeight: articleCount === n ? 700 : 400, color: articleCount === n ? TEAL : 'text.secondary' }}>{n}</Typography>
-                  </Box>
-                ))}
+              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px', overflow: 'hidden' }}>
+                {Object.entries(MODAL_SEARCHES).map(([cat, items], ci) => {
+                  const filtered = items.filter(i => i.name.toLowerCase().includes(searchFind.toLowerCase()))
+                  if (filtered.length === 0) return null
+                  const cfg = MODAL_SEARCH_ICON[filtered[0].type] || MODAL_SEARCH_ICON.explore
+                  return (
+                    <Box key={cat} sx={{ borderTop: ci > 0 ? '1px solid' : 'none', borderColor: 'divider' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1.5, pt: 0.875, pb: 0.25 }}>
+                        <Typography sx={{ fontSize: '10px', fontWeight: 800, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{cat}</Typography>
+                        {searches.some(s => items.find(i => i.name === s.name)) && (
+                          <Typography onClick={() => setSearches(prev => prev.filter(s => !items.find(i => i.name === s.name)))}
+                            sx={{ fontSize: '10px', color: TEAL, cursor: 'pointer', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}>Clear</Typography>
+                        )}
+                      </Box>
+                      {filtered.map(item => (
+                        <Box key={item.name} onClick={() => toggleSearch(item)}
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.6, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,0,0,0.025)' } }}>
+                          <Box sx={{ width: 15, height: 15, border: `1.5px solid ${isSearchActive(item.name) ? TEAL : 'rgba(0,0,0,0.25)'}`, bgcolor: isSearchActive(item.name) ? TEAL : 'transparent', borderRadius: '3px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {isSearchActive(item.name) && <CheckIcon sx={{ fontSize: 10, color: '#fff' }} />}
+                          </Box>
+                          <Typography sx={{ fontSize: '12px', flex: 1 }}>{item.name}</Typography>
+                          {cfg.Icon ? <cfg.Icon sx={{ fontSize: 13, color: 'rgba(0,0,0,0.2)' }} /> : <Typography sx={{ fontSize: '12px', color: 'rgba(0,0,0,0.25)', fontWeight: 700 }}>#</Typography>}
+                        </Box>
+                      ))}
+                    </Box>
+                  )
+                })}
               </Box>
             </Box>
+          )}
 
-            {/* Auto-add threshold */}
+          {/* ── Instructions ── */}
+          {activeSection === 'prompt' && (
             <Box>
-              <Typography sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>Auto-add threshold</Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled', mb: 1.25 }}>Articles at or above this AI match score are automatically added to the edition.</Typography>
-              <Box sx={{ display: 'flex', gap: 0.75 }}>
-                {AUTO_ADD_PCTS.map(pct => (
-                  <Box key={pct} onClick={() => setAutoAddPct(pct)}
-                    sx={{
-                      flex: 1, py: 0.9, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${autoAddPct === pct ? TEAL : 'rgba(0,0,0,0.15)'}`,
-                      bgcolor: autoAddPct === pct ? 'rgba(0,130,127,0.07)' : 'transparent',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '12px', fontWeight: autoAddPct === pct ? 700 : 400, color: autoAddPct === pct ? TEAL : 'text.secondary' }}>{pct}%</Typography>
-                  </Box>
-                ))}
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1, px: 1.25, py: 0.75, bgcolor: 'rgba(0,130,127,0.04)', borderRadius: '6px' }}>
-                <AutoAwesomeIcon sx={{ fontSize: 12, color: TEAL }} />
-                <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>
-                  At <strong>{autoAddPct}%</strong>, roughly the top {autoAddPct >= 85 ? '2–3' : autoAddPct >= 78 ? '4–5' : autoAddPct >= 72 ? '5–7' : '7–9'} articles will be auto-added per edition.
-                </Typography>
-              </Box>
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>
+                Give Mira extra guidance on what to include, exclude, or prioritise. This runs every time a new edition is generated.
+              </Typography>
+              <TextField fullWidth multiline rows={5} size="small"
+                placeholder="e.g. Always lead with stories that mention our CEO. Flag anything that contradicts our official messaging. Skip earnings call recaps and republished wire copy…"
+                value={prompt} onChange={e => setPrompt(e.target.value)}
+                sx={{ mb: 1.5, '& .MuiInputBase-root': { fontSize: '13px', borderRadius: '8px' } }}
+              />
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+                Leave blank and Mira will use the selected skill's default behaviour.
+              </Typography>
             </Box>
+          )}
 
-            {/* Sentiment filter */}
-            <Box>
-              <Typography sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>Sentiment filter</Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled', mb: 1.25 }}>Only surface articles matching the selected sentiment.</Typography>
-              <Box sx={{ display: 'flex', gap: 0.75 }}>
-                {[
-                  { val: 'all',      label: 'All sentiment' },
-                  { val: 'pos-neu',  label: 'Positive & Neutral' },
+          {/* ── Preferences ── */}
+          {activeSection === 'prefs' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 0.25 }}>Articles per edition</Typography>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1.25 }}>Maximum articles Mira includes in each edition.</Typography>
+                <Box sx={{ display: 'flex', gap: 0.75 }}>
+                  {ARTICLE_COUNTS.map(n => (
+                    <Box key={n} onClick={() => setArticleCount(n)}
+                      sx={{ flex: 1, py: 0.75, textAlign: 'center', borderRadius: '8px', cursor: 'pointer', border: `1.5px solid ${articleCount === n ? TEAL : 'rgba(0,0,0,0.12)'}`, bgcolor: articleCount === n ? 'rgba(0,130,127,0.07)' : 'transparent', transition: 'all 0.15s', '&:hover': { borderColor: TEAL } }}
+                    >
+                      <Typography sx={{ fontSize: '13px', fontWeight: articleCount === n ? 700 : 400, color: articleCount === n ? TEAL : 'text.secondary' }}>{n}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 0.25 }}>Sentiment filter</Typography>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1.25 }}>Only surface articles matching the selected sentiment.</Typography>
+                <PillGroup value={sentiment} onChange={setSentiment} options={[
+                  { val: 'all', label: 'All sentiment' },
+                  { val: 'pos-neu', label: 'Positive & Neutral' },
                   { val: 'positive', label: 'Positive only' },
-                ].map(opt => (
-                  <Box key={opt.val} onClick={() => setSentiment(opt.val)}
-                    sx={{
-                      flex: 1, py: 0.9, px: 0.5, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${sentiment === opt.val ? TEAL : 'rgba(0,0,0,0.15)'}`,
-                      bgcolor: sentiment === opt.val ? 'rgba(0,130,127,0.07)' : 'transparent',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '12px', fontWeight: sentiment === opt.val ? 700 : 400, color: sentiment === opt.val ? TEAL : 'text.secondary' }}>{opt.label}</Typography>
-                  </Box>
-                ))}
+                ]} />
               </Box>
-            </Box>
 
-            {/* Outlet tier */}
-            <Box>
-              <Typography sx={{ fontSize: '12px', fontWeight: 600, mb: 0.5, color: 'text.secondary' }}>Outlet tier</Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled', mb: 1.25 }}>Restrict AI to articles from outlets of a certain reach tier.</Typography>
-              <Box sx={{ display: 'flex', gap: 0.75 }}>
-                {[
-                  { val: 'all',    label: 'All outlets' },
+              <Box>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 0.25 }}>Outlet tier</Typography>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1.25 }}>Restrict Mira to outlets of a certain reach tier.</Typography>
+                <PillGroup value={outletTier} onChange={setOutletTier} options={[
+                  { val: 'all', label: 'All outlets' },
                   { val: 'tier12', label: 'Tier 1 & 2 only' },
-                  { val: 'tier1',  label: 'Tier 1 only' },
-                ].map(opt => (
-                  <Box key={opt.val} onClick={() => setOutletTier(opt.val)}
-                    sx={{
-                      flex: 1, py: 0.9, px: 0.5, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${outletTier === opt.val ? TEAL : 'rgba(0,0,0,0.15)'}`,
-                      bgcolor: outletTier === opt.val ? 'rgba(0,130,127,0.07)' : 'transparent',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Typography sx={{ fontSize: '12px', fontWeight: outletTier === opt.val ? 700 : 400, color: outletTier === opt.val ? TEAL : 'text.secondary' }}>{opt.label}</Typography>
-                  </Box>
-                ))}
+                  { val: 'tier1', label: 'Tier 1 only' },
+                ]} />
               </Box>
+
             </Box>
+          )}
 
-          </Box>
-        )}
-      </DialogContent>
+          {/* ── Schedule ── */}
+          {activeSection === 'schedule' && (() => {
+            const WEEKDAYS   = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            const MONTH_DAYS = ['1st', '2nd', '3rd', '4th', '5th', '7th', '10th', '14th', '15th', '21st', '28th']
+            const SEND_TIMES = ['6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '5:00 PM']
+            const handleSchedCadenceChange = c => {
+              setSchedCadence(c)
+              if (c === 'Daily') setSchedDay(null)
+              if (c === 'Weekly') setSchedDay(WEEKDAYS.includes(schedDay) ? schedDay : 'Friday')
+              if (c === 'Monthly') setSchedDay(MONTH_DAYS.includes(schedDay) ? schedDay : '1st')
+            }
+            const summaryLabel = schedCadence === 'Daily'
+              ? `Every day at ${schedTime}`
+              : schedCadence === 'Weekly'
+              ? `Every ${schedDay} at ${schedTime}`
+              : `Monthly on the ${schedDay} at ${schedTime}`
+            return (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 2 }}>
+                    Set when each edition is sent. Mira will complete curation before this time.
+                  </Typography>
 
-      {/* Footer */}
-      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Button onClick={() => step === 0 ? onClose() : setStep(s => s - 1)}
-          sx={{ textTransform: 'none', color: 'text.secondary' }}>
-          {step === 0 ? 'Cancel' : '← Back'}
-        </Button>
-        <Button variant="contained" disabled={!canNext()}
-          onClick={() => step < CURATION_STEPS.length - 1 ? setStep(s => s + 1) : onClose()}
-          sx={{
-            textTransform: 'none', fontWeight: 600, borderRadius: '8px', color: '#fff',
-            bgcolor: TEAL,
-            '&:hover': { bgcolor: '#006e6b' },
-            '&.Mui-disabled': { bgcolor: 'rgba(0,0,0,0.1)', color: 'rgba(0,0,0,0.3)' },
-          }}
-        >
-          {step === CURATION_STEPS.length - 1 ? '✓ Save changes' : 'Continue →'}
+                  {/* Summary badge */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.5, bgcolor: TEAL_LIGHT, borderRadius: '10px', border: `1.5px solid ${TEAL}20`, mb: 3 }}>
+                    <ScheduleIcon sx={{ fontSize: 18, color: TEAL, flexShrink: 0 }} />
+                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: TEAL }}>{summaryLabel}</Typography>
+                  </Box>
+
+                  {/* Cadence */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.secondary', mb: 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cadence</Typography>
+                    <Box sx={{ display: 'flex', gap: 0.75 }}>
+                      {['Daily', 'Weekly', 'Monthly'].map(c => (
+                        <Box key={c} onClick={() => handleSchedCadenceChange(c)}
+                          sx={{
+                            flex: 1, py: 1, textAlign: 'center', borderRadius: '8px', cursor: 'pointer',
+                            border: `1.5px solid ${schedCadence === c ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                            bgcolor: schedCadence === c ? TEAL_LIGHT : 'transparent',
+                            transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                          }}
+                        >
+                          <Typography sx={{ fontSize: '13px', fontWeight: schedCadence === c ? 700 : 400, color: schedCadence === c ? TEAL : 'text.secondary' }}>{c}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+
+                  {/* Day picker — conditional */}
+                  {schedCadence !== 'Daily' && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.secondary', mb: 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        {schedCadence === 'Weekly' ? 'Day of week' : 'Day of month'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {(schedCadence === 'Weekly' ? WEEKDAYS : MONTH_DAYS).map(day => (
+                          <Box key={day} onClick={() => setSchedDay(day)}
+                            sx={{
+                              px: 1.25, py: 0.6, borderRadius: '7px', cursor: 'pointer',
+                              border: `1.5px solid ${schedDay === day ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                              bgcolor: schedDay === day ? TEAL_LIGHT : 'transparent',
+                              transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                            }}
+                          >
+                            <Typography sx={{ fontSize: '12px', fontWeight: schedDay === day ? 700 : 400, color: schedDay === day ? TEAL : 'text.secondary' }}>
+                              {schedCadence === 'Weekly' ? day.slice(0, 3) : day}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Time picker */}
+                  <Box>
+                    <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.secondary', mb: 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Send time</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {SEND_TIMES.map(t => (
+                        <Box key={t} onClick={() => setSchedTime(t)}
+                          sx={{
+                            px: 1.25, py: 0.6, borderRadius: '7px', cursor: 'pointer',
+                            border: `1.5px solid ${schedTime === t ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                            bgcolor: schedTime === t ? TEAL_LIGHT : 'transparent',
+                            transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                          }}
+                        >
+                          <Typography sx={{ fontSize: '12px', fontWeight: schedTime === t ? 700 : 400, color: schedTime === t ? TEAL : 'text.secondary' }}>{t}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            )
+          })()}
+
+        </Box>
+      </Box>
+
+      {/* ── Footer ── */}
+      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5, flexShrink: 0 }}>
+        <Button onClick={onClose} sx={{ textTransform: 'none', color: 'text.secondary', fontWeight: 500 }}>Cancel</Button>
+        <Button variant="contained" onClick={onClose}
+          sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', color: '#fff', bgcolor: TEAL, '&:hover': { bgcolor: '#006e6b' } }}>
+          Save changes
         </Button>
       </Box>
     </Dialog>
@@ -901,15 +1165,16 @@ function CurationSettingsModal({ open, onClose, series, initialStep = 0 }) {
 }
 
 // ── Series detail right panel ─────────────────────────────────────────────────
-function SeriesDetail({ series }) {
+function SeriesDetail({ series, curationSkill, onCurationSkillChange }) {
   const navigate = useNavigate()
   const editions = EDITION_HISTORY[series.id] || []
   const [curationOpen, setCurationOpen] = useState(false)
-  const [curationStep, setCurationStep] = useState(0)
-  const openCuration = (step = 0) => { setCurationStep(step); setCurationOpen(true) }
+  const [headerSkillAnchor, setHeaderSkillAnchor] = useState(null)
+  const openCuration = () => setCurationOpen(true)
+  const effectiveSkill = curationSkill || series.curationSkill
   return (
     <Box sx={{ height: '100%', overflow: 'auto' }}>
-      <CurationSettingsModal open={curationOpen} onClose={() => setCurationOpen(false)} series={series} initialStep={curationStep} />
+      <CurationSettingsModal open={curationOpen} onClose={() => setCurationOpen(false)} series={series} />
       {/* Header */}
       <Box sx={{ px: 3, pt: 3, pb: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5, gap: 2 }}>
@@ -926,15 +1191,32 @@ function SeriesDetail({ series }) {
           </Box>
 
           {/* Right: action buttons */}
-          <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-            <Button size="small" startIcon={<PeopleOutlineIcon sx={{ fontSize: 15 }} />} variant="outlined" sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5 }}>
-              {series.recipients} recipients
-            </Button>
-            <Button size="small" startIcon={<AutoAwesomeIcon sx={{ fontSize: 15 }} />} variant="outlined"
-              onClick={() => openCuration(0)}
-              sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5, '&:hover': { borderColor: TEAL, color: TEAL, bgcolor: 'rgba(0,130,127,0.04)' } }}>
-              Curation settings
-            </Button>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button size="small" startIcon={<PeopleOutlineIcon sx={{ fontSize: 15 }} />} variant="outlined" sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5 }}>
+                {series.recipients} recipients
+              </Button>
+              <Button size="small" startIcon={<AutoAwesomeIcon sx={{ fontSize: 15 }} />} variant="outlined"
+                onClick={() => openCuration()}
+                sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'divider', color: 'text.secondary', py: 0.5, '&:hover': { borderColor: TEAL, color: TEAL, bgcolor: 'rgba(0,130,127,0.04)' } }}>
+                Curation settings
+              </Button>
+            </Box>
+            {/* Series-level curation skill */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>Mira Curation Skill:</Typography>
+              <CurationSkillBadge
+                skillId={effectiveSkill}
+                showChange
+                onClick={e => setHeaderSkillAnchor(e.currentTarget)}
+              />
+              <CurationSkillMenu
+                anchor={headerSkillAnchor}
+                onClose={() => setHeaderSkillAnchor(null)}
+                currentSkill={effectiveSkill}
+                onSelect={skillId => { onCurationSkillChange && onCurationSkillChange(skillId); setHeaderSkillAnchor(null) }}
+              />
+            </Box>
           </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -952,7 +1234,7 @@ function SeriesDetail({ series }) {
             <SearchPills searches={series.searches} max={4} />
             <Typography
               className="edit-sources-link"
-              onClick={() => openCuration(0)}
+              onClick={() => openCuration()}
               sx={{ fontSize: '12px', color: TEAL, cursor: 'pointer', fontWeight: 500, ml: 0.25, opacity: 0, transition: 'opacity 0.15s', '&:hover': { textDecoration: 'underline' } }}
             >
               Edit sources
@@ -1025,7 +1307,12 @@ function SeriesDetail({ series }) {
         <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.08em', textTransform: 'uppercase', mb: 1.5 }}>
           Next {series.cadence} Edition
         </Typography>
-        <LatestEditionCard series={series} onEdit={() => navigate(`/mw-newsletters/editor/${series.id}`)} />
+        <LatestEditionCard
+          series={series}
+          onEdit={() => navigate(`/mw-newsletters/editor/${series.id}`)}
+          curationSkill={effectiveSkill}
+          onCurationSkillChange={onCurationSkillChange}
+        />
 
         {editions.length > 0 && (
           <>
@@ -1693,7 +1980,7 @@ function RecipientDetailPanel({ listId, lists, setLists, onBack }) {
           <Box sx={{ flex: 1 }} />
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddOpen(true)}
             sx={{ bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' }, textTransform: 'none', fontWeight: 600 }}>
-            Add Contacts
+            Add Recipients
           </Button>
         </Box>
         {/* Newsletter chips */}
@@ -1773,14 +2060,14 @@ function RecipientDetailPanel({ listId, lists, setLists, onBack }) {
 
       {/* Add contacts dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, fontSize: '16px' }}>Add Contacts</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '16px' }}>Add Recipients</DialogTitle>
         <DialogContent>
           <Typography sx={{ fontSize: '13px', color: 'text.secondary', mb: 1.5 }}>Enter email addresses separated by commas, semicolons, or new lines.</Typography>
           <TextField autoFocus fullWidth multiline rows={5} placeholder="name@company.com, name2@company.com…" value={newEmails} onChange={e => setNewEmails(e.target.value)} sx={{ '& .MuiOutlinedInput-root': { fontSize: '13px' } }} />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setAddOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddContacts} disabled={!newEmails.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' } }}>Add Contacts</Button>
+          <Button variant="contained" onClick={handleAddContacts} disabled={!newEmails.trim()} sx={{ textTransform: 'none', fontWeight: 600, bgcolor: PURPLE, color: '#fff', '&:hover': { bgcolor: '#9a1f87' } }}>Add Recipients</Button>
         </DialogActions>
       </Dialog>
 
@@ -2368,20 +2655,1062 @@ function NewSeriesModal({ open, onClose }) {
   )
 }
 
+// ── Newsletter Onboarding Flow ────────────────────────────────────────────────
+
+const MOCK_SEARCH = { name: 'Brand Monitoring', type: 'explore' }
+
+// Mock analysis results Mira would surface from a reference upload/paste
+const MOCK_ANALYSIS = {
+  'coverage-roundup': {
+    sections: ['Corporate News', 'Competitor Coverage', 'Industry Must-Reads'],
+    sources: ['Yahoo Finance', 'CNBC', 'Bloomberg', 'Fast Company'],
+    sourcesExtra: 4,
+    cadence: 'Weekly (Mondays)',
+    format: 'Broad coverage · ~12 articles · 1–2 sentence summaries',
+    audience: 'Internal comms & leadership team',
+  },
+  'executive-briefing': {
+    sections: ['Key Highlights', 'Strategic Context', 'What to Watch'],
+    sources: ['Reuters', 'Financial Times', 'Bloomberg', 'Axios'],
+    sourcesExtra: 2,
+    cadence: 'Weekly (Fridays)',
+    format: 'Executive-facing · ~8 articles · 2–3 sentence summaries',
+    audience: 'Leadership & C-Suite',
+  },
+  'analytics-snapshot': {
+    sections: ['Share of Voice', 'Sentiment Breakdown', 'Top Stories by Reach'],
+    sources: ['Meltwater', 'Brandwatch', 'Google Analytics'],
+    sourcesExtra: 2,
+    cadence: 'Monthly',
+    format: 'Data-focused · ~6 metric sections · Charts + narrative',
+    audience: 'Brand & comms team',
+  },
+}
+
+const GEN_STEPS_BASE = [
+  { pct: 0,  msg: 'Setting up your newsletter series…' },
+  { pct: 18, msg: 'Connecting to Brand Monitoring search…' },
+  { pct: 42, msg: 'Mira is scanning and ranking articles…' },
+  { pct: 67, msg: 'Curating your first edition…' },
+  { pct: 88, msg: 'Applying your style and preferences…' },
+]
+
+const GEN_STEPS_WITH_REF = [
+  { pct: 0,  msg: 'Setting up your newsletter series…' },
+  { pct: 15, msg: 'Connecting to Brand Monitoring search…' },
+  { pct: 32, msg: 'Analysing your reference edition for style and structure…' },
+  { pct: 56, msg: 'Mira is applying your editorial voice to article selection…' },
+  { pct: 78, msg: 'Curating your first edition in your style…' },
+  { pct: 92, msg: 'Final formatting and quality checks…' },
+]
+
+// Visual on the landing page — shows the "searches → newsletter" transformation
+function OnboardingVisual() {
+  const articles = [
+    { title: 'Meltwater expands AI capabilities with new acquisition', source: 'TechCrunch', age: '2h ago' },
+    { title: 'Media intelligence: what leading brands do differently', source: 'Forbes',     age: '5h ago' },
+    { title: 'Q1 earnings: media software sector up 14%',              source: 'Reuters',    age: '8h ago' },
+  ]
+  return (
+    <Box sx={{ display: 'flex', gap: 2.5, alignItems: 'center' }}>
+      {/* Source cards */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, flex: 1 }}>
+        {articles.map((a, i) => (
+          <Box key={i} sx={{
+            p: 1.5, bgcolor: '#fff', borderRadius: '8px',
+            border: '1px solid rgba(0,0,0,0.09)',
+            boxShadow: `0 ${1 + i}px ${4 + i * 2}px rgba(0,0,0,0.06)`,
+            transform: `translateY(${i * 1}px)`,
+          }}>
+            <Typography sx={{ fontSize: '10.5px', fontWeight: 600, lineHeight: 1.4, mb: 0.5, color: 'text.primary' }}>
+              {a.title}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: TEAL, flexShrink: 0 }} />
+              <Typography sx={{ fontSize: '10px', color: TEAL, fontWeight: 600 }}>{a.source}</Typography>
+              <Typography sx={{ fontSize: '10px', color: 'text.disabled' }}>{a.age}</Typography>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Arrow + AI sparkle */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.75, px: 0.25 }}>
+        <AutoAwesomeIcon sx={{
+          fontSize: 24, color: TEAL,
+          '@keyframes ob-sparkle': { '0%,100%': { opacity:1, transform:'scale(1) rotate(-5deg)' }, '50%': { opacity:0.65, transform:'scale(1.2) rotate(5deg)' } },
+          animation: 'ob-sparkle 2.4s ease-in-out infinite',
+        }} />
+        <ArrowForwardIcon sx={{ fontSize: 16, color: TEAL, opacity: 0.35 }} />
+      </Box>
+
+      {/* Newsletter preview card */}
+      <Box sx={{
+        width: 130, flexShrink: 0, bgcolor: '#fff', borderRadius: '10px',
+        border: `1.5px solid ${TEAL}35`,
+        boxShadow: '0 12px 32px rgba(0,130,127,0.14), 0 3px 10px rgba(0,0,0,0.07)',
+        overflow: 'hidden',
+      }}>
+        <Box sx={{ bgcolor: TEAL, px: 1.5, py: 1.25, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255,255,255,0.75)', flexShrink: 0 }} />
+          <Box sx={{ height: 4, width: 44, bgcolor: 'rgba(255,255,255,0.5)', borderRadius: 2 }} />
+        </Box>
+        <Box sx={{ p: 1.25, display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+          <Box sx={{ height: 5, width: '92%', bgcolor: 'rgba(0,0,0,0.18)', borderRadius: 2 }} />
+          <Box sx={{ height: 3, width: '68%', bgcolor: 'rgba(0,0,0,0.09)', borderRadius: 2 }} />
+          <Box sx={{ height: 1, bgcolor: 'rgba(0,0,0,0.07)', my: 0.25 }} />
+          {[78, 58, 88, 50, 72].map((w, i) => (
+            <Box key={i} sx={{ height: i % 2 === 0 ? 3 : 2.5, width: `${w}%`, borderRadius: 2, bgcolor: i % 3 === 0 ? `${TEAL}40` : 'rgba(0,0,0,0.07)' }} />
+          ))}
+        </Box>
+        <Box sx={{ height: 18, bgcolor: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.06)' }} />
+      </Box>
+    </Box>
+  )
+}
+
+// Per-skill copy for the "learn from example" step
+const SKILL_EXAMPLE_COPY = {
+  'coverage-roundup': {
+    headline: 'Share a roundup Mira can learn from',
+    subhead: 'Upload or paste a previous edition and Mira will study how you select stories, structure coverage, and balance topics — so every roundup it produces sounds unmistakably like you.',
+    learnPoints: ['Story selection and prioritisation', 'Section structure and cadence', 'Tone and editorial voice'],
+    uploadLabel: 'Drop a previous roundup edition here',
+    pasteLabel: 'Or paste a past edition below',
+    pastePlaceholder: 'Paste the full content of a previous roundup — subject line, body copy, article selections, any commentary. The richer the example, the better Mira calibrates…',
+  },
+  'executive-briefing': {
+    headline: 'Show Mira how you brief the room',
+    subhead: 'Upload or paste a past executive briefing and Mira will learn how you distil complex news into clear, decisive intelligence — your framing, your depth, your language.',
+    learnPoints: ['How you frame and synthesise news', 'Level of depth vs. brevity', 'The language your executives expect'],
+    uploadLabel: 'Drop a previous executive briefing here',
+    pasteLabel: 'Or paste a past briefing below',
+    pastePlaceholder: 'Paste a previous executive briefing — the key points, context, and any recommendations or framing. Mira will learn to match your voice and judgement…',
+  },
+  'analytics-snapshot': {
+    headline: 'Teach Mira your metrics narrative',
+    subhead: 'Upload or paste a past report and Mira will learn which numbers you lead with, how you contextualise performance, and what story matters most to your stakeholders.',
+    learnPoints: ['Which metrics you prioritise', 'How you contextualise and benchmark', 'The narrative arc your audience expects'],
+    uploadLabel: 'Drop a previous analytics report here',
+    pasteLabel: 'Or paste a past report below',
+    pastePlaceholder: 'Paste a previous analytics or performance report — metrics, commentary, trends, and any storytelling context. Mira will learn how you turn data into a narrative…',
+  },
+}
+
+function NewsletterOnboarding({ onComplete }) {
+  const [phase, setPhase]     = useState('landing')   // 'landing' | 'wizard' | 'generating'
+  const [step, setStep]       = useState(0)            // 0=skill, 1=example, 2=logo, 3=recipients, 4=schedule
+  const [skill, setSkill]     = useState(null)
+  const [logoUrl, setLogoUrl]   = useState(null)
+  const [logoName, setLogoName] = useState('')
+  const [refFileName, setRefFileName] = useState('')
+  const [refPaste, setRefPaste]       = useState('')
+  const [analysisState, setAnalysisState] = useState(null)  // null | 'loading' | 'shown' | 'confirmed'
+  const [recipients, setRecipients] = useState('')
+  const [cadence, setCadence]   = useState('Weekly')
+  const [sendDay, setSendDay]   = useState('Friday')
+  const [sendTime, setSendTime] = useState('8:00 AM')
+  const [genProgress, setGenProgress] = useState(0)
+  const [genMessage, setGenMessage]   = useState(GEN_STEPS_BASE[0].msg)
+  const [genDone, setGenDone] = useState(false)
+  const logoInputRef = useRef(null)
+  const refFileInputRef = useRef(null)
+
+  const STEP_LABELS = ['Share an example', 'Choose a skill', 'Upload your logo', 'Add recipients', 'Set a schedule']
+
+  const hasRefContent = !!(refFileName || refPaste.trim())
+
+  // Drive the generating animation — use richer steps when a reference was provided
+  useEffect(() => {
+    if (phase !== 'generating') return
+    const GEN_STEPS = hasRefContent ? GEN_STEPS_WITH_REF : GEN_STEPS_BASE
+    setGenProgress(GEN_STEPS[0].pct)
+    setGenMessage(GEN_STEPS[0].msg)
+    setGenDone(false)
+    let i = 1
+    const tick = setInterval(() => {
+      if (i < GEN_STEPS.length) {
+        setGenProgress(GEN_STEPS[i].pct)
+        setGenMessage(GEN_STEPS[i].msg)
+        i++
+      } else {
+        clearInterval(tick)
+        setGenProgress(100)
+        setGenMessage('Your first edition is ready!')
+        setGenDone(true)
+        setTimeout(() => onComplete({ skill, logoUrl, recipients, cadence, sendDay, sendTime }), 1400)
+      }
+    }, 920)
+    return () => clearInterval(tick)
+  }, [phase, onComplete, hasRefContent]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLogoFile = file => {
+    if (!file) return
+    setLogoUrl(URL.createObjectURL(file))
+    setLogoName(file.name)
+  }
+
+  const handleRefFile = file => {
+    if (!file) return
+    setRefFileName(file.name)
+    setRefPaste('')
+    setAnalysisState(null)  // reset analysis when content changes
+  }
+
+  const handleRefPasteChange = val => {
+    setRefPaste(val)
+    setAnalysisState(null)  // reset analysis when content changes
+  }
+
+  const runAnalysis = () => {
+    setAnalysisState('loading')
+    setTimeout(() => setAnalysisState('shown'), 1900)
+  }
+
+  const recipientCount = recipients
+    .split(/[\n,]/).map(s => s.trim()).filter(s => s.includes('@')).length
+
+  // ── Generating ────────────────────────────────────────────────────────────
+  if (phase === 'generating') {
+    const activeSkill = CURATION_SKILLS[skill]
+    const { Icon: SkillIcon } = activeSkill || {}
+    return (
+      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#fafffe', p: 4 }}>
+        <Box sx={{ maxWidth: 460, width: '100%', textAlign: 'center' }}>
+          {/* Animated icon */}
+          <Box sx={{
+            width: 72, height: 72, borderRadius: '20px',
+            bgcolor: activeSkill ? activeSkill.bg : TEAL_LIGHT,
+            border: `2px solid ${activeSkill ? activeSkill.color : TEAL}25`,
+            mx: 'auto', mb: 3.5,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {genDone
+              ? <CheckCircleIcon sx={{ fontSize: 34, color: '#22c55e' }} />
+              : <AutoAwesomeIcon sx={{
+                  fontSize: 34, color: activeSkill ? activeSkill.color : TEAL,
+                  '@keyframes gen-pulse': { '0%,100%': { opacity:1, transform:'scale(1)' }, '50%': { opacity:0.6, transform:'scale(1.15)' } },
+                  animation: 'gen-pulse 1.8s ease-in-out infinite',
+                }} />
+            }
+          </Box>
+
+          <Typography sx={{ fontWeight: 800, fontSize: '22px', letterSpacing: '-0.02em', mb: 1 }}>
+            {genDone ? 'Your newsletter is ready!' : 'Generating your newsletter…'}
+          </Typography>
+          <Typography sx={{ fontSize: '14px', color: 'text.secondary', mb: 4, minHeight: 24 }}>
+            {genDone
+              ? 'Head to the editor to review and customise before sending.'
+              : genMessage
+            }
+          </Typography>
+
+          {/* Progress bar */}
+          <LinearProgress
+            variant="determinate"
+            value={genProgress}
+            sx={{
+              height: 7, borderRadius: 4, bgcolor: 'rgba(0,0,0,0.07)',
+              '& .MuiLinearProgress-bar': {
+                bgcolor: genDone ? '#22c55e' : (activeSkill ? activeSkill.color : TEAL),
+                borderRadius: 4, transition: 'transform 0.7s ease',
+              },
+            }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+              Skill: <strong>{activeSkill?.label}</strong> · Source: <strong>{MOCK_SEARCH.name}</strong>
+              {hasRefContent && <> · <strong>Style reference loaded</strong></>}
+            </Typography>
+            <Typography sx={{ fontSize: '11px', fontWeight: 700, color: genDone ? '#22c55e' : (activeSkill ? activeSkill.color : TEAL) }}>
+              {genProgress}%
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    )
+  }
+
+  // ── Landing ────────────────────────────────────────────────────────────────
+  if (phase === 'landing') {
+    const searchCfg = SEARCH_TYPE_CFG[MOCK_SEARCH.type] || SEARCH_TYPE_CFG.explore
+    return (
+      <Box sx={{
+        height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'auto', py: 5,
+        background: 'radial-gradient(ellipse 70% 50% at 65% 55%, rgba(0,130,127,0.07) 0%, transparent 70%), #fafffe',
+      }}>
+        <Box sx={{ maxWidth: 980, mx: 'auto', px: 5, display: 'flex', gap: 7, alignItems: 'center', width: '100%' }}>
+
+          {/* ── Left: copy ── */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {/* Eyebrow */}
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, bgcolor: TEAL_LIGHT, border: `1px solid ${TEAL}25`, borderRadius: '20px', px: 1.5, py: 0.6, mb: 3 }}>
+              <AutoAwesomeIcon sx={{ fontSize: 12, color: TEAL }} />
+              <Typography sx={{ fontSize: '11px', fontWeight: 700, color: TEAL, letterSpacing: '0.04em', lineHeight: 1 }}>
+                AI-powered newsletters
+              </Typography>
+            </Box>
+
+            {/* Headline */}
+            <Typography sx={{ fontSize: 'clamp(30px, 3.8vw, 46px)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.025em', color: 'text.primary', mb: 2.5 }}>
+              Newsletters that<br />
+              <Box component="span" sx={{ color: TEAL }}>think for themselves.</Box>
+            </Typography>
+
+            {/* Body */}
+            <Typography sx={{ fontSize: '15px', lineHeight: 1.7, color: 'text.secondary', mb: 3.5, maxWidth: 420 }}>
+              Connect your saved searches. Mira monitors the news, curates the most relevant stories, and assembles a polished edition — automatically, every time.
+            </Typography>
+
+            {/* Search callout */}
+            <Box sx={{
+              display: 'inline-flex', alignItems: 'center', gap: 1.5,
+              bgcolor: 'background.paper', borderRadius: '10px',
+              border: `1.5px solid ${TEAL}20`, p: 1.5, mb: 3.5,
+              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+            }}>
+              <CheckCircleIcon sx={{ fontSize: 18, color: TEAL, flexShrink: 0 }} />
+              <Box>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.4 }}>
+                  <strong style={{ color: 'rgba(0,0,0,0.85)' }}>1 search ready</strong> to power your first newsletter
+                </Typography>
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, bgcolor: searchCfg.bg, borderRadius: '4px', px: 0.75, py: 0.3, mt: 0.5 }}>
+                  <searchCfg.Icon sx={{ fontSize: 11, color: searchCfg.color }} />
+                  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: searchCfg.color }}>{MOCK_SEARCH.name}</Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* CTA */}
+            <Box>
+              <Button
+                variant="contained"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => setPhase('wizard')}
+                sx={{
+                  bgcolor: TEAL, color: '#fff', fontWeight: 700, fontSize: '15px',
+                  textTransform: 'none', borderRadius: '10px', px: 3.5, py: 1.5,
+                  boxShadow: '0 4px 16px rgba(0,130,127,0.28)',
+                  '&:hover': { bgcolor: '#006e6b', transform: 'translateY(-1px)', boxShadow: '0 7px 24px rgba(0,130,127,0.35)' },
+                  transition: 'all 0.2s',
+                  display: 'block', mb: 1.5,
+                }}
+              >
+                Generate my first newsletter
+              </Button>
+              <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>
+                Ready in about 30 seconds · Nothing is sent without your review
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* ── Right: visual ── */}
+          <Box sx={{ flexShrink: 0, display: { xs: 'none', md: 'flex' }, alignItems: 'center', justifyContent: 'center', minWidth: 360 }}>
+            <OnboardingVisual />
+          </Box>
+        </Box>
+      </Box>
+    )
+  }
+
+  // ── Wizard ─────────────────────────────────────────────────────────────────
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#fafffe', overflow: 'hidden' }}>
+
+      {/* Header */}
+      <Box sx={{ px: 4, pt: 3, pb: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
+          <Box>
+            <Typography sx={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.015em', mb: 0.3 }}>
+              Set up your newsletter
+            </Typography>
+            <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>
+              Step {step + 1} of {STEP_LABELS.length} — {STEP_LABELS[step]}
+            </Typography>
+          </Box>
+          <Button onClick={() => setPhase('landing')} sx={{ textTransform: 'none', color: 'text.secondary', fontSize: '13px', mt: 0.5 }}>
+            ← Back
+          </Button>
+        </Box>
+
+        {/* Step indicators */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+          {STEP_LABELS.map((label, i) => {
+            const done   = i < step
+            const active = i === step
+            return (
+              <Box key={label} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Box sx={{
+                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    bgcolor: done ? TEAL : active ? TEAL : 'rgba(0,0,0,0.08)',
+                    border: `2px solid ${done ? TEAL : active ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                    transition: 'all 0.2s',
+                  }}>
+                    {done
+                      ? <CheckIcon sx={{ fontSize: 12, color: '#fff' }} />
+                      : <Typography sx={{ fontSize: '10px', fontWeight: 700, color: active ? '#fff' : 'text.disabled', lineHeight: 1 }}>{i + 1}</Typography>
+                    }
+                  </Box>
+                  <Typography sx={{ fontSize: '12px', fontWeight: active ? 700 : 500, color: active ? TEAL : done ? TEAL : 'text.disabled', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </Typography>
+                </Box>
+                {i < STEP_LABELS.length - 1 && (
+                  <Box sx={{ width: 36, height: 2, bgcolor: i < step ? TEAL : 'rgba(0,0,0,0.1)', mx: 1.25, transition: 'background-color 0.3s' }} />
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
+
+      {/* Body */}
+      <Box sx={{ flex: 1, overflow: 'auto', py: 4, px: 4 }}>
+
+        {/* ── Step 1: Choose skill ── */}
+        {step === 1 && (
+          <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+            <Typography sx={{ fontSize: '15px', color: 'text.secondary', lineHeight: 1.65, mb: 3.5 }}>
+              Choose how Mira approaches curation for this newsletter. You can change it anytime.
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {Object.values(CURATION_SKILLS).map(s => {
+                const { Icon: SkillIcon } = s
+                const active = skill === s.id
+                return (
+                  <Box
+                    key={s.id}
+                    onClick={() => setSkill(s.id)}
+                    sx={{
+                      p: 2.5, borderRadius: '12px', cursor: 'pointer',
+                      border: `2px solid ${active ? s.color : 'rgba(0,0,0,0.1)'}`,
+                      bgcolor: active ? s.bg : 'background.paper',
+                      display: 'flex', alignItems: 'flex-start', gap: 2,
+                      transition: 'all 0.15s',
+                      '&:hover': { borderColor: s.color, bgcolor: s.bg },
+                      boxShadow: active ? `0 0 0 3px ${s.color}12` : '0 1px 4px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <Box sx={{
+                      width: 44, height: 44, borderRadius: '10px', bgcolor: `${s.color}18`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.15,
+                    }}>
+                      <SkillIcon sx={{ fontSize: 22, color: s.color }} />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '15px', color: active ? s.color : 'text.primary' }}>
+                          {s.label}
+                        </Typography>
+                        {active && <CheckCircleIcon sx={{ fontSize: 16, color: s.color }} />}
+                      </Box>
+                      <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.55 }}>
+                        {s.description}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
+        )}
+
+        {/* ── Step 0: Share an example edition ── */}
+        {step === 0 && (() => {
+          const ex = SKILL_EXAMPLE_COPY[skill] || SKILL_EXAMPLE_COPY['executive-briefing']
+          const activeSkill = CURATION_SKILLS[skill]
+          return (
+            <Box sx={{ maxWidth: 580, mx: 'auto' }}>
+              {/* Skill-aware header */}
+              {(() => {
+                const SkillHeaderIcon = activeSkill?.Icon || AutoAwesomeIcon
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3.5, p: 2.5, bgcolor: activeSkill ? activeSkill.bg : TEAL_LIGHT, borderRadius: '12px', border: `1.5px solid ${activeSkill ? activeSkill.color : TEAL}25` }}>
+                    <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: activeSkill ? `${activeSkill.color}20` : TEAL_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <SkillHeaderIcon sx={{ fontSize: 20, color: activeSkill ? activeSkill.color : TEAL }} />
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontWeight: 700, fontSize: '16px', mb: 0.5, color: activeSkill ? activeSkill.color : TEAL }}>
+                        {ex.headline}
+                      </Typography>
+                      <Typography sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.6 }}>
+                        {ex.subhead}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )
+              })()}
+
+              {/* What Mira learns */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.5 }}>
+                <AutoAwesomeIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                <Typography sx={{ fontSize: '11px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                  Mira will analyse
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
+                {ex.learnPoints.map(pt => (
+                  <Box key={pt} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.6, bgcolor: 'rgba(0,0,0,0.04)', borderRadius: '20px', px: 1.25, py: 0.5, border: '1px solid rgba(0,0,0,0.07)' }}>
+                    <CheckIcon sx={{ fontSize: 11, color: TEAL }} />
+                    <Typography sx={{ fontSize: '11px', color: 'text.secondary', fontWeight: 500 }}>{pt}</Typography>
+                  </Box>
+                ))}
+              </Box>
+
+              {/* File upload area */}
+              <input
+                ref={refFileInputRef}
+                type="file"
+                accept=".pdf,.html,.htm,.docx,.doc,.txt"
+                style={{ display: 'none' }}
+                onChange={e => handleRefFile(e.target.files?.[0])}
+              />
+
+              {refFileName ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, mb: 2, bgcolor: activeSkill ? activeSkill.bg : TEAL_LIGHT, borderRadius: '10px', border: `1.5px solid ${activeSkill ? activeSkill.color : TEAL}30` }}>
+                  <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: activeSkill ? `${activeSkill.color}18` : TEAL_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CheckCircleIcon sx={{ fontSize: 18, color: activeSkill ? activeSkill.color : TEAL }} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refFileName}</Typography>
+                    <Typography sx={{ fontSize: '11px', color: 'text.secondary' }}>Ready for Mira to learn from</Typography>
+                  </Box>
+                  <Button size="small" onClick={() => setRefFileName('')} sx={{ textTransform: 'none', fontSize: '11px', color: 'text.secondary', flexShrink: 0 }}>
+                    Remove
+                  </Button>
+                </Box>
+              ) : (
+                <Box
+                  onClick={() => refFileInputRef.current?.click()}
+                  sx={{
+                    border: '2px dashed rgba(0,0,0,0.15)', borderRadius: '10px',
+                    p: 3, textAlign: 'center', cursor: 'pointer', mb: 2,
+                    transition: 'all 0.15s',
+                    '&:hover': { borderColor: activeSkill ? activeSkill.color : TEAL, bgcolor: activeSkill ? activeSkill.bg : TEAL_LIGHT },
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: 0.4 }}>{ex.uploadLabel}</Typography>
+                  <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>PDF, HTML, DOCX or TXT</Typography>
+                </Box>
+              )}
+
+              {/* OR divider */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <Box sx={{ flex: 1, height: 1, bgcolor: 'rgba(0,0,0,0.08)' }} />
+                <Typography sx={{ fontSize: '11px', color: 'text.disabled', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>or</Typography>
+                <Box sx={{ flex: 1, height: 1, bgcolor: 'rgba(0,0,0,0.08)' }} />
+              </Box>
+
+              {/* Paste area */}
+              <Typography sx={{ fontSize: '12px', fontWeight: 600, color: 'text.secondary', mb: 1 }}>{ex.pasteLabel}</Typography>
+              <TextField
+                fullWidth multiline rows={5}
+                placeholder={ex.pastePlaceholder}
+                value={refPaste}
+                disabled={!!refFileName || analysisState === 'shown' || analysisState === 'confirmed'}
+                onChange={e => handleRefPasteChange(e.target.value)}
+                sx={{
+                  mb: 1.5,
+                  '& .MuiInputBase-root': { fontSize: '13px', borderRadius: '10px', fontFamily: 'inherit', lineHeight: 1.6 },
+                  opacity: (refFileName || analysisState === 'shown' || analysisState === 'confirmed') ? 0.5 : 1,
+                }}
+              />
+
+              <Typography sx={{ fontSize: '12px', color: 'text.disabled', mb: hasRefContent && !analysisState ? 2.5 : 0 }}>
+                Optional — you can skip this and Mira will still produce a great first edition.
+              </Typography>
+
+              {/* ── Analyse CTA ── appears once content is provided */}
+              {hasRefContent && !analysisState && (
+                <Box sx={{ mt: 2, p: 2.5, bgcolor: activeSkill ? activeSkill.bg : TEAL_LIGHT, borderRadius: '12px', border: `1.5px solid ${activeSkill ? activeSkill.color : TEAL}25`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: 0.3, color: 'text.primary' }}>
+                      {refFileName ? `"${refFileName}" ready to analyse` : `${refPaste.trim().split(/\s+/).length} words ready to analyse`}
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>
+                      Let Mira read your example before you continue
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    startIcon={<AutoAwesomeIcon sx={{ fontSize: 15 }} />}
+                    onClick={runAnalysis}
+                    sx={{
+                      bgcolor: activeSkill ? activeSkill.color : TEAL,
+                      color: '#fff', fontWeight: 700, fontSize: '13px',
+                      textTransform: 'none', borderRadius: '8px', px: 2.25, py: 1,
+                      flexShrink: 0,
+                      '&:hover': { bgcolor: activeSkill ? activeSkill.color : TEAL, filter: 'brightness(0.88)' },
+                      boxShadow: `0 4px 14px ${activeSkill ? activeSkill.color : TEAL}40`,
+                    }}
+                  >
+                    Analyse with Mira
+                  </Button>
+                </Box>
+              )}
+
+              {/* ── Loading state ── */}
+              {analysisState === 'loading' && (
+                <Box sx={{ mt: 2, p: 3, bgcolor: 'background.paper', borderRadius: '12px', border: '1.5px solid', borderColor: 'divider', textAlign: 'center' }}>
+                  <AutoAwesomeIcon sx={{
+                    fontSize: 28, color: activeSkill ? activeSkill.color : TEAL, mb: 1.5,
+                    '@keyframes an-pulse': { '0%,100%': { opacity:1, transform:'scale(1) rotate(-5deg)' }, '50%': { opacity:0.6, transform:'scale(1.18) rotate(5deg)' } },
+                    animation: 'an-pulse 1.6s ease-in-out infinite',
+                  }} />
+                  <Typography sx={{ fontWeight: 600, fontSize: '14px', mb: 0.5 }}>Mira is reading your example…</Typography>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>Detecting structure, tone, sources and cadence</Typography>
+                  <LinearProgress sx={{ mt: 2, borderRadius: 2, height: 4, bgcolor: 'rgba(0,0,0,0.07)', '& .MuiLinearProgress-bar': { bgcolor: activeSkill ? activeSkill.color : TEAL, borderRadius: 2 } }} />
+                </Box>
+              )}
+
+              {/* ── Analysis results card ── */}
+              {(analysisState === 'shown' || analysisState === 'confirmed') && (() => {
+                const analysis = MOCK_ANALYSIS[skill] || MOCK_ANALYSIS['executive-briefing']
+                const ac = activeSkill ? activeSkill.color : TEAL
+                const ab = activeSkill ? activeSkill.bg : TEAL_LIGHT
+                const isConfirmed = analysisState === 'confirmed'
+
+                const rows = [
+                  { Icon: ViewStreamOutlinedIcon, label: 'Sections detected',
+                    content: (
+                      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.5 }}>
+                        {analysis.sections.map(s => (
+                          <Box key={s} sx={{ px: 1.25, py: 0.4, borderRadius: '20px', border: `1.5px solid ${ac}35`, bgcolor: ab, display: 'inline-flex' }}>
+                            <Typography sx={{ fontSize: '12px', fontWeight: 600, color: ac }}>{s}</Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    )
+                  },
+                  { Icon: AllInboxOutlinedIcon, label: 'Sources identified',
+                    content: (
+                      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 0.5 }}>
+                        {analysis.sources.map(s => (
+                          <Box key={s} sx={{ px: 1.1, py: 0.35, borderRadius: '20px', border: '1.5px solid rgba(0,0,0,0.12)', bgcolor: 'rgba(0,0,0,0.03)' }}>
+                            <Typography sx={{ fontSize: '12px', fontWeight: 500, color: 'text.primary' }}>{s}</Typography>
+                          </Box>
+                        ))}
+                        {analysis.sourcesExtra > 0 && (
+                          <Box sx={{ px: 1.1, py: 0.35, borderRadius: '20px', border: '1.5px solid rgba(0,0,0,0.12)', bgcolor: 'rgba(0,0,0,0.03)' }}>
+                            <Typography sx={{ fontSize: '12px', fontWeight: 500, color: 'text.secondary' }}>+{analysis.sourcesExtra} more</Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    )
+                  },
+                  { Icon: AccessTimeOutlinedIcon, label: 'Cadence', content: <Typography sx={{ fontSize: '14px', fontWeight: 700, mt: 0.25 }}>{analysis.cadence}</Typography> },
+                  { Icon: EditOutlinedIcon,        label: 'Format & tone', content: <Typography sx={{ fontSize: '14px', fontWeight: 700, mt: 0.25 }}>{analysis.format}</Typography> },
+                  { Icon: GroupOutlinedIcon,       label: 'Audience', content: <Typography sx={{ fontSize: '14px', fontWeight: 700, mt: 0.25 }}>{analysis.audience}</Typography> },
+                ]
+
+                return (
+                  <Box sx={{ mt: 2, borderRadius: '12px', overflow: 'hidden', border: `1.5px solid ${ac}30`, boxShadow: `0 4px 20px ${ac}15` }}>
+                    {/* Header */}
+                    <Box sx={{ px: 2.5, py: 1.75, bgcolor: ab, borderBottom: `1px solid ${ac}20`, display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                      {isConfirmed
+                        ? <CheckCircleIcon sx={{ fontSize: 16, color: ac }} />
+                        : <AutoAwesomeIcon sx={{ fontSize: 16, color: ac }} />
+                      }
+                      <Typography sx={{ fontWeight: 700, fontSize: '14px', color: ac }}>
+                        {isConfirmed ? 'Mira is calibrated to your style' : 'Detected from your example'}
+                      </Typography>
+                      {isConfirmed && (
+                        <Button size="small" onClick={() => setAnalysisState('shown')}
+                          sx={{ ml: 'auto', textTransform: 'none', fontSize: '11px', color: 'text.secondary', p: 0 }}>
+                          Edit
+                        </Button>
+                      )}
+                    </Box>
+
+                    {/* Rows */}
+                    <Box sx={{ bgcolor: 'background.paper' }}>
+                      {rows.map((row, i) => {
+                        const RowIcon = row.Icon
+                        return (
+                          <Box key={row.label} sx={{ px: 2.5, py: 1.75, display: 'flex', alignItems: 'flex-start', gap: 2, borderBottom: i < rows.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
+                            <Box sx={{ width: 30, height: 30, borderRadius: '7px', bgcolor: 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.15 }}>
+                              <RowIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography sx={{ fontSize: '11px', color: 'text.disabled', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{row.label}</Typography>
+                              {row.content}
+                            </Box>
+                          </Box>
+                        )
+                      })}
+                    </Box>
+
+                    {/* Actions */}
+                    {!isConfirmed && (
+                      <Box sx={{ px: 2.5, py: 2, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'rgba(0,0,0,0.015)', display: 'flex', gap: 1.25 }}>
+                        <Button
+                          variant="contained"
+                          startIcon={<CheckIcon sx={{ fontSize: 14 }} />}
+                          onClick={() => setAnalysisState('confirmed')}
+                          sx={{
+                            bgcolor: ac, color: '#fff', fontWeight: 700, fontSize: '13px',
+                            textTransform: 'none', borderRadius: '8px', px: 2.5, py: 1,
+                            '&:hover': { bgcolor: ac, filter: 'brightness(0.88)' },
+                            boxShadow: `0 3px 12px ${ac}35`,
+                          }}
+                        >
+                          Yes, looks good
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={() => { setAnalysisState(null); setRefFileName(''); setRefPaste('') }}
+                          sx={{
+                            borderColor: 'rgba(0,0,0,0.15)', color: 'text.secondary',
+                            fontWeight: 600, fontSize: '13px',
+                            textTransform: 'none', borderRadius: '8px', px: 2,
+                            '&:hover': { borderColor: 'rgba(0,0,0,0.3)', bgcolor: 'rgba(0,0,0,0.03)' },
+                          }}
+                        >
+                          Edit a few things
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+                )
+              })()}
+            </Box>
+          )
+        })()}
+
+        {/* ── Step 2: Upload logo ── */}
+        {step === 2 && (
+          <Box sx={{ maxWidth: 500, mx: 'auto' }}>
+            <Typography sx={{ fontSize: '15px', color: 'text.secondary', lineHeight: 1.65, mb: 3.5 }}>
+              Add your brand logo so every edition feels on-brand. You can update this anytime in settings.
+            </Typography>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => handleLogoFile(e.target.files?.[0])}
+            />
+
+            {logoUrl ? (
+              <Box sx={{ p: 2.5, border: `2px solid ${TEAL}30`, borderRadius: '12px', bgcolor: TEAL_LIGHT, display: 'flex', alignItems: 'center', gap: 2.5, mb: 2 }}>
+                <Box sx={{
+                  width: 88, height: 60, borderRadius: '8px', bgcolor: '#fff',
+                  border: '1px solid rgba(0,0,0,0.09)', overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                }}>
+                  <Box component="img" src={logoUrl} alt="Logo preview" sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', p: 0.75 }} />
+                </Box>
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                    <CheckCircleIcon sx={{ fontSize: 14, color: TEAL }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: '14px' }}>Logo uploaded</Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '12px', color: 'text.secondary', mb: 1 }}>{logoName}</Typography>
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Button size="small" onClick={() => logoInputRef.current?.click()}
+                      sx={{ textTransform: 'none', fontSize: '12px', color: TEAL, p: 0, minWidth: 0, '&:hover': { textDecoration: 'underline' } }}>
+                      Replace
+                    </Button>
+                    <Button size="small" onClick={() => { setLogoUrl(null); setLogoName('') }}
+                      sx={{ textTransform: 'none', fontSize: '12px', color: 'text.secondary', p: 0, minWidth: 0 }}>
+                      Remove
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            ) : (
+              <Box
+                onClick={() => logoInputRef.current?.click()}
+                sx={{
+                  border: '2px dashed rgba(0,0,0,0.15)', borderRadius: '12px',
+                  p: 5, textAlign: 'center', cursor: 'pointer', mb: 2,
+                  transition: 'all 0.15s',
+                  '&:hover': { borderColor: TEAL, bgcolor: TEAL_LIGHT },
+                }}
+              >
+                <Box sx={{ width: 52, height: 52, borderRadius: '12px', bgcolor: 'rgba(0,0,0,0.05)', mx: 'auto', mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <AddIcon sx={{ fontSize: 26, color: 'text.disabled' }} />
+                </Box>
+                <Typography sx={{ fontWeight: 600, fontSize: '14px', mb: 0.5 }}>Click to upload your logo</Typography>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>PNG, SVG or JPG · Recommended 200 × 60 px</Typography>
+              </Box>
+            )}
+
+            <Typography sx={{ fontSize: '12px', color: 'text.disabled', textAlign: 'center', mt: 1 }}>
+              Optional — you can skip this and add it later in settings
+            </Typography>
+          </Box>
+        )}
+
+        {/* ── Step 3: Add recipients ── */}
+        {step === 3 && (
+          <Box sx={{ maxWidth: 500, mx: 'auto' }}>
+            <Typography sx={{ fontSize: '15px', color: 'text.secondary', lineHeight: 1.65, mb: 3.5 }}>
+              Who should receive this newsletter? Enter email addresses below — one per line, or comma-separated. You can manage full recipient lists later.
+            </Typography>
+
+            <TextField
+              fullWidth multiline rows={6}
+              placeholder={'sarah@company.com\nmichael@company.com\nleadership@company.com\n\nOr paste a comma-separated list…'}
+              value={recipients}
+              onChange={e => setRecipients(e.target.value)}
+              sx={{ mb: 1.5, '& .MuiInputBase-root': { fontSize: '13px', borderRadius: '10px', fontFamily: 'inherit', lineHeight: 1.6 } }}
+            />
+
+            {recipientCount > 0 && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 2, px: 1.25, py: 1, bgcolor: TEAL_LIGHT, borderRadius: '8px', border: `1px solid ${TEAL}20` }}>
+                <CheckCircleIcon sx={{ fontSize: 14, color: TEAL }} />
+                <Typography sx={{ fontSize: '12px', color: TEAL, fontWeight: 600 }}>
+                  {recipientCount} valid email address{recipientCount !== 1 ? 'es' : ''} detected
+                </Typography>
+              </Box>
+            )}
+
+            <Typography sx={{ fontSize: '12px', color: 'text.disabled' }}>
+              Optional — skip this and configure recipient lists after your series is created.
+            </Typography>
+          </Box>
+        )}
+
+        {/* ── Step 4: Set a schedule ── */}
+        {step === 4 && (() => {
+          const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+          const MONTH_DAYS = ['1st', '2nd', '3rd', '4th', '5th', '7th', '10th', '14th', '15th', '21st', '28th']
+          const SEND_TIMES = ['6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '5:00 PM']
+          const scheduleLabel = cadence === 'Daily'
+            ? `Every day at ${sendTime}`
+            : cadence === 'Weekly'
+            ? `Every ${sendDay} at ${sendTime}`
+            : `Monthly on the ${sendDay} at ${sendTime}`
+          const handleCadenceChange = c => {
+            setCadence(c)
+            if (c === 'Daily') setSendDay(null)
+            if (c === 'Weekly') setSendDay(WEEKDAYS.includes(sendDay) ? sendDay : 'Friday')
+            if (c === 'Monthly') setSendDay(MONTH_DAYS.includes(sendDay) ? sendDay : '1st')
+          }
+          return (
+            <Box sx={{ maxWidth: 520, mx: 'auto' }}>
+              <Typography sx={{ fontSize: '15px', color: 'text.secondary', lineHeight: 1.65, mb: 3.5 }}>
+                Set when each edition should be sent. Mira will complete curation before this time so your newsletter is ready to go.
+              </Typography>
+
+              {/* Cadence */}
+              <Box sx={{ mb: 3 }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 1 }}>Cadence</Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {['Daily', 'Weekly', 'Monthly'].map(c => (
+                    <Box key={c} onClick={() => handleCadenceChange(c)}
+                      sx={{
+                        flex: 1, py: 1.25, textAlign: 'center', borderRadius: '10px', cursor: 'pointer',
+                        border: `2px solid ${cadence === c ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                        bgcolor: cadence === c ? TEAL_LIGHT : 'transparent',
+                        transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '14px', fontWeight: cadence === c ? 700 : 500, color: cadence === c ? TEAL : 'text.secondary' }}>{c}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Send day — conditional on cadence */}
+              {cadence !== 'Daily' && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 1 }}>
+                    {cadence === 'Weekly' ? 'Day of week' : 'Day of month'}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                    {(cadence === 'Weekly' ? WEEKDAYS : MONTH_DAYS).map(day => (
+                      <Box key={day} onClick={() => setSendDay(day)}
+                        sx={{
+                          px: 1.5, py: 0.75, borderRadius: '8px', cursor: 'pointer',
+                          border: `1.5px solid ${sendDay === day ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                          bgcolor: sendDay === day ? TEAL_LIGHT : 'transparent',
+                          transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                        }}
+                      >
+                        <Typography sx={{ fontSize: '13px', fontWeight: sendDay === day ? 700 : 400, color: sendDay === day ? TEAL : 'text.secondary' }}>
+                          {cadence === 'Weekly' ? day.slice(0, 3) : day}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {/* Send time */}
+              <Box sx={{ mb: 3.5 }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: 600, mb: 1 }}>Send time</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                  {SEND_TIMES.map(t => (
+                    <Box key={t} onClick={() => setSendTime(t)}
+                      sx={{
+                        px: 1.25, py: 0.6, borderRadius: '8px', cursor: 'pointer',
+                        border: `1.5px solid ${sendTime === t ? TEAL : 'rgba(0,0,0,0.12)'}`,
+                        bgcolor: sendTime === t ? TEAL_LIGHT : 'transparent',
+                        transition: 'all 0.15s', '&:hover': { borderColor: TEAL },
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '12px', fontWeight: sendTime === t ? 700 : 400, color: sendTime === t ? TEAL : 'text.secondary' }}>{t}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Summary banner */}
+              <Box sx={{ p: 2, bgcolor: TEAL_LIGHT, borderRadius: '10px', border: `1.5px solid ${TEAL}20`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <ScheduleIcon sx={{ fontSize: 22, color: TEAL, flexShrink: 0 }} />
+                <Box>
+                  <Typography sx={{ fontSize: '14px', fontWeight: 700, color: TEAL }}>
+                    {scheduleLabel}
+                  </Typography>
+                  <Typography sx={{ fontSize: '11px', color: 'text.secondary', mt: 0.3 }}>
+                    Mira will have your edition ready before the send time. You can adjust this anytime in settings.
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          )
+        })()}
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ px: 4, py: 2.5, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <Button
+          onClick={() => step === 0 ? setPhase('landing') : setStep(s => s - 1)}
+          sx={{ textTransform: 'none', color: 'text.secondary', fontSize: '13px' }}
+        >
+          {step === 0 ? '← Overview' : '← Back'}
+        </Button>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {step > 0 && step < STEP_LABELS.length - 1 && (
+            <Button
+              onClick={() => setStep(s => s + 1)}
+              sx={{ textTransform: 'none', color: 'text.secondary', fontSize: '13px' }}
+            >
+              Skip for now
+            </Button>
+          )}
+          {step === STEP_LABELS.length - 1 && (
+            <Button
+              onClick={() => setPhase('generating')}
+              sx={{ textTransform: 'none', color: 'text.secondary', fontSize: '13px' }}
+            >
+              Skip &amp; generate
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            disabled={step === 1 && !skill}
+            endIcon={step === STEP_LABELS.length - 1
+              ? <AutoAwesomeIcon sx={{ fontSize: 15 }} />
+              : <ArrowForwardIcon sx={{ fontSize: 15 }} />
+            }
+            onClick={() => step < STEP_LABELS.length - 1 ? setStep(s => s + 1) : setPhase('generating')}
+            sx={{
+              bgcolor: TEAL, color: '#fff', fontWeight: 700, fontSize: '13px',
+              textTransform: 'none', borderRadius: '8px', px: 2.5, py: 1,
+              boxShadow: step === STEP_LABELS.length - 1 ? '0 4px 14px rgba(0,130,127,0.25)' : 'none',
+              '&:hover': { bgcolor: '#006e6b' },
+              '&.Mui-disabled': { bgcolor: 'rgba(0,0,0,0.1)', color: 'rgba(0,0,0,0.3)' },
+            }}
+          >
+            {step === STEP_LABELS.length - 1 ? 'Generate my newsletter' : 'Continue'}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
-export default function MwNewslettersPage() {
+export default function MwNewslettersPage({ ftuxMode = false }) {
   const [selectedId, setSelectedId]         = useState(ALL_VIEW_ID)
   const [search, setSearch]                 = useState('')
   const [newSeriesOpen, setNewSeriesOpen]   = useState(false)
   const [recipientLists, setRecipientLists] = useState(INITIAL_RECIPIENT_LISTS)
   const [selectedListId, setSelectedListId] = useState(null) // for drill-down inside recipients view
 
+  // In ftuxMode the user must complete onboarding first; otherwise go straight to inbox
+  const [onboarded, setOnboarded] = useState(!ftuxMode)
+
+  // In ftuxMode, holds the single series built from the onboarding wizard
+  const [ftuxSeries, setFtuxSeries] = useState(null)
+
+  // Series-level curation skill overrides (keyed by series id)
+  const [seriesSkills, setSeriesSkills] = useState(() =>
+    Object.fromEntries(SERIES.map(s => [s.id, s.curationSkill]))
+  )
+  const handleCurationSkillChange = (seriesId, skillId) =>
+    setSeriesSkills(prev => ({ ...prev, [seriesId]: skillId }))
+
+  if (!onboarded) {
+    return (
+      <NewsletterOnboarding
+        onComplete={(data) => {
+          if (ftuxMode && data?.skill) {
+            const skillNames = {
+              'coverage-roundup':   'Coverage Roundup',
+              'executive-briefing': 'Executive Briefing',
+              'analytics-snapshot': 'Analytics Snapshot',
+            }
+            const recipientCount = data.recipients
+              ? data.recipients.split(/[\s,;]+/).filter(s => /\S+@\S+\.\S+/.test(s)).length
+              : 0
+            const seriesCadence  = data.cadence  || 'Weekly'
+            const seriesSendDay  = data.sendDay  || 'Friday'
+            const seriesSendTime = data.sendTime || '8:00 AM'
+            const computedNextSend = seriesCadence === 'Daily'
+              ? `Tomorrow, ${seriesSendTime}`
+              : seriesCadence === 'Weekly'
+              ? `${seriesSendDay}, ${seriesSendTime}`
+              : `${seriesSendDay} of next month, ${seriesSendTime}`
+            const newSeries = {
+              id: 'my-newsletter',
+              name: skillNames[data.skill] || 'My Newsletter',
+              cadence: seriesCadence,
+              sendDay: seriesCadence !== 'Daily' ? seriesSendDay : null,
+              sendTime: seriesSendTime,
+              status: 'curating',
+              articlesCount: 6,
+              progress: 12,
+              sources: ['Explore'],
+              searches: [{ name: MOCK_SEARCH.name, type: MOCK_SEARCH.type }],
+              recipients: recipientCount,
+              nextSend: computedNextSend,
+              latestLabel: 'May 11, 2026',
+              curationSkill: data.skill,
+              description: 'Your first newsletter, auto-curated by Mira.',
+              logoUrl: data.logoUrl || null,
+            }
+            setFtuxSeries(newSeries)
+            setSeriesSkills({ 'my-newsletter': data.skill })
+            setSelectedId('my-newsletter')
+          } else {
+            setSelectedId('daily-brief')
+          }
+          setOnboarded(true)
+        }}
+      />
+    )
+  }
+
+  // When in ftux mode use only the single series built from the onboarding flow;
+  // otherwise show the full pre-populated series list.
+  const activeSeries = (ftuxMode && ftuxSeries) ? [ftuxSeries] : SERIES
+
   const isRecipientsView = selectedId === RECIPIENTS_VIEW_ID
 
-  const selectedSeries = SERIES.find(s => s.id === selectedId)
-  const filtered       = SERIES.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
-  const readyCount     = SERIES.filter(s => s.status === 'ready').length
-  const isAllView      = selectedId === ALL_VIEW_ID
+  const selectedSeries = activeSeries.find(s => s.id === selectedId)
+  const filtered       = activeSeries.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
+  const readyCount     = activeSeries.filter(s => s.status === 'ready').length
+  const isAllView      = selectedId === ALL_VIEW_ID && !ftuxMode
 
   return (
     <Box sx={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
@@ -2402,66 +3731,70 @@ export default function MwNewslettersPage() {
         </Box>
 
         <Box sx={{ flex: 1, overflow: 'auto' }}>
-          {/* All Newsletters inbox entry */}
-          <Box
-            onClick={() => setSelectedId(ALL_VIEW_ID)}
-            sx={{
-              mx: 1.5, mb: 0.5, mt: 0.5, px: 1.5, py: 1.25,
-              borderRadius: '8px', cursor: 'pointer',
-              bgcolor: isAllView ? TEAL_LIGHT : 'transparent',
-              border: `1px solid ${isAllView ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
-              display: 'flex', alignItems: 'center', gap: 1.5,
-              '&:hover': { bgcolor: isAllView ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
-            }}
-          >
-            <Box sx={{
-              width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
-              bgcolor: isAllView ? 'rgba(0,130,127,0.15)' : 'rgba(0,0,0,0.06)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <AllInboxOutlinedIcon sx={{ fontSize: 16, color: isAllView ? TEAL : 'text.secondary' }} />
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: isAllView ? 700 : 500, color: isAllView ? TEAL : 'text.primary' }}>
-                All Newsletters
-              </Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
-                {SERIES.length} series · all editions
-              </Typography>
-            </Box>
-            {readyCount > 0 && (
-              <Box sx={{ bgcolor: TEAL, borderRadius: '10px', px: 0.8, py: 0.2, flexShrink: 0 }}>
-                <Typography sx={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{readyCount}</Typography>
+          {/* All Newsletters inbox entry — hidden in ftux mode (only one series exists) */}
+          {!ftuxMode && (
+            <Box
+              onClick={() => setSelectedId(ALL_VIEW_ID)}
+              sx={{
+                mx: 1.5, mb: 0.5, mt: 0.5, px: 1.5, py: 1.25,
+                borderRadius: '8px', cursor: 'pointer',
+                bgcolor: isAllView ? TEAL_LIGHT : 'transparent',
+                border: `1px solid ${isAllView ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
+                display: 'flex', alignItems: 'center', gap: 1.5,
+                '&:hover': { bgcolor: isAllView ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
+              }}
+            >
+              <Box sx={{
+                width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
+                bgcolor: isAllView ? 'rgba(0,130,127,0.15)' : 'rgba(0,0,0,0.06)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <AllInboxOutlinedIcon sx={{ fontSize: 16, color: isAllView ? TEAL : 'text.secondary' }} />
               </Box>
-            )}
-          </Box>
-
-          {/* Recipient Lists nav item */}
-          <Box
-            onClick={() => { setSelectedId(RECIPIENTS_VIEW_ID); setSelectedListId(null) }}
-            sx={{
-              mx: 1.5, mb: 0.5, px: 1.5, py: 1.25,
-              borderRadius: '8px', cursor: 'pointer',
-              bgcolor: isRecipientsView ? TEAL_LIGHT : 'transparent',
-              border: `1px solid ${isRecipientsView ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
-              display: 'flex', alignItems: 'center', gap: 1.5,
-              '&:hover': { bgcolor: isRecipientsView ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
-            }}
-          >
-            <Box sx={{
-              width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
-              bgcolor: isRecipientsView ? 'rgba(0,130,127,0.15)' : 'rgba(0,0,0,0.06)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <PeopleOutlineIcon sx={{ fontSize: 16, color: isRecipientsView ? TEAL : 'text.secondary' }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: isAllView ? 700 : 500, color: isAllView ? TEAL : 'text.primary' }}>
+                  All Newsletters
+                </Typography>
+                <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+                  {activeSeries.length} series · all editions
+                </Typography>
+              </Box>
+              {readyCount > 0 && (
+                <Box sx={{ bgcolor: TEAL, borderRadius: '10px', px: 0.8, py: 0.2, flexShrink: 0 }}>
+                  <Typography sx={{ fontSize: '10px', fontWeight: 700, color: '#fff' }}>{readyCount}</Typography>
+                </Box>
+              )}
             </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: isRecipientsView ? 700 : 500, color: isRecipientsView ? TEAL : 'text.primary' }}>Recipient Lists</Typography>
-              <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{recipientLists.length} lists · {recipientLists.reduce((s,l)=>s+l.subscribers,0).toLocaleString()} subscribers</Typography>
-            </Box>
-          </Box>
+          )}
 
-          <Divider sx={{ mx: 1.5, mb: 0.5 }} />
+          {/* Recipient Lists nav item — hidden in ftux mode */}
+          {!ftuxMode && (
+            <Box
+              onClick={() => { setSelectedId(RECIPIENTS_VIEW_ID); setSelectedListId(null) }}
+              sx={{
+                mx: 1.5, mb: 0.5, px: 1.5, py: 1.25,
+                borderRadius: '8px', cursor: 'pointer',
+                bgcolor: isRecipientsView ? TEAL_LIGHT : 'transparent',
+                border: `1px solid ${isRecipientsView ? 'rgba(0,130,127,0.2)' : 'transparent'}`,
+                display: 'flex', alignItems: 'center', gap: 1.5,
+                '&:hover': { bgcolor: isRecipientsView ? TEAL_LIGHT : 'rgba(0,0,0,0.04)' },
+              }}
+            >
+              <Box sx={{
+                width: 30, height: 30, borderRadius: '6px', flexShrink: 0,
+                bgcolor: isRecipientsView ? 'rgba(0,130,127,0.15)' : 'rgba(0,0,0,0.06)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <PeopleOutlineIcon sx={{ fontSize: 16, color: isRecipientsView ? TEAL : 'text.secondary' }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: isRecipientsView ? 700 : 500, color: isRecipientsView ? TEAL : 'text.primary' }}>Recipient Lists</Typography>
+                <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{recipientLists.length} lists · {recipientLists.reduce((s,l)=>s+l.subscribers,0).toLocaleString()} subscribers</Typography>
+              </Box>
+            </Box>
+          )}
+
+          {!ftuxMode && <Divider sx={{ mx: 1.5, mb: 0.5 }} />}
 
           {/* Series section header */}
           <Box sx={{ px: 2, pt: 0.75, pb: 0.75, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -2489,7 +3822,11 @@ export default function MwNewslettersPage() {
           : isAllView
           ? <AllNewslettersInbox />
           : selectedSeries
-            ? <SeriesDetail series={selectedSeries} />
+            ? <SeriesDetail
+                series={selectedSeries}
+                curationSkill={seriesSkills[selectedSeries.id]}
+                onCurationSkillChange={skillId => handleCurationSkillChange(selectedSeries.id, skillId)}
+              />
             : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <Typography sx={{ color: 'text.disabled' }}>Select a series to view editions</Typography>
