@@ -39,6 +39,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const ALL_VIEW_ID        = '__all__'
@@ -560,16 +561,126 @@ function CurationSkillMenu({ anchor, onClose, currentSkill, onSelect }) {
   )
 }
 
+// ── Draft email preview ───────────────────────────────────────────────────────
+const PREVIEW_ARTICLES = {
+  'daily-brief': [
+    { tag: 'Brand Mention', title: 'Meltwater expands AI capabilities with new partnership announcement', source: 'TechCrunch', time: '2h ago', summary: 'The media intelligence platform announced a strategic integration with three leading AI providers, aiming to enhance real-time sentiment analysis and automated reporting workflows.' },
+    { tag: 'Industry', title: 'Social listening market projected to reach $9.4B by 2028 as enterprises scale up', source: 'Forbes', time: '4h ago', summary: 'New research shows enterprise adoption of media monitoring tools accelerating, with AI-driven curation cited as the primary driver of renewed investment in the category.' },
+    { tag: 'Leadership', title: 'CEO interview: "Data literacy is the new executive superpower"', source: 'Harvard Business Review', time: '6h ago', summary: 'An in-depth conversation on how communications leaders are rethinking their approach to earned media measurement and competitive intelligence in the AI era.' },
+    { tag: 'Competitor', title: 'Cision announces pricing changes ahead of Q2 earnings call', source: 'PR Newswire', time: '8h ago', summary: 'The announcement triggered mixed reactions from the analyst community, with some citing pressure from newer entrants in the media intelligence space.' },
+  ],
+  'monthly-roundup': [
+    { tag: 'Coverage Trend', title: 'Meltwater named a Leader in 2026 Gartner Magic Quadrant for Social Analytics', source: 'Gartner', time: 'Apr 14', summary: 'The annual report highlights Meltwater\'s strong execution and completeness of vision, particularly in AI-assisted curation and cross-channel monitoring.' },
+    { tag: 'Product', title: 'New Mira features drive 40% increase in newsletter engagement across enterprise accounts', source: 'Business Wire', time: 'Apr 9', summary: 'Internal data and customer case studies show significant uplift in open rates and click-throughs since the rollout of AI-curated newsletter editions.' },
+    { tag: 'Market', title: 'Brands are doubling down on owned media as trust in paid channels erodes', source: 'Marketing Week', time: 'Apr 3', summary: 'A new study from the Reuters Institute underscores a strategic shift toward curated newsletters and direct audience relationships as primary comms channels.' },
+  ],
+  'competitor-digest': [
+    { tag: 'Cision', title: 'Cision acquires PR analytics startup for $280M in bid to strengthen AI roadmap', source: 'Wall Street Journal', time: 'Apr 21', summary: 'The acquisition is expected to accelerate Cision\'s move into predictive media analytics, putting it in more direct competition with Meltwater\'s Mira platform.' },
+    { tag: 'Brandwatch', title: 'Brandwatch launches real-time trend detection for social listening enterprise tier', source: 'Adweek', time: 'Apr 18', summary: 'The new feature positions Brandwatch more directly against Meltwater\'s Explore product, targeting enterprise communications teams with high-volume monitoring needs.' },
+    { tag: 'Sprinklr', title: 'Sprinklr reports Q1 beat but lowers full-year guidance amid SMB churn', source: 'Reuters', time: 'Apr 15', summary: 'Analysts note the divergence between enterprise retention and SMB churn as a signal of broader market segmentation in the social analytics space.' },
+  ],
+  'media-coverage': [
+    { tag: 'Tier 1', title: 'Meltwater CEO joins panel on AI governance at Davos side event', source: 'Financial Times', time: 'Apr 20', summary: 'The panel discussion, attended by 200+ communications executives, focused on responsible AI deployment in media intelligence and the ethics of automated content curation.' },
+    { tag: 'Trade', title: 'PR Week names Meltwater\'s Mira among top 10 innovations reshaping communications in 2026', source: 'PR Week', time: 'Apr 17', summary: 'The annual innovation roundup highlights how AI-assisted newsletters are transforming how communications teams distribute earned media insights internally.' },
+    { tag: 'Regional', title: 'APAC expansion: Meltwater opens Singapore hub to serve growing Southeast Asia demand', source: 'Tech in Asia', time: 'Apr 12', summary: 'The new regional office will support over 400 enterprise clients across SEA, with a dedicated team focused on local-language media monitoring and AI curation.' },
+  ],
+}
+
+function DraftEmailPreview({ series, curationSkill }) {
+  const articles = PREVIEW_ARTICLES[series.id] || PREVIEW_ARTICLES['daily-brief']
+  const skill = CURATION_SKILLS[curationSkill]
+  const accentColor = SERIES_COLORS[series.id] || TEAL
+
+  return (
+    <Box sx={{ bgcolor: '#f0f2f5', borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
+      {/* Email client chrome */}
+      <Box sx={{ maxWidth: 620, mx: 'auto' }}>
+        {/* Email meta bar */}
+        <Box sx={{ bgcolor: 'background.paper', borderRadius: '8px 8px 0 0', border: '1px solid', borderColor: 'divider', borderBottom: 'none', px: 2.5, py: 1.5, display: 'flex', flexDirection: 'column', gap: 0.4 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>From:</Typography>
+            <Typography sx={{ fontSize: '11px', color: 'text.primary', fontWeight: 500 }}>{series.name} <Box component="span" sx={{ color: 'text.disabled', fontWeight: 400 }}>&lt;newsletters@meltwater.com&gt;</Box></Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>Subject:</Typography>
+            <Typography sx={{ fontSize: '11px', color: 'text.primary', fontWeight: 500 }}>{series.latestLabel} Edition — {series.articlesCount} stories curated</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled', minWidth: 56 }}>Status:</Typography>
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: TEAL }} />
+              <Typography sx={{ fontSize: '11px', color: TEAL, fontWeight: 600 }}>Draft · In curation ({series.progress}% complete)</Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Email body */}
+        <Box sx={{ bgcolor: '#ffffff', border: '1px solid', borderColor: 'divider', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
+
+          {/* Newsletter header */}
+          <Box sx={{ bgcolor: accentColor, px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {series.logoUrl
+                ? <Box component="img" src={series.logoUrl} alt="Logo" sx={{ height: 28, maxWidth: 100, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+                : <NlIcon size={22} color="rgba(255,255,255,0.9)" />
+              }
+              <Typography sx={{ fontSize: '15px', fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>{series.name}</Typography>
+            </Box>
+            <Typography sx={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)' }}>{series.latestLabel}</Typography>
+          </Box>
+
+          {/* Mira intro strip */}
+          <Box sx={{ px: 3, py: 1.75, bgcolor: `${accentColor}0d`, borderBottom: '1px solid', borderColor: `${accentColor}20`, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 13, color: accentColor }} />
+            <Typography sx={{ fontSize: '12px', color: 'text.secondary' }}>
+              Curated by <strong style={{ color: accentColor }}>Mira</strong>
+              {skill && <> using <strong style={{ color: accentColor }}>{skill.label}</strong></>}
+              {' · '}{series.articlesCount} stories selected · Draft in progress
+            </Typography>
+          </Box>
+
+          {/* Articles */}
+          <Box sx={{ px: 3, pt: 2.5, pb: 1 }}>
+            {articles.map((article, i) => (
+              <Box key={i} sx={{ mb: 2.5, pb: 2.5, borderBottom: i < articles.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                  <Box sx={{ px: 1, py: 0.25, borderRadius: '4px', bgcolor: `${accentColor}15`, border: `1px solid ${accentColor}25` }}>
+                    <Typography sx={{ fontSize: '10px', fontWeight: 700, color: accentColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.tag}</Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>{article.source} · {article.time}</Typography>
+                </Box>
+                <Typography sx={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.4, mb: 0.6, color: 'text.primary' }}>{article.title}</Typography>
+                <Typography sx={{ fontSize: '12px', color: 'text.secondary', lineHeight: 1.6 }}>{article.summary}</Typography>
+              </Box>
+            ))}
+          </Box>
+
+          {/* Draft watermark footer */}
+          <Box sx={{ px: 3, py: 2, bgcolor: 'rgba(0,0,0,0.025)', borderTop: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography sx={{ fontSize: '11px', color: 'text.disabled' }}>
+              {series.articlesCount} of ~{Math.round(series.articlesCount / (series.progress / 100))} articles curated · More being added automatically
+            </Typography>
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.4, bgcolor: 'rgba(0,0,0,0.05)', borderRadius: '4px' }}>
+              <Typography sx={{ fontSize: '10px', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Draft preview</Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
 // ── Latest edition card ───────────────────────────────────────────────────────
-function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChange }) {
+function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChange, initialPreviewOpen = false }) {
   const isCurating = series.status === 'curating'
   const isReady    = series.status === 'ready'
   const borderColor = isReady ? AMBER : TEAL
   const headerBg    = isReady ? AMBER_LIGHT : TEAL_LIGHT
   const [skillMenuAnchor, setSkillMenuAnchor] = useState(null)
+  const [previewOpen, setPreviewOpen] = useState(initialPreviewOpen)
 
   return (
-    <Box sx={{ border: `1.5px solid ${borderColor}`, borderRadius: '10px', overflow: 'hidden', mb: 3, bgcolor: 'background.paper', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+    <Box sx={{ border: `1.5px solid ${previewOpen ? TEAL : borderColor}`, borderRadius: '10px', overflow: 'hidden', mb: 3, bgcolor: 'background.paper', boxShadow: previewOpen ? '0 4px 20px rgba(0,130,127,0.12)' : '0 2px 12px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s, border-color 0.2s' }}>
       {/* Header strip */}
       <Box sx={{ px: 2.5, py: 1.5, bgcolor: headerBg, borderBottom: `1px solid ${isReady ? 'rgba(245,158,11,0.2)' : 'rgba(0,130,127,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -582,9 +693,17 @@ function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChang
         {/* Action buttons in header */}
         <Box sx={{ display: 'flex', gap: 1 }}>
           {isCurating && (
-            <Button size="small" variant="outlined" onClick={e => { e.stopPropagation(); window.open(`/mw-newsletters/preview/${series.id}`, '_blank') }}
-              sx={{ textTransform: 'none', fontSize: '12px', borderColor: 'rgba(0,130,127,0.35)', color: TEAL, py: 0.5, bgcolor: 'rgba(255,255,255,0.6)', '&:hover': { bgcolor: 'rgba(255,255,255,0.9)', borderColor: TEAL } }}>
-              Preview draft
+            <Button size="small" variant={previewOpen ? 'contained' : 'outlined'}
+              onClick={e => { e.stopPropagation(); setPreviewOpen(p => !p) }}
+              startIcon={previewOpen ? <ExpandMoreIcon sx={{ fontSize: 14, transform: 'rotate(180deg)' }} /> : <VisibilityOutlinedIcon sx={{ fontSize: 14 }} />}
+              sx={{
+                textTransform: 'none', fontSize: '12px', py: 0.5,
+                ...(previewOpen
+                  ? { bgcolor: TEAL, color: '#fff', '&:hover': { bgcolor: '#006e6b' } }
+                  : { borderColor: 'rgba(0,130,127,0.35)', color: TEAL, bgcolor: 'rgba(255,255,255,0.6)', '&:hover': { bgcolor: 'rgba(255,255,255,0.9)', borderColor: TEAL } }
+                ),
+              }}>
+              {previewOpen ? 'Close preview' : 'Preview draft'}
             </Button>
           )}
           <Button
@@ -698,6 +817,11 @@ function LatestEditionCard({ series, onEdit, curationSkill, onCurationSkillChang
           </Box>
           {isCurating && <StatusBadge status={series.status} />}
         </Box>
+
+        {/* Inline draft preview */}
+        {previewOpen && (
+          <DraftEmailPreview series={series} curationSkill={curationSkill} />
+        )}
       </Box>
     </Box>
   )
@@ -1165,7 +1289,7 @@ function CurationSettingsModal({ open, onClose, series }) {
 }
 
 // ── Series detail right panel ─────────────────────────────────────────────────
-function SeriesDetail({ series, curationSkill, onCurationSkillChange }) {
+function SeriesDetail({ series, curationSkill, onCurationSkillChange, initialPreviewOpen = false }) {
   const navigate = useNavigate()
   const editions = EDITION_HISTORY[series.id] || []
   const [curationOpen, setCurationOpen] = useState(false)
@@ -1312,6 +1436,7 @@ function SeriesDetail({ series, curationSkill, onCurationSkillChange }) {
           onEdit={() => navigate(`/mw-newsletters/editor/${series.id}`)}
           curationSkill={effectiveSkill}
           onCurationSkillChange={onCurationSkillChange}
+          initialPreviewOpen={initialPreviewOpen}
         />
 
         {editions.length > 0 && (
@@ -3643,6 +3768,9 @@ export default function MwNewslettersPage({ ftuxMode = false }) {
   // In ftuxMode, holds the single series built from the onboarding wizard
   const [ftuxSeries, setFtuxSeries] = useState(null)
 
+  // Auto-open the draft preview after onboarding completes
+  const [autoOpenPreview, setAutoOpenPreview] = useState(false)
+
   // Series-level curation skill overrides (keyed by series id)
   const [seriesSkills, setSeriesSkills] = useState(() =>
     Object.fromEntries(SERIES.map(s => [s.id, s.curationSkill]))
@@ -3692,6 +3820,7 @@ export default function MwNewslettersPage({ ftuxMode = false }) {
             setFtuxSeries(newSeries)
             setSeriesSkills({ 'my-newsletter': data.skill })
             setSelectedId('my-newsletter')
+            setAutoOpenPreview(true)
           } else {
             setSelectedId('daily-brief')
           }
@@ -3826,6 +3955,7 @@ export default function MwNewslettersPage({ ftuxMode = false }) {
                 series={selectedSeries}
                 curationSkill={seriesSkills[selectedSeries.id]}
                 onCurationSkillChange={skillId => handleCurationSkillChange(selectedSeries.id, skillId)}
+                initialPreviewOpen={autoOpenPreview}
               />
             : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
